@@ -1,5 +1,3 @@
-import { SendMessage } from "./components/SendMessage";
-
 export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -7,7 +5,7 @@ export default function Home() {
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
         </div>
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <SendMessage />
+          Bem Vindo a Atendimento BR!
         </div>
       </main>
     </div>

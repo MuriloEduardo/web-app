@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SessionsList } from "../SessionsList";
+import { SendMessage } from "@/app/components/SendMessage";
 
 export const dynamic = "force-dynamic";
 
@@ -136,6 +137,8 @@ export default async function SessionPage({ params }: PageProps) {
                         )}
                     </div>
                 </div>
+
+                <SendMessage />
             </div>
         </main>
     );
