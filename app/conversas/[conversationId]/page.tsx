@@ -253,14 +253,14 @@ export default async function ConversaPage({ params }: PageProps) {
                             </div>
                         )}
                     </div>
-                </div>
 
-                <SendMessage
-                    toWaId={toWaId}
-                    contactName={contactName}
-                    displayPhoneNumber={displayPhoneNumber}
-                    phoneNumberId={phoneNumberId}
-                />
+                    <SendMessage
+                        toWaId={toWaId}
+                        contactName={contactName}
+                        displayPhoneNumber={displayPhoneNumber}
+                        phoneNumberId={phoneNumberId}
+                    />
+                </div>
             </div>
         </main>
     );
