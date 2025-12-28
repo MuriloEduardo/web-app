@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SessionsList } from "./SessionsList";
+import { ConversasList } from "./ConversasList";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +49,7 @@ async function getConversations(): Promise<Conversation[]> {
         .filter((v): v is Conversation => v !== null);
 }
 
-export default async function SessionsPage() {
+export default async function ConversasPage() {
     const conversations = await getConversations();
 
     return (
@@ -68,7 +68,7 @@ export default async function SessionsPage() {
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr]">
                 <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black">
-                    <SessionsList conversations={conversations} />
+                    <ConversasList conversations={conversations} />
                 </div>
 
                 <div className="rounded-lg border border-zinc-200 bg-white p-6 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-300">

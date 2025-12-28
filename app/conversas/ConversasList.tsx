@@ -8,10 +8,10 @@ type Conversation = {
 
 type Props = {
     conversations: Conversation[];
-    selectedSessionId?: number;
+    selectedConversationId?: number;
 };
 
-export function SessionsList({ conversations, selectedSessionId }: Props) {
+export function ConversasList({ conversations, selectedConversationId }: Props) {
     return (
         <div className="flex flex-col gap-2">
             <div className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
@@ -20,11 +20,11 @@ export function SessionsList({ conversations, selectedSessionId }: Props) {
             <div className="flex flex-col gap-1">
                 {conversations.map((c) => {
                     const id = c.id;
-                    const selected = id === selectedSessionId;
+                    const selected = id === selectedConversationId;
                     return (
                         <Link
                             key={id}
-                            href={`/sessions/${id}`}
+                            href={`/conversas/${id}`}
                             className={
                                 selected
                                     ? "rounded-md bg-zinc-200 px-3 py-2 text-sm font-semibold text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"

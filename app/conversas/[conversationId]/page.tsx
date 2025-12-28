@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SessionsList } from "../SessionsList";
+import { ConversasList } from "../ConversasList";
 import { SendMessage } from "@/app/components/SendMessage";
 
 export const dynamic = "force-dynamic";
@@ -28,7 +28,7 @@ type CommunicationsMessage = {
 };
 
 type PageProps = {
-    params: Promise<{ sessionId: string }>;
+    params: Promise<{ conversationId: string }>;
 };
 
 function getBaseUrlFromEnv(): string {
@@ -118,25 +118,25 @@ function normalizeMessages(messages: CommunicationsMessage[]) {
     });
 }
 
-export default async function SessionPage({ params }: PageProps) {
-    const { sessionId } = await params;
+export default async function ConversaPage({ params }: PageProps) {
+    const { conversationId } = await params;
 
     const [conversations, rawMessages] = await Promise.all([
         getConversations(),
-        getMessages(sessionId),
+        getMessages(conversationId),
     ]);
 
-    const selectedSessionId = Number(sessionId);
+    const selectedConversationId = Number(conversationId);
     const messages = normalizeMessages(rawMessages);
 
-    const selectedConversation = conversations.find((c) => c?.id === selectedSessionId);
+    const selectedConversation = conversations.find((c) => c?.id === selectedConversationId);
 
     return (
         <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-6 py-10">
             <div className="flex items-center justify-between">
                 <div className="flex flex-col">
                     <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-                        Conversa {sessionId}
+                        Conversa {conversationId}
                     </h1>
                     {selectedConversation?.participant && (
                         <div className="text-sm text-zinc-600 dark:text-zinc-300">
@@ -146,7 +146,7 @@ export default async function SessionPage({ params }: PageProps) {
                 </div>
                 <div className="flex items-center gap-4">
                     <Link
-                        href="/sessions"
+                        href="/conversas"
                         className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
                     >
                         Todas as conversas
@@ -156,13 +156,17 @@ export default async function SessionPage({ params }: PageProps) {
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr]">
                 <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black">
-                    <SessionsList
+                    <ConversasList
                         conversations={conversations.map((c) => ({
                             id: c.id,
                             participant: c.participant,
                             wa_id: c.wa_id,
                         }))}
-                        selectedSessionId={Number.isFinite(selectedSessionId) ? selectedSessionId : undefined}
+                        selectedConversationId={
+                            Number.isFinite(selectedConversationId)
+                                ? selectedConversationId
+                                : undefined
+                        }
                     />
                 </div>
 
