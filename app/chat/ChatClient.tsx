@@ -64,7 +64,7 @@ export function ChatClient({ initialMessages }: Props) {
     const abortRef = useRef<AbortController | null>(null);
     const fetchingRef = useRef(false);
     const stoppedRef = useRef(false);
-    const delayRef = useRef(3000);
+    const delayRef = useRef(30000);
 
     useEffect(() => {
         stoppedRef.current = false;
@@ -89,7 +89,7 @@ export function ChatClient({ initialMessages }: Props) {
                 const next = Array.isArray(json.data) ? coerceMessages(json.data) : [];
                 setMessages(next);
 
-                delayRef.current = 3000;
+                delayRef.current = 30000;
             } catch (err) {
                 // Ignore aborts; treat other errors with backoff.
                 if (!(err instanceof DOMException && err.name === "AbortError")) {

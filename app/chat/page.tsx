@@ -14,7 +14,7 @@ function getBaseUrlFromEnv(): string {
 
 async function getInitialMessages() {
     const res = await fetch(`${getBaseUrlFromEnv()}/api/messages`, {
-        cache: "no-store",
+        cache: 'default',
     });
 
     if (!res.ok) {
