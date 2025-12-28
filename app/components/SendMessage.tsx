@@ -5,6 +5,7 @@ import { sendMetaOutbound } from "@/app/actions/sendMetaOutbound";
 
 export function SendMessage() {
     const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+    const [messageBody, setMessageBody] = useState();
 
     async function handleSend() {
         setStatus("sending");
@@ -35,7 +36,7 @@ export function SendMessage() {
                                         to: "555174019092",
                                         type: "text",
                                         text: {
-                                            body: "Testeeeeeeeeeeeeeeeeeeeeeeeee",
+                                            body: messageBody,
                                         },
                                     },
                                 ],
@@ -58,11 +59,20 @@ export function SendMessage() {
     }
 
     return (
-        <button onClick={handleSend} disabled={status === "sending"}>
-            {status === "sending" && "Enviando..."}
-            {status === "idle" && "Enviar mensagem"}
-            {status === "sent" && "Mensagem enviada"}
-            {status === "error" && "Erro ao enviar"}
-        </button>
+        <div className="flex flex-col gap-3">
+            <textarea
+                value={messageBody}
+                onChange={(e) => setMessageBody(e.target.value)}
+                rows={4}
+                className="w-full rounded-md border border-zinc-200 bg-white p-3 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
+            />
+
+            <button onClick={handleSend} disabled={status === "sending"}>
+                {status === "sending" && "Enviando..."}
+                {status === "idle" && "Enviar mensagem"}
+                {status === "sent" && "Mensagem enviada"}
+                {status === "error" && "Erro ao enviar"}
+            </button>
+        </div>
     );
 }
