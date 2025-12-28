@@ -11,6 +11,32 @@ type Props = {
     initialMessages: unknown[];
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null;
+}
+
+function extractWhatsAppText(payload: unknown): string | null {
+    if (!isRecord(payload)) return null;
+
+    const entry = payload.entry;
+    if (!Array.isArray(entry) || !isRecord(entry[0])) return null;
+
+    const changes = entry[0].changes;
+    if (!Array.isArray(changes) || !isRecord(changes[0])) return null;
+
+    const value = changes[0].value;
+    if (!isRecord(value)) return null;
+
+    const messages = value.messages;
+    if (!Array.isArray(messages) || !isRecord(messages[0])) return null;
+
+    const text = messages[0].text;
+    if (!isRecord(text)) return null;
+
+    const body = text.body;
+    return typeof body === "string" ? body : null;
+}
+
 function coerceMessages(input: unknown[]): Message[] {
     const out: Message[] = [];
 
@@ -26,30 +52,17 @@ function coerceMessages(input: unknown[]): Message[] {
             continue;
         }
 
-        // Shape B (flow-manager executions): { id: number, workflow_data: { messages: [{ type, data: { id, content } }] } }
-        const executionId =
+        // Shape B (communications): { id: number, direction: string, conversation_id: number, payload: {...} }
+        const id =
             typeof obj.id === "number" || typeof obj.id === "string"
                 ? String(obj.id)
-                : "unknown";
+                : `msg:${out.length}`;
 
-        const workflowData = obj.workflow_data as Record<string, unknown> | undefined;
-        const messages = workflowData?.messages as unknown;
-        if (!Array.isArray(messages)) continue;
+        const direction = typeof obj.direction === "string" ? obj.direction : "unknown";
+        const text = extractWhatsAppText(obj.payload) ?? null;
+        if (!text) continue;
 
-        for (const m of messages) {
-            if (!m || typeof m !== "object") continue;
-            const mo = m as Record<string, unknown>;
-            const type = typeof mo.type === "string" ? mo.type : "message";
-            const data = mo.data as Record<string, unknown> | undefined;
-            const content = typeof data?.content === "string" ? data.content : null;
-            if (!content) continue;
-
-            const msgId = typeof data?.id === "string" ? data.id : undefined;
-            out.push({
-                id: msgId ? `${executionId}:${msgId}` : `${executionId}:${type}:${out.length}`,
-                text: `[${type}] ${content}`,
-            });
-        }
+        out.push({ id, text: `[${direction}] ${text}` });
     }
 
     return out;

@@ -1,21 +1,28 @@
 import { NextResponse } from "next/server";
 
-export async function GET() {
-    const backendUrl = process.env.FLOW_MANAGER_URL;
-    const baseUrl = backendUrl?.replace(/\/$/, "");
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null;
+}
+
+export async function GET(req: Request) {
+    const baseUrl = process.env.COMMUNICATIONS_WEB_URL?.replace(/\/$/, "");
 
     if (!baseUrl) {
         return NextResponse.json(
             {
                 error: {
-                    code: "FLOW_MANAGER_URL_NOT_CONFIGURED",
+                    code: "COMMUNICATIONS_WEB_URL_NOT_CONFIGURED",
                 },
             },
             { status: 500 }
         );
     }
 
-    const res = await fetch(`${baseUrl}/executions/`, {
+    const url = new URL(req.url);
+    const limit = url.searchParams.get("limit") ?? "50";
+    const offset = url.searchParams.get("offset") ?? "0";
+
+    const res = await fetch(`${baseUrl}/messages?limit=${encodeURIComponent(limit)}&offset=${encodeURIComponent(offset)}`, {
         cache: "no-store",
         headers: {
             accept: "application/json",
@@ -39,5 +46,16 @@ export async function GET() {
         );
     }
 
-    return NextResponse.json({ data: responseBody });
+    const items =
+        isRecord(responseBody) && Array.isArray(responseBody.items)
+            ? responseBody.items
+            : Array.isArray(responseBody)
+                ? responseBody
+                : [];
+
+    const total = isRecord(responseBody) && typeof responseBody.total === "number" ? responseBody.total : undefined;
+    const metaLimit = isRecord(responseBody) && typeof responseBody.limit === "number" ? responseBody.limit : undefined;
+    const metaOffset = isRecord(responseBody) && typeof responseBody.offset === "number" ? responseBody.offset : undefined;
+
+    return NextResponse.json({ data: items, meta: { total, limit: metaLimit, offset: metaOffset } });
 }

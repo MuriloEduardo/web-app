@@ -1,20 +1,33 @@
 import { NextResponse } from "next/server";
 
-type Execution = {
-    session_id?: number;
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null;
+}
+
+type Conversation = {
+    id?: number;
+    company_number?: string;
+    wa_id?: string;
+    participant?: string;
+    created_at?: string;
+    updated_at?: string;
 };
 
-export async function GET() {
-    const baseUrl = process.env.FLOW_MANAGER_URL?.replace(/\/$/, "");
+export async function GET(req: Request) {
+    const baseUrl = process.env.COMMUNICATIONS_WEB_URL?.replace(/\/$/, "");
 
     if (!baseUrl) {
         return NextResponse.json(
-            { error: { code: "FLOW_MANAGER_URL_NOT_CONFIGURED" } },
+            { error: { code: "COMMUNICATIONS_WEB_URL_NOT_CONFIGURED" } },
             { status: 500 }
         );
     }
 
-    const res = await fetch(`${baseUrl}/executions/`, {
+    const url = new URL(req.url);
+    const limit = url.searchParams.get("limit") ?? "50";
+    const offset = url.searchParams.get("offset") ?? "0";
+
+    const res = await fetch(`${baseUrl}/conversations?limit=${encodeURIComponent(limit)}&offset=${encodeURIComponent(offset)}`, {
         cache: "no-store",
         headers: { accept: "application/json" },
     });
@@ -26,21 +39,27 @@ export async function GET() {
 
     if (!res.ok) {
         return NextResponse.json(
-            { error: { code: "SESSIONS_FETCH_FAILED", details: body } },
+            { error: { code: "CONVERSATIONS_FETCH_FAILED", details: body } },
             { status: res.status }
         );
     }
 
-    const executions = (body as unknown) as Execution[];
-    const sessions = Array.isArray(executions)
-        ? Array.from(
-            new Set(
-                executions
-                    .map((e) => e?.session_id)
-                    .filter((v): v is number => typeof v === "number")
-            )
-        ).sort((a, b) => b - a)
-        : [];
+    const conversations =
+        isRecord(body) && Array.isArray(body.items)
+            ? (body.items as Conversation[])
+            : Array.isArray(body)
+                ? (body as Conversation[])
+                : [];
 
-    return NextResponse.json({ data: sessions });
+    // Sort desc by conversation id if present
+    conversations.sort((a, b) => (b?.id ?? 0) - (a?.id ?? 0));
+
+    return NextResponse.json({
+        data: conversations,
+        meta: {
+            total: isRecord(body) && typeof body.total === "number" ? body.total : undefined,
+            limit: isRecord(body) && typeof body.limit === "number" ? body.limit : undefined,
+            offset: isRecord(body) && typeof body.offset === "number" ? body.offset : undefined,
+        },
+    });
 }

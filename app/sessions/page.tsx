@@ -3,6 +3,10 @@ import { SessionsList } from "./SessionsList";
 
 export const dynamic = "force-dynamic";
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null;
+}
+
 function getBaseUrlFromEnv(): string {
     const appUrl = process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL;
     if (appUrl) return appUrl.replace(/\/$/, "");
@@ -13,7 +17,13 @@ function getBaseUrlFromEnv(): string {
     return "http://localhost:3000";
 }
 
-async function getSessions(): Promise<number[]> {
+type Conversation = {
+    id: number;
+    participant?: string;
+    wa_id?: string;
+};
+
+async function getConversations(): Promise<Conversation[]> {
     const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions`, {
         cache: "no-store",
     });
@@ -21,13 +31,26 @@ async function getSessions(): Promise<number[]> {
     if (!res.ok) return [];
 
     const json = (await res.json()) as { data?: unknown };
-    return Array.isArray(json.data)
-        ? json.data.filter((v): v is number => typeof v === "number")
-        : [];
+
+    const items = Array.isArray(json.data) ? (json.data as unknown[]) : [];
+    return items
+        .map((c) => {
+            if (!isRecord(c)) return null;
+            if (typeof c.id !== "number") return null;
+
+            const conversation: Conversation = {
+                id: c.id,
+                participant: typeof c.participant === "string" ? c.participant : undefined,
+                wa_id: typeof c.wa_id === "string" ? c.wa_id : undefined,
+            };
+
+            return conversation;
+        })
+        .filter((v): v is Conversation => v !== null);
 }
 
 export default async function SessionsPage() {
-    const sessions = await getSessions();
+    const conversations = await getConversations();
 
     return (
         <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-6 py-10">
@@ -45,11 +68,11 @@ export default async function SessionsPage() {
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr]">
                 <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black">
-                    <SessionsList sessions={sessions} />
+                    <SessionsList conversations={conversations} />
                 </div>
 
                 <div className="rounded-lg border border-zinc-200 bg-white p-6 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-300">
-                    Selecione uma sessão para ver as mensagens.
+                    Selecione uma conversa para ver as mensagens.
                 </div>
             </div>
         </main>
