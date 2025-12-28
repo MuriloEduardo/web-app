@@ -5,7 +5,7 @@ import { sendMetaOutbound } from "@/app/actions/sendMetaOutbound";
 
 export function SendMessage() {
     const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-    const [messageBody, setMessageBody] = useState();
+    const [messageBody, setMessageBody] = useState("");
 
     async function handleSend() {
         setStatus("sending");
@@ -56,6 +56,7 @@ export function SendMessage() {
         }
 
         setStatus("sent");
+        setMessageBody("");
     }
 
     return (
