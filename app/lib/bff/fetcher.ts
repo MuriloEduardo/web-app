@@ -43,7 +43,9 @@ export async function bffPost<T>(
         body: JSON.stringify(body),
     });
 
-    const payload = (await res.json().catch(() => null)) as unknown;
+    // Response.json() is typed as unknown in newer libs; treat as any for envelope parsing.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload = (await res.json().catch(() => null)) as any;
 
     if (!res.ok) {
         return {
