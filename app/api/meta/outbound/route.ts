@@ -3,8 +3,21 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     const payload = await req.json();
 
+    const baseUrl = process.env.COMMUNICATIONS_WEB_URL?.replace(/\/$/, "");
+
+    if (!baseUrl) {
+        return NextResponse.json(
+            {
+                error: {
+                    code: "COMMUNICATIONS_WEB_URL_NOT_CONFIGURED",
+                },
+            },
+            { status: 500 }
+        );
+    }
+
     const res = await fetch(
-        `${process.env.COMMUNICATIONS_WEB_URL}/meta/outbound`,
+        `${baseUrl}/meta/outbound`,
         {
             method: "POST",
             headers: {

@@ -1,20 +1,21 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-    const backendUrl = process.env.COMMUNICATIONS_WEB_URL;
+    const backendUrl = process.env.FLOW_MANAGER_URL;
+    const baseUrl = backendUrl?.replace(/\/$/, "");
 
-    if (!backendUrl) {
+    if (!baseUrl) {
         return NextResponse.json(
             {
                 error: {
-                    code: "META_BACKEND_URL_NOT_CONFIGURED",
+                    code: "FLOW_MANAGER_URL_NOT_CONFIGURED",
                 },
             },
             { status: 500 }
         );
     }
 
-    const res = await fetch(`${backendUrl}/messages`, {
+    const res = await fetch(`${baseUrl}/executions/`, {
         cache: "no-store",
         headers: {
             accept: "application/json",
