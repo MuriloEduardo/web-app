@@ -27,6 +27,13 @@ type CommunicationsMessage = {
     created_at?: string;
 };
 
+type WhatsAppConversationContext = {
+    displayPhoneNumber?: string;
+    phoneNumberId?: string;
+    contactName?: string;
+    contactWaId?: string;
+};
+
 type PageProps = {
     params: Promise<{ conversationId: string }>;
 };
@@ -104,6 +111,51 @@ function extractWhatsAppText(payload: unknown): string | null {
     return typeof body === "string" ? body : null;
 }
 
+function extractWhatsAppConversationContext(payload: unknown): WhatsAppConversationContext | null {
+    if (!isRecord(payload)) return null;
+
+    const entry = payload.entry;
+    if (!Array.isArray(entry) || !isRecord(entry[0])) return null;
+
+    const changes = entry[0].changes;
+    if (!Array.isArray(changes) || !isRecord(changes[0])) return null;
+
+    const value = changes[0].value;
+    if (!isRecord(value)) return null;
+
+    const metadata = value.metadata;
+    const contacts = value.contacts;
+
+    const ctx: WhatsAppConversationContext = {};
+
+    if (isRecord(metadata)) {
+        if (typeof metadata.display_phone_number === "string") {
+            ctx.displayPhoneNumber = metadata.display_phone_number;
+        }
+        if (typeof metadata.phone_number_id === "string") {
+            ctx.phoneNumberId = metadata.phone_number_id;
+        }
+    }
+
+    if (Array.isArray(contacts) && isRecord(contacts[0])) {
+        const waId = contacts[0].wa_id;
+        if (typeof waId === "string") ctx.contactWaId = waId;
+
+        const profile = contacts[0].profile;
+        if (isRecord(profile) && typeof profile.name === "string") {
+            ctx.contactName = profile.name;
+        }
+    }
+
+    const hasAny =
+        Boolean(ctx.displayPhoneNumber) ||
+        Boolean(ctx.phoneNumberId) ||
+        Boolean(ctx.contactName) ||
+        Boolean(ctx.contactWaId);
+
+    return hasAny ? ctx : null;
+}
+
 function normalizeMessages(messages: CommunicationsMessage[]) {
     return messages.map((m, idx) => {
         const id =
@@ -130,6 +182,16 @@ export default async function ConversaPage({ params }: PageProps) {
     const messages = normalizeMessages(rawMessages);
 
     const selectedConversation = conversations.find((c) => c?.id === selectedConversationId);
+
+    const extractedCtx = rawMessages
+        .map((m) => extractWhatsAppConversationContext(m.payload))
+        .find((ctx): ctx is WhatsAppConversationContext => ctx !== null);
+
+    const toWaId = selectedConversation?.wa_id ?? extractedCtx?.contactWaId;
+    const displayPhoneNumber =
+        selectedConversation?.company_number ?? extractedCtx?.displayPhoneNumber;
+    const phoneNumberId = extractedCtx?.phoneNumberId;
+    const contactName = selectedConversation?.participant ?? extractedCtx?.contactName;
 
     return (
         <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-6 py-10">
@@ -193,7 +255,12 @@ export default async function ConversaPage({ params }: PageProps) {
                     </div>
                 </div>
 
-                <SendMessage />
+                <SendMessage
+                    toWaId={toWaId}
+                    contactName={contactName}
+                    displayPhoneNumber={displayPhoneNumber}
+                    phoneNumberId={phoneNumberId}
+                />
             </div>
         </main>
     );
