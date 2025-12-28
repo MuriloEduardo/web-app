@@ -11,14 +11,11 @@ export function SendMessage() {
         setStatus("sending");
 
         const payload = {
-            object: "whatsapp_business_account",
             entry: [
                 {
-                    id: "111377161860817",
                     changes: [
                         {
                             value: {
-                                messaging_product: "whatsapp",
                                 metadata: {
                                     display_phone_number: "15550280506",
                                     phone_number_id: "109628212037229",
@@ -41,7 +38,6 @@ export function SendMessage() {
                                     },
                                 ],
                             },
-                            field: "messages",
                         },
                     ],
                 },
