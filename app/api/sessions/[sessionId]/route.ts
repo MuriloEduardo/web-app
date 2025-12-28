@@ -4,9 +4,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
 }
 
-type Message = {
-    conversation_id?: number;
-};
+type Message = unknown;
 
 export async function GET(
     req: Request,
@@ -35,7 +33,12 @@ export async function GET(
     const limit = url.searchParams.get("limit") ?? "50";
     const offset = url.searchParams.get("offset") ?? "0";
 
-    const res = await fetch(`${baseUrl}/messages?limit=${encodeURIComponent(limit)}&offset=${encodeURIComponent(offset)}`, {
+    const query = new URLSearchParams();
+    query.set("conversation_id", String(numericSessionId));
+    query.set("limit", limit);
+    query.set("offset", offset);
+
+    const res = await fetch(`${baseUrl}/messages?${query.toString()}`, {
         cache: "no-store",
         headers: { accept: "application/json" },
     });
@@ -59,12 +62,8 @@ export async function GET(
                 ? (body as Message[])
                 : [];
 
-    const filtered = Array.isArray(items)
-        ? items.filter((m) => m?.conversation_id === numericSessionId)
-        : [];
-
     return NextResponse.json({
-        data: filtered,
+        data: items,
         meta: {
             total: isRecord(body) && typeof body.total === "number" ? body.total : undefined,
             limit: isRecord(body) && typeof body.limit === "number" ? body.limit : undefined,

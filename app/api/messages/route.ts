@@ -21,8 +21,14 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const limit = url.searchParams.get("limit") ?? "50";
     const offset = url.searchParams.get("offset") ?? "0";
+    const conversationId = url.searchParams.get("conversation_id");
 
-    const res = await fetch(`${baseUrl}/messages?limit=${encodeURIComponent(limit)}&offset=${encodeURIComponent(offset)}`, {
+    const query = new URLSearchParams();
+    query.set("limit", limit);
+    query.set("offset", offset);
+    if (conversationId) query.set("conversation_id", conversationId);
+
+    const res = await fetch(`${baseUrl}/messages?${query.toString()}`, {
         cache: "no-store",
         headers: {
             accept: "application/json",
