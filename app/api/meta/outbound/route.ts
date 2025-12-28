@@ -4,7 +4,7 @@ export async function POST(req: Request) {
     const payload = await req.json();
 
     const res = await fetch(
-        `${process.env.META_BACKEND_URL}/meta/outbound`,
+        `${process.env.COMMUNICATIONS_WEB_URL}/meta/outbound`,
         {
             method: "POST",
             headers: {
