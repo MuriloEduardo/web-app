@@ -26,7 +26,7 @@ export default async function ConfiguracoesPage() {
                 <h1 className="text-lg font-semibold">Configurações</h1>
 
                 <div className="mt-4 grid gap-3">
-                    <div className="rounded border p-3 dark:border-white/10">
+                    <div className="rounded border p-3 dark:border-gray-800">
                         <div className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                             Email
                         </div>
@@ -35,7 +35,7 @@ export default async function ConfiguracoesPage() {
                         </div>
                     </div>
 
-                    <div className="rounded border p-3 dark:border-white/10">
+                    <div className="rounded border p-3 dark:border-gray-800">
                         <div className="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
                             Telefone
                         </div>
