@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageStatusIcon } from "@/app/components/MessageItem";
+import { MessageStatusIcon } from "@/app/components/MessageStatusIcon";
 
 type Conversation = {
     id: number;

@@ -1,6 +1,6 @@
-import { CheckIcon } from "@heroicons/react/24/solid";
+import { MessageStatusIcon } from "@/app/components/MessageStatusIcon";
 
-type MessageStatus = "sent" | "delivered" | "read";
+export { MessageStatusIcon } from "@/app/components/MessageStatusIcon";
 
 type Props = {
     id: string;
@@ -10,52 +10,8 @@ type Props = {
     status?: string | null;
 };
 
-function normalizeStatus(status: string | null | undefined): MessageStatus | undefined {
-    if (!status) return undefined;
-    const s = status.trim().toLowerCase();
-    if (s === "sent") return "sent";
-    if (s === "delivered" || s.startsWith("delivered_")) return "delivered";
-    if (s === "read" || s.startsWith("read_")) return "read";
-    return undefined;
-}
-
-function StatusChecks({ status, className }: { status: MessageStatus; className?: string }) {
-    const colorClass =
-        status === "read" ? "text-blue-500" : "text-zinc-500 dark:text-zinc-400";
-
-    const containerClass = className ? `inline-flex ${className}` : "inline-flex";
-    const iconClass = `h-4 w-4 ${colorClass}`;
-
-    if (status === "sent") {
-        return <CheckIcon className={iconClass} aria-label="Enviado" />;
-    }
-
-    return (
-        <span className={containerClass} aria-label={status === "read" ? "Lido" : "Entregue"}>
-            <CheckIcon className={iconClass} aria-hidden="true" />
-            <CheckIcon className={iconClass + " -ml-2"} aria-hidden="true" />
-        </span>
-    );
-}
-
-export function MessageStatusIcon({
-    direction,
-    status,
-    className,
-}: {
-    direction: string;
-    status?: string | null;
-    className?: string;
-}) {
-    const isOutbound = direction === "outbound";
-    const normalizedStatus = isOutbound ? normalizeStatus(status) : undefined;
-    if (!normalizedStatus) return null;
-    return <StatusChecks status={normalizedStatus} className={className} />;
-}
-
 export function MessageItem({ id, direction, text, createdAt, status }: Props) {
     const isOutbound = direction === "outbound";
-    const normalizedStatus = isOutbound ? normalizeStatus(status) : undefined;
 
     return (
         <div
@@ -73,7 +29,7 @@ export function MessageItem({ id, direction, text, createdAt, status }: Props) {
                     <span>{text}</span>
                     <div className="flex items-center justify-end gap-1 text-xs opacity-25">
                         <span>{createdAt ?? ""}</span>
-                        {normalizedStatus ? <StatusChecks status={normalizedStatus} /> : null}
+                        <MessageStatusIcon direction={direction} status={status} />
                     </div>
                 </div>
             </div>
