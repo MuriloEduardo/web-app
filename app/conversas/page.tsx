@@ -246,9 +246,7 @@ export default async function ConversasPage() {
                 </h1>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr]">
-                <ConversasList conversations={enriched} />
-            </div>
+            <ConversasList conversations={enriched} />
         </main>
     );
 }
