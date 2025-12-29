@@ -179,7 +179,7 @@ export default async function ConversasPage() {
     );
 
     return (
-        <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-6 py-10">
+        <main className="min-h-screen w-full dark:bg-gray-900">
             <div className="flex items-center justify-between">
                 <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
                     Conversas
@@ -195,10 +195,6 @@ export default async function ConversasPage() {
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr]">
                 <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black">
                     <ConversasList conversations={enriched} />
-                </div>
-
-                <div className="rounded-lg border border-zinc-200 bg-white p-6 text-sm text-zinc-600 dark:border-zinc-800 dark:bg-black dark:text-zinc-300">
-                    Selecione uma conversa para ver as mensagens.
                 </div>
             </div>
         </main>
