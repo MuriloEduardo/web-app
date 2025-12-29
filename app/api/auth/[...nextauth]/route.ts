@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 
 import { authOptions } from "@/app/lib/auth";
 
+export const runtime = "nodejs";
+
 const handler = NextAuth(authOptions);
 
 function secretMissingInProd() {
@@ -17,7 +19,7 @@ export async function GET(req: Request, ctx: any) {
         );
     }
 
-    return (handler as any)(req, ctx);
+    return (handler as any)(req);
 }
 
 export async function POST(req: Request, ctx: any) {
@@ -28,5 +30,5 @@ export async function POST(req: Request, ctx: any) {
         );
     }
 
-    return (handler as any)(req, ctx);
+    return (handler as any)(req);
 }
