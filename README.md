@@ -36,6 +36,7 @@ Healthcheck endpoint:
 - NextAuth route: `POST/GET /api/auth/[...nextauth]`
 - Login page: `/login`
 - Protected route: `/dashboard`
+ - Route protection: `proxy.ts` (Next.js 16 replacement for middleware)
 
 Env vars:
 
