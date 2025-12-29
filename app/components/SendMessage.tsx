@@ -125,7 +125,7 @@ export function SendMessage({
                         formRef.current?.requestSubmit();
                     }
                 }}
-                className="w-full p-3 text-sm dark:text-white dark:bg-transparent focus:outline-none resize-none"
+                className="w-full p-3 text-sm dark:bg-transparent focus:outline-none resize-none"
             />
 
             <button

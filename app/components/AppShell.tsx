@@ -29,15 +29,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {children}
 
             {hideNav ? null : (
-                <nav className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white px-4 py-3 dark:bg-black">
+                <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white px-4 py-3 dark:bg-black">
                     <div className="mx-auto flex w-full max-w-3xl items-center gap-2">
                         <Link
                             href="/dashboard"
                             className={
                                 "flex-1 rounded px-3 py-2 text-center text-sm font-medium " +
                                 (isActive(pathname, "/dashboard")
-                                    ? "text-black dark:text-white"
-                                    : "text-zinc-500 dark:text-zinc-400")
+                                    ? "opacity-25"
+                                    : "")
                             }
                         >
                             <HomeIcon className="mx-auto h-5 w-5" />
@@ -47,8 +47,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                             className={
                                 "flex-1 rounded px-3 py-2 text-center text-sm font-medium " +
                                 (isActive(pathname, "/conversas")
-                                    ? "text-black dark:text-white"
-                                    : "text-zinc-500 dark:text-zinc-400")
+                                    ? "opacity-25"
+                                    : "")
                             }
                         >
                             <ChatBubbleBottomCenterIcon className="mx-auto h-5 w-5" />
@@ -58,8 +58,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                             className={
                                 "flex-1 rounded px-3 py-2 text-center text-sm font-medium " +
                                 (isActive(pathname, "/configuracoes")
-                                    ? "text-black dark:text-white"
-                                    : "text-zinc-500 dark:text-zinc-400")
+                                    ? "opacity-25"
+                                    : "")
                             }
                         >
                             <Cog6ToothIcon className="mx-auto h-5 w-5" />

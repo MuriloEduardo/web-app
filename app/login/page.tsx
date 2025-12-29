@@ -41,7 +41,7 @@ function LoginForm() {
 
     return (
         <div className="flex min-h-screen items-center justify-center font-sans">
-            <main className="w-full max-w-sm rounded p-6 dark:text-white">
+            <main className="w-full max-w-sm rounded p-6">
                 <h1 className="text-lg font-semibold">Entrar</h1>
 
                 <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-3">

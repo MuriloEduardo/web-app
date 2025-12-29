@@ -68,7 +68,7 @@ export default async function DashboardPage() {
 
     return (
         <div className="flex items-center justify-center font-sans pb-14">
-            <main className="w-full max-w-3xl rounded p-6 dark:text-white">
+            <main className="w-full max-w-3xl rounded p-6">
                 <h1 className="text-lg font-semibold">Bem-vindo!</h1>
                 <p className="mt-2 text-sm">
                     Você está logado como <b>{email}</b>

@@ -15,7 +15,7 @@ export default function LogoutButton({ className }: Props) {
             type="button"
             className={
                 className ??
-                "rounded bg-black px-3 py-2 text-white disabled:opacity-60 dark:bg-gray-800 dark:text-white"
+                "rounded bg-black px-3 py-2 text-white disabled:opacity-60 dark:bg-gray-800"
             }
             disabled={loading}
             onClick={async () => {
