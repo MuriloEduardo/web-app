@@ -252,17 +252,6 @@ export default async function ConversaPage({ params }: PageProps) {
 
     const selectedConversation = conversations.find((c) => c?.id === selectedConversationId);
 
-    const debugEnabled = process.env.DEBUG_CONVERSAS === "1";
-    if (debugEnabled) {
-        console.log("[conversas] open", {
-            conversationId,
-            selectedConversationId,
-            conversationsCount: conversations.length,
-            rawMessagesCount: rawMessages.length,
-            selectedConversation,
-        });
-    }
-
     const extractedCtx = pickBestWhatsAppContext(
         rawMessages
             .map((m) => extractWhatsAppConversationContext(m.payload))
@@ -279,25 +268,6 @@ export default async function ConversaPage({ params }: PageProps) {
         },
         {} as Record<string, number>
     );
-
-    if (debugEnabled) {
-        console.log("[conversas] payload sample types", payloadTypeCounts);
-
-        for (const [idx, m] of sample.entries()) {
-            const parsed = parseJsonIfString(m.payload);
-            const ctx = extractWhatsAppConversationContext(m.payload);
-            console.log(`[conversas] msg#${idx} summary`, {
-                direction: m.direction,
-                source: m.source,
-                target: m.target,
-                payload: summarize(m.payload),
-                parsedPayload: summarize(parsed),
-                extractedCtx: ctx,
-            });
-        }
-
-        console.log("[conversas] extractedCtx picked", extractedCtx);
-    }
 
     const toWaId = selectedConversation?.wa_id ?? extractedCtx?.contactWaId;
     const displayPhoneNumber =
@@ -319,31 +289,18 @@ export default async function ConversaPage({ params }: PageProps) {
 
     const conversationLabel = contactName ?? toWaId ?? `Conversa ${conversationId}`;
 
-    if (debugEnabled) {
-        console.log("[conversas] resolved fields", {
-            toWaId,
-            displayPhoneNumber,
-            phoneNumberId,
-            contactName,
-            conversationLabel,
-        });
-    }
-
     return (
         <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-6 py-10">
             <div className="flex items-center justify-between">
                 <div className="flex flex-col">
-                    <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+                    <h1 className="text-xl font-semibold">
                         {conversationLabel}
                     </h1>
-                    <div className="text-sm text-zinc-600 dark:text-zinc-300">
-                        Conversa {conversationId}
-                    </div>
                 </div>
                 <div className="flex items-center gap-4">
                     <Link
                         href="/conversas"
-                        className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
+                        className="text-sm"
                     >
                         Todas as conversas
                     </Link>

@@ -86,7 +86,7 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
                 className="w-full rounded-md border border-zinc-200 bg-white p-3 text-sm text-zinc-900 dark:border-zinc-800 dark:bg-black dark:text-zinc-50"
             />
 
-            <button onClick={handleSend} disabled={status === "sending" || !canSend}>
+            <button className="border border-white rounded text-white" onClick={handleSend} disabled={status === "sending" || !canSend}>
                 {status === "sending" && "Enviando..."}
                 {status === "idle" && "Enviar mensagem"}
                 {status === "sent" && "Mensagem enviada"}
