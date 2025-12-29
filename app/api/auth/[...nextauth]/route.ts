@@ -1,5 +1,5 @@
 import NextAuth from "next-auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { authOptions } from "@/app/lib/auth";
 
@@ -11,7 +11,7 @@ function secretMissingInProd() {
     return process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_SECRET;
 }
 
-export async function GET(req: Request, ctx: any) {
+export async function GET(req: NextRequest, ctx: { params: { nextauth: string[] } }) {
     if (secretMissingInProd()) {
         return NextResponse.json(
             { ok: false, error: "NEXTAUTH_SECRET is required in production" },
@@ -19,10 +19,10 @@ export async function GET(req: Request, ctx: any) {
         );
     }
 
-    return (handler as any)(req);
+    return (handler as any)(req, ctx);
 }
 
-export async function POST(req: Request, ctx: any) {
+export async function POST(req: NextRequest, ctx: { params: { nextauth: string[] } }) {
     if (secretMissingInProd()) {
         return NextResponse.json(
             { ok: false, error: "NEXTAUTH_SECRET is required in production" },
@@ -30,5 +30,5 @@ export async function POST(req: Request, ctx: any) {
         );
     }
 
-    return (handler as any)(req);
+    return (handler as any)(req, ctx);
 }
