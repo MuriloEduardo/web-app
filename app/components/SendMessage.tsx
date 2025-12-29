@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { sendMetaOutbound } from "@/app/actions/sendMetaOutbound";
 import {
     ArrowPathIcon,
@@ -20,12 +20,6 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
     const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
     const [messageBody, setMessageBody] = useState("");
     const formRef = useRef<HTMLFormElement | null>(null);
-
-    useEffect(() => {
-        if (messageBody.trim().length > 0 && (status === "sent" || status === "error")) {
-            setStatus("idle");
-        }
-    }, [messageBody, status]);
 
     const canSend = useMemo(() => {
         return Boolean(
@@ -102,7 +96,13 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
                 required
                 id="messageBody"
                 value={messageBody}
-                onChange={(e) => setMessageBody(e.target.value)}
+                onChange={(e) => {
+                    const next = e.target.value;
+                    setMessageBody(next);
+                    if (next.trim().length > 0 && (status === "sent" || status === "error")) {
+                        setStatus("idle");
+                    }
+                }}
                 placeholder={
                     !displayPhoneNumber || !phoneNumberId || !toWaId
                         ? "Abra uma conversa do WhatsApp para enviar."

@@ -55,6 +55,7 @@ type CommunicationsMessage = {
     source?: string;
     target?: string;
     status?: unknown;
+    statuses?: unknown;
     payload?: unknown;
     created_at?: string;
 };
@@ -200,6 +201,49 @@ function extractWhatsAppStatus(payload: unknown): string | null {
     return typeof status === "string" ? status : null;
 }
 
+function pickLatestStatusFromStatuses(statuses: unknown): string | null {
+    if (!Array.isArray(statuses) || statuses.length === 0) return null;
+
+    const items = statuses.filter((s): s is Record<string, unknown> => isRecord(s));
+    if (items.length === 0) return null;
+
+    const withTime = items
+        .map((s) => {
+            const status = typeof s.status === "string" ? s.status : null;
+            const timestampRaw = s.timestamp;
+            const timestamp =
+                typeof timestampRaw === "string" && /^\d+$/.test(timestampRaw)
+                    ? Number(timestampRaw)
+                    : typeof timestampRaw === "number"
+                        ? timestampRaw
+                        : null;
+
+            const createdAt = typeof s.created_at === "string" ? Date.parse(s.created_at) : NaN;
+            const createdAtMs = Number.isFinite(createdAt) ? createdAt : null;
+
+            const sortKey = timestamp ?? createdAtMs;
+            return { status, sortKey };
+        })
+        .filter((v): v is { status: string; sortKey: number | null } => typeof v.status === "string");
+
+    if (withTime.length === 0) return null;
+
+    // Prefer items with a time; otherwise fall back to array order.
+    const anyHasTime = withTime.some((v) => typeof v.sortKey === "number");
+    if (!anyHasTime) return withTime[withTime.length - 1].status;
+
+    let best = withTime[0];
+    for (const item of withTime) {
+        const a = best.sortKey;
+        const b = item.sortKey;
+        if (typeof b === "number" && (typeof a !== "number" || b > a)) {
+            best = item;
+        }
+    }
+
+    return best.status;
+}
+
 function extractWhatsAppConversationContext(payload: unknown): WhatsAppConversationContext | null {
     payload = parseJsonIfString(payload);
     if (!isRecord(payload)) return null;
@@ -270,9 +314,13 @@ function normalizeMessages(messages: CommunicationsMessage[]) {
 
         const direction = typeof m.direction === "string" ? m.direction : "unknown";
         const text = extractWhatsAppText(m.payload) ?? "(mensagem sem texto)";
+        const statusFromStatuses = pickLatestStatusFromStatuses(m.statuses);
         const statusFromField = typeof m.status === "string" ? m.status : null;
         const statusFromPayload = extractWhatsAppStatus(m.payload);
-        const status = statusFromField ?? statusFromPayload;
+        const status = statusFromStatuses ?? statusFromField ?? statusFromPayload;
+
+        const statuses = m.statuses;
+
         const createdAt =
             typeof m.created_at === "string"
                 ? new Date(m.created_at).toLocaleTimeString("pt-BR", {
@@ -282,7 +330,7 @@ function normalizeMessages(messages: CommunicationsMessage[]) {
                 })
                 : "";
 
-        return { id, direction, text, createdAt, status };
+        return { id, direction, text, createdAt, status, statuses };
     });
 }
 
