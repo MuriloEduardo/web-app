@@ -7,10 +7,6 @@ import { prisma } from "@/app/lib/prisma";
 const isProd = process.env.NODE_ENV === "production";
 const nextAuthSecret = process.env.NEXTAUTH_SECRET ?? (isProd ? undefined : "dev-secret");
 
-if (isProd && !nextAuthSecret) {
-    throw new Error("NEXTAUTH_SECRET is required in production");
-}
-
 export const authOptions: NextAuthOptions = {
     providers: [
         Credentials({
