@@ -43,7 +43,7 @@ export default function RegisterPage() {
 
     return (
         <div className="flex min-h-screen items-center justify-center font-sans dark:bg-gray-900">
-            <main className="w-full max-w-sm rounded bg-white p-6 dark:bg-black dark:text-white">
+            <main className="w-full max-w-sm rounded bg-white p-6 dark:bg-gray-900 dark:text-white">
                 <h1 className="text-lg font-semibold">Criar conta</h1>
 
                 <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-3">
