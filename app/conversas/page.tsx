@@ -1,9 +1,15 @@
 import { ConversasList } from "./ConversasList";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
+}
+
+async function getCookieHeader(): Promise<string> {
+    const h = await headers();
+    return h.get("cookie") ?? "";
 }
 
 function getBaseUrlFromEnv(): string {
@@ -138,8 +144,12 @@ function extractWhatsAppText(payload: unknown): string | null {
 }
 
 async function getConversations(): Promise<Conversation[]> {
+    const cookie = await getCookieHeader();
     const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions`, {
         cache: "no-store",
+        headers: {
+            ...(cookie ? { cookie } : {}),
+        },
     });
 
     if (!res.ok) return [];
@@ -185,9 +195,15 @@ async function getConversations(): Promise<Conversation[]> {
 }
 
 async function getMessagesForConversation(conversationId: number): Promise<CommunicationsMessage[]> {
+    const cookie = await getCookieHeader();
     const res = await fetch(
         `${getBaseUrlFromEnv()}/api/sessions/${conversationId}?limit=20`,
-        { cache: "no-store" }
+        {
+            cache: "no-store",
+            headers: {
+                ...(cookie ? { cookie } : {}),
+            },
+        }
     );
 
     if (!res.ok) return [];

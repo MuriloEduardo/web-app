@@ -3,6 +3,7 @@ import {
     ChevronLeftIcon,
 } from "@heroicons/react/24/solid";
 import { SendMessage } from "@/app/components/SendMessage";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
@@ -89,9 +90,18 @@ function getBaseUrlFromEnv(): string {
     return "http://localhost:3000";
 }
 
+async function getCookieHeader(): Promise<string> {
+    const h = await headers();
+    return h.get("cookie") ?? "";
+}
+
 async function getConversations(): Promise<Conversation[]> {
+    const cookie = await getCookieHeader();
     const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions`, {
         cache: "no-store",
+        headers: {
+            ...(cookie ? { cookie } : {}),
+        },
     });
 
     if (!res.ok) return [];
@@ -120,8 +130,12 @@ async function getConversations(): Promise<Conversation[]> {
 }
 
 async function getMessages(conversationId: string): Promise<CommunicationsMessage[]> {
+    const cookie = await getCookieHeader();
     const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions/${conversationId}?limit=200`, {
         cache: "no-store",
+        headers: {
+            ...(cookie ? { cookie } : {}),
+        },
     });
 
     if (!res.ok) return [];

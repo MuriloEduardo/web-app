@@ -34,8 +34,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ ok: true, user }, { status: 201 });
-  } catch (error: any) {
-    if (error?.code === "P2002") {
+  } catch (error: unknown) {
+    const maybePrismaError = error as { code?: unknown } | null;
+
+    if (maybePrismaError?.code === "P2002") {
       return NextResponse.json(
         { ok: false, error: "Email já cadastrado" },
         { status: 409 },
