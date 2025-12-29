@@ -31,6 +31,25 @@ Healthcheck endpoint:
 
 - `GET /api/health/db` returns `{ ok: true }` when the DB connection works.
 
+## Auth (Login e Senha)
+
+- NextAuth route: `POST/GET /api/auth/[...nextauth]`
+- Login page: `/login`
+- Protected route: `/dashboard`
+
+Env vars:
+
+- `NEXTAUTH_SECRET`
+- `NEXTAUTH_URL` (local: `http://localhost:3000`)
+
+Create a user (dev):
+
+```bash
+curl -sS -X POST http://localhost:3000/api/auth/register \
+	-H 'content-type: application/json' \
+	-d '{"email":"admin@local","password":"admin123","name":"Admin"}'
+```
+
 ## Getting Started
 
 First, run the development server:
