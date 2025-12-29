@@ -14,7 +14,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     const hideNav = pathname === "/" || pathname === "/login" || pathname === "/register";
 
     return (
-        <div className={hideNav ? "min-h-screen" : "min-h-screen pb-20"}>
+        <div className="min-h-screen">
             {children}
 
             {hideNav ? null : (
