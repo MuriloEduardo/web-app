@@ -8,6 +8,35 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
 }
 
+function parseJsonIfString(value: unknown): unknown {
+    if (typeof value !== "string") return value;
+    try {
+        return JSON.parse(value) as unknown;
+    } catch {
+        return value;
+    }
+}
+
+function summarize(value: unknown): Record<string, unknown> {
+    if (typeof value === "string") {
+        return { type: "string", length: value.length, preview: value.slice(0, 120) };
+    }
+    if (Array.isArray(value)) {
+        return { type: "array", length: value.length };
+    }
+    if (isRecord(value)) {
+        return { type: "object", keys: Object.keys(value).slice(0, 20) };
+    }
+    return { type: typeof value };
+}
+
+function isLikelyPhoneOrWaId(value: string | undefined): boolean {
+    if (!value) return false;
+    const trimmed = value.trim();
+    if (!trimmed) return false;
+    return /^\d{6,}$/.test(trimmed);
+}
+
 type Conversation = {
     id: number;
     participant?: string;
@@ -33,6 +62,29 @@ type WhatsAppConversationContext = {
     contactName?: string;
     contactWaId?: string;
 };
+
+function pickBestWhatsAppContext(
+    contexts: WhatsAppConversationContext[]
+): WhatsAppConversationContext | undefined {
+    // Prefer contexts that contain the contact name (profile.name), then wa_id, then metadata.
+    let best: WhatsAppConversationContext | undefined;
+    let bestScore = -1;
+
+    for (const ctx of contexts) {
+        const score =
+            (ctx.contactName ? 100 : 0) +
+            (ctx.contactWaId ? 50 : 0) +
+            (ctx.phoneNumberId ? 10 : 0) +
+            (ctx.displayPhoneNumber ? 5 : 0);
+
+        if (score > bestScore) {
+            bestScore = score;
+            best = ctx;
+        }
+    }
+
+    return best;
+}
 
 type PageProps = {
     params: Promise<{ conversationId: string }>;
@@ -79,7 +131,7 @@ async function getConversations(): Promise<Conversation[]> {
 }
 
 async function getMessages(conversationId: string): Promise<CommunicationsMessage[]> {
-    const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions/${conversationId}`, {
+    const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions/${conversationId}?limit=200`, {
         cache: "no-store",
     });
 
@@ -90,6 +142,7 @@ async function getMessages(conversationId: string): Promise<CommunicationsMessag
 }
 
 function extractWhatsAppText(payload: unknown): string | null {
+    payload = parseJsonIfString(payload);
     if (!isRecord(payload)) return null;
 
     const entry = payload.entry;
@@ -112,6 +165,7 @@ function extractWhatsAppText(payload: unknown): string | null {
 }
 
 function extractWhatsAppConversationContext(payload: unknown): WhatsAppConversationContext | null {
+    payload = parseJsonIfString(payload);
     if (!isRecord(payload)) return null;
 
     const entry = payload.entry;
@@ -125,6 +179,7 @@ function extractWhatsAppConversationContext(payload: unknown): WhatsAppConversat
 
     const metadata = value.metadata;
     const contacts = value.contacts;
+    const messages = value.messages;
 
     const ctx: WhatsAppConversationContext = {};
 
@@ -137,14 +192,28 @@ function extractWhatsAppConversationContext(payload: unknown): WhatsAppConversat
         }
     }
 
-    if (Array.isArray(contacts) && isRecord(contacts[0])) {
-        const waId = contacts[0].wa_id;
+    const firstContact: unknown = Array.isArray(contacts)
+        ? contacts[0]
+        : isRecord(contacts)
+            ? contacts
+            : null;
+
+    if (isRecord(firstContact)) {
+        const waId = firstContact.wa_id;
         if (typeof waId === "string") ctx.contactWaId = waId;
 
-        const profile = contacts[0].profile;
+        const profile = firstContact.profile;
         if (isRecord(profile) && typeof profile.name === "string") {
             ctx.contactName = profile.name;
         }
+    }
+
+    // Fallback: some stored payloads may not include `contacts`, but `messages` often has `from`/`to`.
+    if (!ctx.contactWaId && Array.isArray(messages) && isRecord(messages[0])) {
+        const from = messages[0].from;
+        const to = messages[0].to;
+        if (typeof from === "string") ctx.contactWaId = from;
+        else if (typeof to === "string") ctx.contactWaId = to;
     }
 
     const hasAny =
@@ -183,17 +252,82 @@ export default async function ConversaPage({ params }: PageProps) {
 
     const selectedConversation = conversations.find((c) => c?.id === selectedConversationId);
 
-    const extractedCtx = rawMessages
-        .map((m) => extractWhatsAppConversationContext(m.payload))
-        .find((ctx): ctx is WhatsAppConversationContext => ctx !== null);
+    const debugEnabled = process.env.DEBUG_CONVERSAS === "1";
+    if (debugEnabled) {
+        console.log("[conversas] open", {
+            conversationId,
+            selectedConversationId,
+            conversationsCount: conversations.length,
+            rawMessagesCount: rawMessages.length,
+            selectedConversation,
+        });
+    }
+
+    const extractedCtx = pickBestWhatsAppContext(
+        rawMessages
+            .map((m) => extractWhatsAppConversationContext(m.payload))
+            .filter((ctx): ctx is WhatsAppConversationContext => ctx !== null)
+    );
+
+    // Debug: inspect payload shapes and extracted contexts for first few messages
+    const sample = rawMessages.slice(0, 10);
+    const payloadTypeCounts = sample.reduce(
+        (acc, m) => {
+            const t = typeof m.payload;
+            acc[t] = (acc[t] ?? 0) + 1;
+            return acc;
+        },
+        {} as Record<string, number>
+    );
+
+    if (debugEnabled) {
+        console.log("[conversas] payload sample types", payloadTypeCounts);
+
+        for (const [idx, m] of sample.entries()) {
+            const parsed = parseJsonIfString(m.payload);
+            const ctx = extractWhatsAppConversationContext(m.payload);
+            console.log(`[conversas] msg#${idx} summary`, {
+                direction: m.direction,
+                source: m.source,
+                target: m.target,
+                payload: summarize(m.payload),
+                parsedPayload: summarize(parsed),
+                extractedCtx: ctx,
+            });
+        }
+
+        console.log("[conversas] extractedCtx picked", extractedCtx);
+    }
 
     const toWaId = selectedConversation?.wa_id ?? extractedCtx?.contactWaId;
     const displayPhoneNumber =
         selectedConversation?.company_number ?? extractedCtx?.displayPhoneNumber;
     const phoneNumberId = extractedCtx?.phoneNumberId;
-    const contactName = selectedConversation?.participant ?? extractedCtx?.contactName;
+    const participant = selectedConversation?.participant;
+    const participantIsJustNumber = isLikelyPhoneOrWaId(participant);
+    const participantEqualsWa =
+        participant && selectedConversation?.wa_id
+            ? participant.trim() === selectedConversation.wa_id.trim()
+            : false;
+
+    const contactName =
+        !participant || participant.trim().length === 0
+            ? extractedCtx?.contactName
+            : participantIsJustNumber || participantEqualsWa
+                ? extractedCtx?.contactName ?? participant
+                : participant;
 
     const conversationLabel = contactName ?? toWaId ?? `Conversa ${conversationId}`;
+
+    if (debugEnabled) {
+        console.log("[conversas] resolved fields", {
+            toWaId,
+            displayPhoneNumber,
+            phoneNumberId,
+            contactName,
+            conversationLabel,
+        });
+    }
 
     return (
         <main className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-6 px-6 py-10">
