@@ -79,7 +79,7 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
     }
 
     return (
-        <div className="flex align-middle rounded-md border border-white">
+        <div className="flex align-middle rounded-md border border-white dark:bg-gray-600">
             {(!displayPhoneNumber || !phoneNumberId || !toWaId) && (
                 <div className="rounded-md bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
                     Não foi possível inferir os dados da conversa atual (metadata/contato). Abra uma conversa com mensagens do WhatsApp para enviar.
@@ -89,11 +89,11 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
                 id="messageBody"
                 value={messageBody}
                 onChange={(e) => setMessageBody(e.target.value)}
-                className="w-full rounded-md bg-white p-3 text-sm text-zinc-900 dark:bg-white"
+                className="w-full p-3 text-sm dark:text-white"
             />
 
             <button
-                className="px-2 rounded-full border whitespace-nowrap text-sm text-white disabled:cursor-not-allowed disabled:opacity-60"
+                className="p-3 m-3 rounded-full border dark:bg-white whitespace-nowrap text-sm disabled:cursor-not-allowed disabled:opacity-60"
                 onClick={handleSend}
                 disabled={status === "sending" || !canSend}
             >

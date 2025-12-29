@@ -268,20 +268,22 @@ export default async function ConversaPage({ params }: PageProps) {
     const conversationLabel = contactName ?? toWaId ?? `Conversa ${conversationId}`;
 
     return (
-        <main className="flex h-screen flex-col dark:bg-gray-900">
-            <div className="flex items-center justify-between py-2 dark:text-white">
-                <Link
-                    href="/conversas"
-                    className="text-sm px-2"
-                >
-                    <ChevronLeftIcon className="inline-block h-4 w-4" />
-                </Link>
-                <h1 className="font-semibold">
-                    {conversationLabel}
-                </h1>
+        <main className="flex h-screen flex-col">
+            <div className="fixed top-0 left-0 right-0">
+                <div className="flex items-center justify-between py-2 dark:text-white dark:bg-gray-900">
+                    <Link
+                        href="/conversas"
+                        className="text-sm px-2"
+                    >
+                        <ChevronLeftIcon className="inline-block h-4 w-4" />
+                    </Link>
+                    <h1 className="font-semibold">
+                        {conversationLabel}
+                    </h1>
+                </div>
             </div>
             <div className="grow flex flex-col">
-                <div className="grow flex flex-col gap-2 overflow-y-auto">
+                <div className="grow flex flex-col gap-2 overflow-y-auto px-4 pt-14 pb-24 dark:bg-gray-900">
                     {messages.map((m) => {
                         const isOutbound = m.direction === "outbound";
 
@@ -314,12 +316,14 @@ export default async function ConversaPage({ params }: PageProps) {
                     )}
                 </div>
 
-                <SendMessage
-                    toWaId={toWaId}
-                    contactName={contactName}
-                    displayPhoneNumber={displayPhoneNumber}
-                    phoneNumberId={phoneNumberId}
-                />
+                <div className="fixed bottom-0 left-0 right-0">
+                    <SendMessage
+                        toWaId={toWaId}
+                        contactName={contactName}
+                        displayPhoneNumber={displayPhoneNumber}
+                        phoneNumberId={phoneNumberId}
+                    />
+                </div>
             </div>
         </main>
     );
