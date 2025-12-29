@@ -26,7 +26,7 @@ try {
 
     const relativeTarget = path.relative(prismaClientDir, generatedDir) || "../../.prisma";
     fs.symlinkSync(relativeTarget, linkPath, "junction");
-} catch (error) {
+} catch {
     // Don’t fail installs if symlinks aren’t supported.
     process.exit(0);
 }

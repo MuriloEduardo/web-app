@@ -6,8 +6,9 @@ import { defineConfig } from "prisma/config";
 // Load `.env.local` first (dev), then fall back to `.env`.
 process.env.DOTENV_CONFIG_QUIET = "true";
 
-dotenv.config({ path: ".env.local" } as any);
-dotenv.config({} as any);
+dotenv.config({ path: ".env.local" });
+dotenv.config();
+
 
 export default defineConfig({
     schema: "prisma/schema.prisma",

@@ -7,6 +7,13 @@ export const runtime = "nodejs";
 
 const handler = NextAuth(authOptions);
 
+type NextAuthAppRouteHandler = (
+    req: NextRequest,
+    ctx: Record<string, unknown>,
+) => Promise<Response>;
+
+const routeHandler = handler as unknown as NextAuthAppRouteHandler;
+
 function secretMissingInProd() {
     return process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_SECRET;
 }
@@ -23,7 +30,8 @@ export async function GET(
     }
 
     const params = await ctx.params;
-    return (handler as any)(req, { ...ctx, params });
+    const nextCtx = { ...(ctx as unknown as Record<string, unknown>), params };
+    return routeHandler(req, nextCtx);
 }
 
 export async function POST(
@@ -38,5 +46,6 @@ export async function POST(
     }
 
     const params = await ctx.params;
-    return (handler as any)(req, { ...ctx, params });
+    const nextCtx = { ...(ctx as unknown as Record<string, unknown>), params };
+    return routeHandler(req, nextCtx);
 }
