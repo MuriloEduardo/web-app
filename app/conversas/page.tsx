@@ -116,8 +116,12 @@ type Conversation = {
         payload?: unknown;
         created_at?: string;
         direction?: string;
+        status?: unknown;
+        statuses?: unknown;
     };
     last_message_text?: string;
+    last_message_status?: string | null;
+    last_message_direction?: string;
 };
 
 type CommunicationsMessage = {
@@ -145,6 +149,68 @@ function extractWhatsAppText(payload: unknown): string | null {
 
     const body = text.body;
     return typeof body === "string" ? body : null;
+}
+
+function extractWhatsAppStatus(payload: unknown): string | null {
+    payload = parseJsonIfString(payload);
+    if (!isRecord(payload)) return null;
+
+    const entry = payload.entry;
+    if (!Array.isArray(entry) || !isRecord(entry[0])) return null;
+
+    const changes = entry[0].changes;
+    if (!Array.isArray(changes) || !isRecord(changes[0])) return null;
+
+    const value = changes[0].value;
+    if (!isRecord(value)) return null;
+
+    const statuses = value.statuses;
+    if (!Array.isArray(statuses) || !isRecord(statuses[0])) return null;
+
+    const status = statuses[0].status;
+    return typeof status === "string" ? status : null;
+}
+
+function pickLatestStatusFromStatuses(statuses: unknown): string | null {
+    if (!Array.isArray(statuses) || statuses.length === 0) return null;
+
+    const items = statuses.filter((s): s is Record<string, unknown> => isRecord(s));
+    if (items.length === 0) return null;
+
+    const withTime = items
+        .map((s) => {
+            const status = typeof s.status === "string" ? s.status : null;
+            const timestampRaw = s.timestamp;
+            const timestamp =
+                typeof timestampRaw === "string" && /^\d+$/.test(timestampRaw)
+                    ? Number(timestampRaw)
+                    : typeof timestampRaw === "number"
+                        ? timestampRaw
+                        : null;
+
+            const createdAt = typeof s.created_at === "string" ? Date.parse(s.created_at) : NaN;
+            const createdAtMs = Number.isFinite(createdAt) ? createdAt : null;
+
+            const sortKey = timestamp ?? createdAtMs;
+            return { status, sortKey };
+        })
+        .filter((v): v is { status: string; sortKey: number | null } => typeof v.status === "string");
+
+    if (withTime.length === 0) return null;
+
+    const anyHasTime = withTime.some((v) => typeof v.sortKey === "number");
+    if (!anyHasTime) return withTime[withTime.length - 1].status;
+
+    let best = withTime[0];
+    for (const item of withTime) {
+        const a = best.sortKey;
+        const b = item.sortKey;
+        if (typeof b === "number" && (typeof a !== "number" || b > a)) {
+            best = item;
+        }
+    }
+
+    return best.status;
 }
 
 async function getConversations(): Promise<Conversation[]> {
@@ -178,6 +244,8 @@ async function getConversations(): Promise<Conversation[]> {
                         typeof lastMessageRaw.direction === "string"
                             ? lastMessageRaw.direction
                             : undefined,
+                    status: lastMessageRaw.status,
+                    statuses: lastMessageRaw.statuses,
                 }
                 : undefined;
 
@@ -185,12 +253,20 @@ async function getConversations(): Promise<Conversation[]> {
                 ? extractWhatsAppText(lastMessage.payload) ?? undefined
                 : undefined;
 
+            const lastMessageDirection = lastMessage?.direction;
+            const lastMessageStatus =
+                pickLatestStatusFromStatuses(lastMessage?.statuses) ??
+                (typeof lastMessage?.status === "string" ? lastMessage.status : null) ??
+                (lastMessage?.payload ? extractWhatsAppStatus(lastMessage.payload) : null);
+
             const conversation: Conversation = {
                 id: c.id,
                 participant: typeof c.participant === "string" ? c.participant : undefined,
                 wa_id: typeof c.wa_id === "string" ? c.wa_id : undefined,
                 last_message: lastMessage,
                 last_message_text: lastMessageText,
+                last_message_status: lastMessageStatus,
+                last_message_direction: lastMessageDirection,
             };
 
             return conversation;

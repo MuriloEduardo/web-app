@@ -5,6 +5,8 @@ type Conversation = {
     participant?: string;
     wa_id?: string;
     last_message_text?: string;
+    last_message_status?: string | null;
+    last_message_direction?: string;
 };
 
 type Props = {

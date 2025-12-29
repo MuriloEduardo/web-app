@@ -17,9 +17,9 @@ function normalizeStatus(status: string | null | undefined): MessageStatus | und
     return undefined;
 }
 
-function StatusChecks({ status }: { status: MessageStatus }) {
+function StatusChecks({ status, className }: { status: MessageStatus; className?: string }) {
     // Minimal inline SVGs to avoid extra deps.
-    const baseClass = "h-4 w-4";
+    const baseClass = "h-4 w-4" + (className ? ` ${className}` : "");
 
     if (status === "sent") {
         return (
@@ -57,6 +57,21 @@ function StatusChecks({ status }: { status: MessageStatus }) {
             />
         </svg>
     );
+}
+
+export function MessageStatusIcon({
+    direction,
+    status,
+    className,
+}: {
+    direction: string;
+    status?: string | null;
+    className?: string;
+}) {
+    const isOutbound = direction === "outbound";
+    const normalizedStatus = isOutbound ? normalizeStatus(status) : undefined;
+    if (!normalizedStatus) return null;
+    return <StatusChecks status={normalizedStatus} className={className} />;
 }
 
 export function MessageItem({ id, direction, text, createdAt, status }: Props) {

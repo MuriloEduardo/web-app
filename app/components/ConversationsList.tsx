@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { MessageStatusIcon } from "@/app/components/MessageItem";
 
 type Conversation = {
     id: number;
     participant?: string;
     wa_id?: string;
     last_message_text?: string;
+    last_message_status?: string | null;
+    last_message_direction?: string;
 };
 
 type Props = {
@@ -33,8 +36,13 @@ export function ConversationsList({ conversations, selectedConversationId }: Pro
                             <div className="grow min-w-0 border-b border-t border-gray-800 flex flex-col justify-center p-3">
                                 <div className="truncate">{title}</div>
                                 {c.last_message_text && (
-                                    <div className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-                                        {c.last_message_text}
+                                    <div className="min-w-0 flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+                                        <MessageStatusIcon
+                                            direction={c.last_message_direction ?? "unknown"}
+                                            status={c.last_message_status}
+                                            className="shrink-0"
+                                        />
+                                        <div className="truncate">{c.last_message_text}</div>
                                     </div>
                                 )}
                             </div>
