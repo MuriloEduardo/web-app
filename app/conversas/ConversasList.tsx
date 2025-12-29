@@ -14,7 +14,7 @@ type Props = {
 
 export function ConversasList({ conversations, selectedConversationId }: Props) {
     return (
-        <div className="flex flex-col gap-3 py-6 px-2">
+        <div className="flex flex-col gap-3 p-3">
             {conversations.map((c) => {
                 const id = c.id;
                 const selected = id === selectedConversationId;
@@ -29,11 +29,11 @@ export function ConversasList({ conversations, selectedConversationId }: Props) 
                                 : "active:bg-gray-600 text-white"
                         }
                     >
-                        <div className="flex items-stretch hover:dark:bg-gray-800">
-                            <div className="border dark:bg-gray-700 dark:border-white rounded-full px-5 flex flex-col items-center justify-center text-lg font-semibold text-white shrink-0">
+                        <div className="flex items-center hover:dark:bg-gray-800">
+                            <div className="border dark:bg-gray-700 dark:border-white rounded-full px-4 py-3 flex flex-col items-center justify-center text-lg font-semibold text-white shrink-0">
                                 {c.participant?.charAt(0).toUpperCase() ?? "C"}
                             </div>
-                            <div className="grow min-w-0 border-b border-t border-gray-800 flex flex-col justify-center py-2 px-4">
+                            <div className="grow min-w-0 border-b border-t border-gray-800 flex flex-col justify-center p-3">
                                 <div className="truncate">{title}</div>
                                 {c.last_message_text && (
                                     <div className="truncate text-xs text-zinc-500 dark:text-zinc-400">

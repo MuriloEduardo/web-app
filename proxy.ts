@@ -11,6 +11,7 @@ export const config = {
     "/dashboard/:path*",
     "/conversas/:path*",
     "/configuracoes/:path*",
+    "/api/dashboard/:path*",
     "/api/sessions/:path*",
     "/api/messages/:path*",
   ],
