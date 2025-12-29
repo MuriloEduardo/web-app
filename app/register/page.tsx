@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -42,8 +43,8 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center font-sans dark:bg-gray-900">
-            <main className="w-full max-w-sm rounded bg-white p-6 dark:bg-gray-900 dark:text-white">
+        <div className="flex min-h-screen items-center justify-center font-sans dark:bg-gray-900 dark:text-white">
+            <main className="w-full max-w-sm rounded p-6 flex flex-col gap-3">
                 <h1 className="text-lg font-semibold">Criar conta</h1>
 
                 <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-3">
@@ -78,6 +79,13 @@ export default function RegisterPage() {
                         {loading ? "Criando..." : "Criar conta"}
                     </button>
                 </form>
+
+                <p className="text-sm text-zinc-600 dark:text-zinc-300">
+                    Já possui uma conta?{" "}
+                    <Link href="/login" className="underline">
+                        Entrar
+                    </Link>
+                </p>
             </main>
         </div>
     );
