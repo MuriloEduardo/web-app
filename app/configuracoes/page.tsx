@@ -21,8 +21,8 @@ export default async function ConfiguracoesPage() {
     });
 
     return (
-        <div className="flex min-h-screen items-center justify-center font-sans dark:bg-gray-900">
-            <main className="w-full max-w-3xl rounded bg-white p-6 dark:bg-gray-900 dark:text-white">
+        <div className="flex min-h-screen items-center justify-center font-sans">
+            <main className="w-full max-w-3xl rounded p-6 dark:text-white">
                 <h1 className="text-lg font-semibold">Configurações</h1>
 
                 <div className="mt-4 grid gap-3">

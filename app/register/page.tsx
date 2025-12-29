@@ -43,7 +43,7 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center font-sans dark:bg-gray-900 dark:text-white">
+        <div className="flex min-h-screen items-center justify-center font-sans dark:text-white">
             <main className="w-full max-w-sm rounded p-6 flex flex-col gap-3">
                 <h1 className="text-lg font-semibold">Criar conta</h1>
 

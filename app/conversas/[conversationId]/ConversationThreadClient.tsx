@@ -48,7 +48,7 @@ export function ConversationThreadClient({
 
     return (
         <>
-            <div className="grow flex flex-col gap-3 overflow-y-auto px-4 pt-14 pb-24 dark:bg-gray-900">
+            <div className="grow flex flex-col gap-3 overflow-y-auto px-4 pt-14 pb-24">
                 {messages.map((m) => (
                     <MessageItem
                         key={m.id}
