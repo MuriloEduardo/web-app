@@ -4,8 +4,19 @@ import {
 } from "@heroicons/react/24/solid";
 import { SendMessage } from "@/app/components/SendMessage";
 import { headers } from "next/headers";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+
+import { authOptions } from "@/app/lib/auth";
 
 export const dynamic = "force-dynamic";
+
+async function requireLogin() {
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email?.trim().toLowerCase();
+    if (!email) redirect("/login");
+    return email;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
@@ -251,6 +262,7 @@ function normalizeMessages(messages: CommunicationsMessage[]) {
 }
 
 export default async function ConversaPage({ params }: PageProps) {
+    await requireLogin();
     const { conversationId } = await params;
 
     const [conversations, rawMessages] = await Promise.all([

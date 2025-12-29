@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+
+import { authOptions } from "@/app/lib/auth";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
 }
 
 export async function GET(req: Request) {
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email?.trim().toLowerCase();
+    if (!email) {
+        return NextResponse.json(
+            { error: { code: "UNAUTHORIZED" } },
+            { status: 401 }
+        );
+    }
+
     const baseUrl = process.env.COMMUNICATIONS_WEB_URL?.replace(/\/$/, "");
 
     if (!baseUrl) {

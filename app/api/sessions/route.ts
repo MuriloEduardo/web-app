@@ -28,32 +28,43 @@ export async function GET(req: Request) {
         );
     }
 
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email?.trim().toLowerCase();
+
+    if (!email) {
+        return NextResponse.json(
+            { error: { code: "UNAUTHORIZED" } },
+            { status: 401 }
+        );
+    }
+
     const url = new URL(req.url);
     const limit = url.searchParams.get("limit") ?? "50";
     const offset = url.searchParams.get("offset") ?? "0";
 
     const company_number_from_query = url.searchParams.get("company_number")?.trim() || null;
 
-    let company_number = company_number_from_query;
-    if (!company_number) {
-        const session = await getServerSession(authOptions);
-        const email = session?.user?.email?.trim().toLowerCase();
+    const user = await prisma.user.findUnique({
+        where: { email },
+        select: { phone_number: true },
+    });
 
-        if (email) {
-            const user = await prisma.user.findUnique({
-                where: { email },
-                select: { phone_number: true },
-            });
-            company_number = user?.phone_number?.trim() || null;
-        }
-    }
-
-    if (!company_number) {
+    const userCompanyNumber = user?.phone_number?.trim() || null;
+    if (!userCompanyNumber) {
         return NextResponse.json(
             { error: { code: "COMPANY_NUMBER_REQUIRED" } },
             { status: 400 }
         );
     }
+
+    if (company_number_from_query && company_number_from_query !== userCompanyNumber) {
+        return NextResponse.json(
+            { error: { code: "FORBIDDEN_COMPANY_NUMBER" } },
+            { status: 403 }
+        );
+    }
+
+    const company_number = userCompanyNumber;
 
     const query = new URLSearchParams();
     query.set("company_number", company_number);

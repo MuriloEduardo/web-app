@@ -1,5 +1,9 @@
 import { ConversasList } from "./ConversasList";
 import { headers } from "next/headers";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+
+import { authOptions } from "@/app/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -194,6 +198,13 @@ async function getConversations(): Promise<Conversation[]> {
         .filter((v): v is Conversation => v !== null);
 }
 
+async function requireLogin() {
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email?.trim().toLowerCase();
+    if (!email) redirect("/login");
+    return email;
+}
+
 async function getMessagesForConversation(conversationId: number): Promise<CommunicationsMessage[]> {
     const cookie = await getCookieHeader();
     const res = await fetch(
@@ -213,6 +224,7 @@ async function getMessagesForConversation(conversationId: number): Promise<Commu
 }
 
 export default async function ConversasPage() {
+    await requireLogin();
     const conversations = await getConversations();
 
     const enriched = await Promise.all(
