@@ -11,7 +11,10 @@ function secretMissingInProd() {
     return process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_SECRET;
 }
 
-export async function GET(req: NextRequest, ctx: { params: { nextauth: string[] } }) {
+export async function GET(
+    req: NextRequest,
+    ctx: { params: Promise<{ nextauth: string[] }> },
+) {
     if (secretMissingInProd()) {
         return NextResponse.json(
             { ok: false, error: "NEXTAUTH_SECRET is required in production" },
@@ -19,10 +22,14 @@ export async function GET(req: NextRequest, ctx: { params: { nextauth: string[] 
         );
     }
 
-    return (handler as any)(req, ctx);
+    const params = await ctx.params;
+    return (handler as any)(req, { ...ctx, params });
 }
 
-export async function POST(req: NextRequest, ctx: { params: { nextauth: string[] } }) {
+export async function POST(
+    req: NextRequest,
+    ctx: { params: Promise<{ nextauth: string[] }> },
+) {
     if (secretMissingInProd()) {
         return NextResponse.json(
             { ok: false, error: "NEXTAUTH_SECRET is required in production" },
@@ -30,5 +37,6 @@ export async function POST(req: NextRequest, ctx: { params: { nextauth: string[]
         );
     }
 
-    return (handler as any)(req, ctx);
+    const params = await ctx.params;
+    return (handler as any)(req, { ...ctx, params });
 }
