@@ -1,14 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function LoginPage() {
+export default function RegisterPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
 
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -22,27 +18,32 @@ export default function LoginPage() {
         const email = String(formData.get("email") ?? "");
         const password = String(formData.get("password") ?? "");
 
-        const result = await signIn("credentials", {
-            redirect: false,
-            email,
-            password,
-            callbackUrl,
-        });
+        try {
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+            });
 
-        setLoading(false);
+            const data = (await res.json()) as { ok?: boolean; error?: string };
 
-        if (!result || result.error) {
-            setError("Email ou senha inválidos");
-            return;
+            if (!res.ok || !data.ok) {
+                setError(data.error || "Não foi possível criar sua conta");
+                setLoading(false);
+                return;
+            }
+
+            router.push("/login");
+        } catch {
+            setError("Não foi possível criar sua conta");
+            setLoading(false);
         }
-
-        router.push(result.url ?? callbackUrl);
     }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
             <main className="w-full max-w-sm rounded bg-white p-6 dark:bg-black dark:text-white">
-                <h1 className="text-lg font-semibold">Entrar</h1>
+                <h1 className="text-lg font-semibold">Criar conta</h1>
 
                 <form onSubmit={onSubmit} className="mt-4 flex flex-col gap-3">
                     <input
@@ -67,15 +68,8 @@ export default function LoginPage() {
                         className="rounded bg-black px-3 py-2 disabled:opacity-60"
                         disabled={loading}
                     >
-                        {loading ? "Entrando..." : "Entrar"}
+                        {loading ? "Criando..." : "Criar conta"}
                     </button>
-
-                    <p className="text-sm text-zinc-600 dark:text-zinc-300">
-                        Não tem conta?{" "}
-                        <Link href="/register" className="underline">
-                            Criar conta
-                        </Link>
-                    </p>
                 </form>
             </main>
         </div>

@@ -1,12 +1,27 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          Bem Vindo a Atendimento BR!
-        </div>
+      <main className="flex w-full max-w-3xl flex-col gap-10 rounded bg-white px-6 py-16 dark:bg-black sm:px-16">
+        <section className="flex flex-col gap-3 text-center sm:text-left">
+          <h1 className="text-2xl font-semibold tracking-tight">Atendimento BR</h1>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300">
+            Crie sua conta para começar, ou entre se já tiver acesso.
+          </p>
+
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row text-white">
+            <Link
+              href="/register"
+              className="rounded bg-black px-4 py-2 text-center"
+            >
+              Criar conta
+            </Link>
+            <Link href="/login" className="rounded border px-4 py-2 text-center">
+              Entrar
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );
