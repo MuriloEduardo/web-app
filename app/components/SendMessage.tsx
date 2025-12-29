@@ -14,9 +14,16 @@ type Props = {
     phoneNumberId?: string;
     contactName?: string;
     toWaId?: string;
+    onOptimisticSend?: (text: string) => void;
 };
 
-export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, toWaId }: Props) {
+export function SendMessage({
+    displayPhoneNumber,
+    phoneNumberId,
+    contactName,
+    toWaId,
+    onOptimisticSend,
+}: Props) {
     const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
     const [messageBody, setMessageBody] = useState("");
     const formRef = useRef<HTMLFormElement | null>(null);
@@ -34,7 +41,11 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
         e?.preventDefault();
         if (!canSend || status === "sending") return;
 
+        const bodyToSend = messageBody;
+
         setStatus("sending");
+        onOptimisticSend?.(bodyToSend);
+        setMessageBody("");
 
         const payload = {
             entry: [
@@ -59,7 +70,7 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
                                         to: toWaId,
                                         type: "text",
                                         text: {
-                                            body: messageBody,
+                                            body: bodyToSend,
                                         },
                                     },
                                 ],
@@ -78,7 +89,6 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
         }
 
         setStatus("sent");
-        setMessageBody("");
     }
 
     return (

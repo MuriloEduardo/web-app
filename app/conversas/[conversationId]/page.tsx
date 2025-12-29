@@ -2,13 +2,12 @@ import Link from "next/link";
 import {
     ChevronLeftIcon,
 } from "@heroicons/react/24/solid";
-import { SendMessage } from "@/app/components/SendMessage";
 import { headers } from "next/headers";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/app/lib/auth";
-import { MessageItem } from "@/app/components/MessageItem";
+import { ConversationThreadClient } from "./ConversationThreadClient";
 
 export const dynamic = "force-dynamic";
 
@@ -390,35 +389,13 @@ export default async function ConversaPage({ params }: PageProps) {
                 </div>
             </div>
             <div className="grow flex flex-col">
-                <div className="grow flex flex-col gap-3 overflow-y-auto px-4 pt-14 pb-24 dark:bg-gray-900">
-                    {messages.map((m) => {
-                        return (
-                            <MessageItem
-                                key={m.id}
-                                id={m.id}
-                                direction={m.direction}
-                                text={m.text}
-                                createdAt={m.createdAt}
-                                status={m.status}
-                            />
-                        );
-                    })}
-
-                    {messages.length === 0 && (
-                        <div className="text-sm text-zinc-500 dark:text-zinc-400">
-                            Nenhuma mensagem para esta conversa.
-                        </div>
-                    )}
-                </div>
-
-                <div className="fixed bottom-2 left-4 right-4">
-                    <SendMessage
-                        toWaId={toWaId}
-                        contactName={contactName}
-                        displayPhoneNumber={displayPhoneNumber}
-                        phoneNumberId={phoneNumberId}
-                    />
-                </div>
+                <ConversationThreadClient
+                    initialMessages={messages}
+                    toWaId={toWaId}
+                    contactName={contactName}
+                    displayPhoneNumber={displayPhoneNumber}
+                    phoneNumberId={phoneNumberId}
+                />
             </div>
         </main>
     );
