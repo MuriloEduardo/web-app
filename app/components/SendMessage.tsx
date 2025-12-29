@@ -95,7 +95,7 @@ export function SendMessage({
         <form
             ref={formRef}
             onSubmit={handleSubmit}
-            className="flex align-middle rounded-full border border-white dark:bg-gray-600/75 backdrop-blur-xs max-w-lg w-full mx-auto"
+            className="flex align-middle rounded-full border border-white dark:bg-gray-600/75 backdrop-blur-xs w-full mx-auto"
         >
             {(!displayPhoneNumber || !phoneNumberId || !toWaId) && (
                 <div className="rounded-md bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
@@ -125,11 +125,11 @@ export function SendMessage({
                         formRef.current?.requestSubmit();
                     }
                 }}
-                className="w-full p-3 text-sm dark:bg-transparent focus:outline-none resize-none"
+                className="w-full py-3 px-8 text-sm dark:bg-transparent focus:outline-none resize-none"
             />
 
             <button
-                className="p-3 m-3 rounded-full border dark:bg-white whitespace-nowrap text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                className="p-3 m-3 rounded-full border dark:bg-white dark:text-black whitespace-nowrap text-sm disabled:cursor-not-allowed disabled:opacity-60"
                 type="submit"
                 disabled={status === "sending" || !canSend}
                 aria-label={
