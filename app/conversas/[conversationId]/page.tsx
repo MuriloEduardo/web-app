@@ -235,7 +235,7 @@ export default async function ConversaPage({ params }: PageProps) {
     ]);
 
     const selectedConversationId = Number(conversationId);
-    const messages = normalizeMessages(rawMessages);
+    const messages = normalizeMessages(rawMessages).reverse();
 
     const selectedConversation = conversations.find((c) => c?.id === selectedConversationId);
 
