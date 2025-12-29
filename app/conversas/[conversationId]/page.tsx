@@ -206,41 +206,92 @@ function pickLatestStatusFromStatuses(statuses: unknown): string | null {
     const items = statuses.filter((s): s is Record<string, unknown> => isRecord(s));
     if (items.length === 0) return null;
 
-    const withTime = items
-        .map((s) => {
-            const status = typeof s.status === "string" ? s.status : null;
-            const timestampRaw = s.timestamp;
-            const timestamp =
-                typeof timestampRaw === "string" && /^\d+$/.test(timestampRaw)
-                    ? Number(timestampRaw)
-                    : typeof timestampRaw === "number"
-                        ? timestampRaw
-                        : null;
+    function statusRank(status: string): number {
+        const s = status.trim().toLowerCase();
+        if (s === "read" || s.startsWith("read_")) return 3;
+        if (s === "delivered" || s.startsWith("delivered_")) return 2;
+        if (s === "sent") return 1;
+        return 0;
+    }
 
-            const createdAt = typeof s.created_at === "string" ? Date.parse(s.created_at) : NaN;
-            const createdAtMs = Number.isFinite(createdAt) ? createdAt : null;
+    function toEpochMs(value: unknown): number | null {
+        if (typeof value === "number" && Number.isFinite(value)) {
+            return value > 1_000_000_000_000 ? value : value * 1000;
+        }
+        if (typeof value === "string") {
+            const trimmed = value.trim();
+            if (!/^\d+$/.test(trimmed)) return null;
+            const n = Number(trimmed);
+            if (!Number.isFinite(n)) return null;
+            return n > 1_000_000_000_000 ? n : n * 1000;
+        }
+        return null;
+    }
 
-            const sortKey = timestamp ?? createdAtMs;
-            return { status, sortKey };
-        })
-        .filter((v): v is { status: string; sortKey: number | null } => typeof v.status === "string");
+    function parseCreatedAtMs(value: unknown): number | null {
+        if (typeof value !== "string") return null;
+        // e.g. 2025-12-29T19:48:05.569276 -> truncate to ms
+        const normalized = value.replace(/(\.\d{3})\d+/, "$1");
+        const ms = Date.parse(normalized);
+        return Number.isFinite(ms) ? ms : null;
+    }
 
-    if (withTime.length === 0) return null;
+    function getSortTimeMs(s: Record<string, unknown>): number | null {
+        // Use created_at for tie-break when timestamps are equal.
+        return toEpochMs(s.timestamp) ?? parseCreatedAtMs(s.created_at);
+    }
 
-    // Prefer items with a time; otherwise fall back to array order.
-    const anyHasTime = withTime.some((v) => typeof v.sortKey === "number");
-    if (!anyHasTime) return withTime[withTime.length - 1].status;
+    // Iterate preserving order; choose max by:
+    // 1) timeMs (timestamp/created_at)
+    // 2) createdAtMs (secondary tie-break)
+    // 3) status rank (read > delivered > sent)
+    // 4) index (later wins)
+    let best: { status: string; timeMs: number | null; createdAtMs: number | null; rank: number; index: number } | null = null;
 
-    let best = withTime[0];
-    for (const item of withTime) {
-        const a = best.sortKey;
-        const b = item.sortKey;
-        if (typeof b === "number" && (typeof a !== "number" || b > a)) {
-            best = item;
+    for (let index = 0; index < items.length; index++) {
+        const s = items[index];
+        const status = typeof s.status === "string" ? s.status : null;
+        if (!status) continue;
+
+        const timeMs = getSortTimeMs(s);
+        const createdAtMs = parseCreatedAtMs(s.created_at);
+        const rank = statusRank(status);
+
+        const candidate = { status, timeMs, createdAtMs, rank, index };
+
+        if (!best) {
+            best = candidate;
+            continue;
+        }
+
+        const aTime = best.timeMs;
+        const bTime = candidate.timeMs;
+        if (typeof bTime === "number" && (typeof aTime !== "number" || bTime > aTime)) {
+            best = candidate;
+            continue;
+        }
+        if (typeof aTime === "number" && typeof bTime === "number" && bTime < aTime) continue;
+
+        const aCreated = best.createdAtMs;
+        const bCreated = candidate.createdAtMs;
+        if (typeof bCreated === "number" && (typeof aCreated !== "number" || bCreated > aCreated)) {
+            best = candidate;
+            continue;
+        }
+        if (typeof aCreated === "number" && typeof bCreated === "number" && bCreated < aCreated) continue;
+
+        if (candidate.rank > best.rank) {
+            best = candidate;
+            continue;
+        }
+        if (candidate.rank < best.rank) continue;
+
+        if (candidate.index > best.index) {
+            best = candidate;
         }
     }
 
-    return best.status;
+    return best?.status ?? null;
 }
 
 function extractWhatsAppConversationContext(payload: unknown): WhatsAppConversationContext | null {

@@ -1,3 +1,5 @@
+import { CheckIcon } from "@heroicons/react/24/solid";
+
 type MessageStatus = "sent" | "delivered" | "read";
 
 type Props = {
@@ -12,50 +14,27 @@ function normalizeStatus(status: string | null | undefined): MessageStatus | und
     if (!status) return undefined;
     const s = status.trim().toLowerCase();
     if (s === "sent") return "sent";
-    if (s === "delivered") return "delivered";
-    if (s === "read") return "read";
+    if (s === "delivered" || s.startsWith("delivered_")) return "delivered";
+    if (s === "read" || s.startsWith("read_")) return "read";
     return undefined;
 }
 
 function StatusChecks({ status, className }: { status: MessageStatus; className?: string }) {
-    // Minimal inline SVGs to avoid extra deps.
-    const baseClass = "h-4 w-4" + (className ? ` ${className}` : "");
-
-    if (status === "sent") {
-        return (
-            <svg
-                viewBox="0 0 16 15"
-                className={baseClass + " text-zinc-500 dark:text-zinc-400"}
-                fill="none"
-                aria-label="Enviado"
-            >
-                <path
-                    d="M5.5 11.2 1.8 7.5l1-1 2.7 2.7L13.2.5l1 1L5.5 11.2Z"
-                    fill="currentColor"
-                />
-            </svg>
-        );
-    }
-
     const colorClass =
         status === "read" ? "text-blue-500" : "text-zinc-500 dark:text-zinc-400";
 
+    const containerClass = className ? `inline-flex ${className}` : "inline-flex";
+    const iconClass = `h-4 w-4 ${colorClass}`;
+
+    if (status === "sent") {
+        return <CheckIcon className={iconClass} aria-label="Enviado" />;
+    }
+
     return (
-        <svg
-            viewBox="0 0 18 15"
-            className={baseClass + " " + colorClass}
-            fill="none"
-            aria-label={status === "read" ? "Lido" : "Entregue"}
-        >
-            <path
-                d="M6.1 11.2 2.4 7.5l1-1 2.7 2.7L13.8.5l1 1L6.1 11.2Z"
-                fill="currentColor"
-            />
-            <path
-                d="M10.1 11.2 6.4 7.5l1-1 2.7 2.7L17.8.5l1 1-8.7 9.7Z"
-                fill="currentColor"
-            />
-        </svg>
+        <span className={containerClass} aria-label={status === "read" ? "Lido" : "Entregue"}>
+            <CheckIcon className={iconClass} aria-hidden="true" />
+            <CheckIcon className={iconClass + " -ml-2"} aria-hidden="true" />
+        </span>
     );
 }
 
