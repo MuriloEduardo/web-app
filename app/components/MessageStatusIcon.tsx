@@ -29,7 +29,7 @@ export function MessageStatusIcon({ direction, status, className }: Props) {
             aria-label={normalized === "read" ? "Lido" : "Entregue"}
         >
             <CheckIcon className={iconClass} aria-hidden="true" />
-            <CheckIcon className={iconClass + " -ml-2"} aria-hidden="true" />
+            <CheckIcon className={iconClass + " -ml-3"} aria-hidden="true" />
         </span>
     );
 }
