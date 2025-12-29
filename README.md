@@ -43,6 +43,12 @@ Env vars:
 - `NEXTAUTH_SECRET`
 - `NEXTAUTH_URL` (local: `http://localhost:3000`)
 
+Generate a local secret:
+
+```bash
+openssl rand -base64 32
+```
+
 Create a user (dev):
 
 ```bash
