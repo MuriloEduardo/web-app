@@ -1,5 +1,36 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Prisma Postgres (Vercel)
+
+This project is configured to use Prisma Postgres (and optionally Prisma Accelerate).
+
+- Env vars:
+	- `DATABASE_PRISMA_DATABASE_URL`: main runtime URL (often `prisma+postgres://...` when using Accelerate)
+	- `DATABASE_POSTGRES_URL`: direct Postgres URL used by Prisma CLI for migrations
+
+Notes (Prisma ORM v7):
+
+- The database URL for Prisma CLI is configured in `prisma.config.ts`.
+- The Prisma Client runtime connection uses `DATABASE_PRISMA_DATABASE_URL` via `accelerateUrl`.
+
+Local setup:
+
+```bash
+cp .env.example .env.local
+```
+
+Then fill the two variables in `.env.local`.
+
+Generate Prisma Client:
+
+```bash
+npx prisma generate
+```
+
+Healthcheck endpoint:
+
+- `GET /api/health/db` returns `{ ok: true }` when the DB connection works.
+
 ## Getting Started
 
 First, run the development server:
