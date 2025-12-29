@@ -67,7 +67,7 @@ export default async function DashboardPage() {
     const insights = await getInsights();
 
     return (
-        <div className="flex min-h-screen items-center justify-center font-sans dark:bg-gray-900">
+        <div className="flex items-center justify-center font-sans dark:bg-gray-900 pb-14">
             <main className="w-full max-w-3xl rounded bg-white p-6 dark:bg-gray-900 dark:text-white">
                 <h1 className="text-lg font-semibold">Bem-vindo!</h1>
                 <p className="mt-2 text-sm">
