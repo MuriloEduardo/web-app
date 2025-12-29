@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MessageStatusIcon } from "@/app/components/MessageStatusIcon";
+import { MessageTime } from "@/app/components/MessageTime";
 
 type Conversation = {
     id: number;
@@ -8,6 +9,7 @@ type Conversation = {
     last_message_text?: string;
     last_message_status?: string | null;
     last_message_direction?: string;
+    last_message_created_at?: string;
 };
 
 type Props = {
@@ -34,7 +36,13 @@ export function ConversationsList({ conversations, selectedConversationId }: Pro
                                 {c.participant?.charAt(0).toUpperCase() ?? "C"}
                             </div>
                             <div className="grow min-w-0 border-b border-t border-gray-800 flex flex-col justify-center p-3">
-                                <div className="truncate">{title}</div>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="truncate">{title}</div>
+                                    <MessageTime
+                                        utcIso={c.last_message_created_at}
+                                        className="shrink-0 text-xs text-zinc-500 dark:text-zinc-400"
+                                    />
+                                </div>
                                 {c.last_message_text && (
                                     <div className="min-w-0 flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
                                         <MessageStatusIcon

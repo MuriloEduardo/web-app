@@ -9,6 +9,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/app/lib/auth";
 import { pickLatestStatusFromStatuses } from "@/app/lib/messageStatuses";
 import { ConversationThreadClient } from "./ConversationThreadClient";
+import { formatTimeBrazil } from "@/app/components/MessageTime";
 
 export const dynamic = "force-dynamic";
 
@@ -278,14 +279,7 @@ function normalizeMessages(messages: CommunicationsMessage[]) {
 
         const statuses = m.statuses;
 
-        const createdAt =
-            typeof m.created_at === "string"
-                ? new Date(m.created_at).toLocaleTimeString("pt-BR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false,
-                })
-                : "";
+        const createdAt = typeof m.created_at === "string" ? formatTimeBrazil(m.created_at) ?? "" : "";
 
         return { id, direction, text, createdAt, status, statuses };
     });

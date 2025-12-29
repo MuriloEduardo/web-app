@@ -123,6 +123,7 @@ type Conversation = {
     last_message_text?: string;
     last_message_status?: string | null;
     last_message_direction?: string;
+    last_message_created_at?: string;
 };
 
 type CommunicationsMessage = {
@@ -226,6 +227,7 @@ async function getConversations(): Promise<Conversation[]> {
                 last_message_text: lastMessageText,
                 last_message_status: lastMessageStatus,
                 last_message_direction: lastMessageDirection,
+                last_message_created_at: lastMessage?.created_at,
             };
 
             return conversation;

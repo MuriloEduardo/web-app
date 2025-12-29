@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 
 import { MessageItem } from "@/app/components/MessageItem";
 import { SendMessage } from "@/app/components/SendMessage";
+import { formatTimeBrazil } from "@/app/components/MessageTime";
 
 type Message = {
     id: string;
@@ -32,11 +33,7 @@ export function ConversationThreadClient({
 
     const handleOptimisticSend = useCallback((text: string) => {
         const now = new Date();
-        const createdAt = now.toLocaleTimeString("pt-BR", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-        });
+        const createdAt = formatTimeBrazil(now.toISOString()) ?? "";
 
         const optimistic: Message = {
             id: `optimistic:${now.getTime()}:${Math.random().toString(16).slice(2)}`,
