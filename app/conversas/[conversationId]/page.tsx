@@ -328,7 +328,7 @@ export default async function ConversaPage({ params }: PageProps) {
     return (
         <main className="flex h-screen flex-col">
             <div className="fixed top-0 left-0 right-0">
-                <div className="flex items-center justify-between p-2">
+                <div className="flex items-center justify-between p-2 backdrop-blur-sm">
                     <Link
                         href="/conversas"
                         className="leading-none text-sm p-2 hover:dark:bg-gray-800 active:dark:bg-gray-700 rounded-full"

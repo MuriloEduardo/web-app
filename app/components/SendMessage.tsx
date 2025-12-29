@@ -95,7 +95,7 @@ export function SendMessage({
         <form
             ref={formRef}
             onSubmit={handleSubmit}
-            className="flex align-middle rounded-full border border-white dark:bg-gray-600/75 max-w-lg w-full mx-auto"
+            className="flex align-middle rounded-full border border-white dark:bg-gray-600/75 backdrop-blur-xs max-w-lg w-full mx-auto"
         >
             {(!displayPhoneNumber || !phoneNumberId || !toWaId) && (
                 <div className="rounded-md bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
