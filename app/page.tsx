@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+    <div className="flex min-h-screen items-center justify-center font-sans dark:bg-gray-900">
       <main className="flex w-full max-w-3xl flex-col gap-10 rounded bg-white px-6 py-16 dark:bg-black sm:px-16">
         <section className="flex flex-col gap-3 text-center sm:text-left">
           <h1 className="text-2xl font-semibold tracking-tight">Atendimento BR</h1>
