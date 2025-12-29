@@ -17,7 +17,7 @@ type Props = {
 
 export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, toWaId }: Props) {
     const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
-    const [messageBody, setMessageBody] = useState("Escreva sua mensagem aqui...");
+    const [messageBody, setMessageBody] = useState("");
 
     const canSend = useMemo(() => {
         return Boolean(

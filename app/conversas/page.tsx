@@ -180,22 +180,14 @@ export default async function ConversasPage() {
 
     return (
         <main className="min-h-screen w-full dark:bg-gray-900">
-            <div className="flex items-center justify-between">
-                <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+            <div className="flex items-center justify-between p-2">
+                <h1 className="text-xl font-semibold dark:text-white">
                     Conversas
                 </h1>
-                <Link
-                    href="/"
-                    className="text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-300 dark:hover:text-zinc-50"
-                >
-                    Home
-                </Link>
             </div>
 
             <div className="grid grid-cols-1 gap-6 md:grid-cols-[280px_1fr]">
-                <div className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-black">
-                    <ConversasList conversations={enriched} />
-                </div>
+                <ConversasList conversations={enriched} />
             </div>
         </main>
     );

@@ -277,13 +277,13 @@ export default async function ConversaPage({ params }: PageProps) {
                     >
                         <ChevronLeftIcon className="inline-block h-4 w-4" />
                     </Link>
-                    <h1 className="font-semibold">
+                    <h1 className="font-semibold px-2">
                         {conversationLabel}
                     </h1>
                 </div>
             </div>
             <div className="grow flex flex-col">
-                <div className="grow flex flex-col gap-2 overflow-y-auto px-4 pt-14 pb-24 dark:bg-gray-900">
+                <div className="grow flex flex-col gap-3 overflow-y-auto px-4 pt-14 pb-24 dark:bg-gray-900">
                     {messages.map((m) => {
                         const isOutbound = m.direction === "outbound";
 
@@ -299,8 +299,8 @@ export default async function ConversaPage({ params }: PageProps) {
                                 <div
                                     className={
                                         isOutbound
-                                            ? "max-w-[78%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-zinc-200 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                                            : "max-w-[78%] whitespace-pre-wrap rounded-2xl rounded-bl-md bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
+                                            ? "wrap-anywhere rounded-2xl rounded-br-md bg-zinc-200 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                                            : "wrap-anywhere rounded-2xl rounded-bl-md bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
                                     }
                                 >
                                     {m.text}
