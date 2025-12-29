@@ -9,11 +9,13 @@ export async function POST(req: Request) {
   try {
     const body = (await req.json()) as {
       email?: string;
+      phone_number?: string;
       password?: string;
       name?: string;
     };
 
     const email = (body.email ?? "").trim().toLowerCase();
+    const phone_number = body.phone_number?.trim() || null;
     const password = body.password ?? "";
     const name = body.name?.trim() || null;
 
@@ -27,8 +29,8 @@ export async function POST(req: Request) {
     const passwordHash = await bcrypt.hash(password, 12);
 
     const user = await prisma.user.create({
-      data: { email, passwordHash, name },
-      select: { id: true, email: true, name: true },
+      data: { email, phone_number, passwordHash, name },
+      select: { id: true, email: true, phone_number: true, name: true },
     });
 
     return NextResponse.json({ ok: true, user }, { status: 201 });

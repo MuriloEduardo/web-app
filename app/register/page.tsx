@@ -16,13 +16,14 @@ export default function RegisterPage() {
 
         const formData = new FormData(e.currentTarget);
         const email = String(formData.get("email") ?? "");
+        const phone_number = String(formData.get("phone_number") ?? "");
         const password = String(formData.get("password") ?? "");
 
         try {
             const res = await fetch("/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ email, phone_number, password }),
             });
 
             const data = (await res.json()) as { ok?: boolean; error?: string };
@@ -52,6 +53,12 @@ export default function RegisterPage() {
                         placeholder="Email"
                         className="rounded border px-3 py-2"
                         required
+                    />
+                    <input
+                        name="phone_number"
+                        type="tel"
+                        placeholder="Telefone (opcional)"
+                        className="rounded border px-3 py-2"
                     />
                     <input
                         name="password"
