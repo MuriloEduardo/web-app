@@ -17,19 +17,6 @@ function parseJsonIfString(value: unknown): unknown {
     }
 }
 
-function summarize(value: unknown): Record<string, unknown> {
-    if (typeof value === "string") {
-        return { type: "string", length: value.length, preview: value.slice(0, 120) };
-    }
-    if (Array.isArray(value)) {
-        return { type: "array", length: value.length };
-    }
-    if (isRecord(value)) {
-        return { type: "object", keys: Object.keys(value).slice(0, 20) };
-    }
-    return { type: typeof value };
-}
-
 function isLikelyPhoneOrWaId(value: string | undefined): boolean {
     if (!value) return false;
     const trimmed = value.trim();
@@ -235,7 +222,7 @@ function normalizeMessages(messages: CommunicationsMessage[]) {
         const direction = typeof m.direction === "string" ? m.direction : "unknown";
         const text = extractWhatsAppText(m.payload) ?? "(mensagem sem texto)";
 
-        return { id, text: `[${direction}] ${text}` };
+        return { id, direction, text };
     });
 }
 
@@ -256,17 +243,6 @@ export default async function ConversaPage({ params }: PageProps) {
         rawMessages
             .map((m) => extractWhatsAppConversationContext(m.payload))
             .filter((ctx): ctx is WhatsAppConversationContext => ctx !== null)
-    );
-
-    // Debug: inspect payload shapes and extracted contexts for first few messages
-    const sample = rawMessages.slice(0, 10);
-    const payloadTypeCounts = sample.reduce(
-        (acc, m) => {
-            const t = typeof m.payload;
-            acc[t] = (acc[t] ?? 0) + 1;
-            return acc;
-        },
-        {} as Record<string, number>
     );
 
     const toWaId = selectedConversation?.wa_id ?? extractedCtx?.contactWaId;
@@ -332,14 +308,30 @@ export default async function ConversaPage({ params }: PageProps) {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                        {messages.map((m) => (
-                            <div
-                                key={m.id}
-                                className="rounded-md bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
-                            >
-                                {m.text}
-                            </div>
-                        ))}
+                        {messages.map((m) => {
+                            const isOutbound = m.direction === "outbound";
+
+                            return (
+                                <div
+                                    key={m.id}
+                                    className={
+                                        isOutbound
+                                            ? "flex w-full justify-end"
+                                            : "flex w-full justify-start"
+                                    }
+                                >
+                                    <div
+                                        className={
+                                            isOutbound
+                                                ? "max-w-[78%] whitespace-pre-wrap rounded-2xl rounded-br-md bg-zinc-200 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
+                                                : "max-w-[78%] whitespace-pre-wrap rounded-2xl rounded-bl-md bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
+                                        }
+                                    >
+                                        {m.text}
+                                    </div>
+                                </div>
+                            );
+                        })}
 
                         {messages.length === 0 && (
                             <div className="text-sm text-zinc-500 dark:text-zinc-400">

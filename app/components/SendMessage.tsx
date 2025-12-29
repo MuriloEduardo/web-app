@@ -80,6 +80,7 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
                 </div>
             )}
             <textarea
+                id="messageBody"
                 value={messageBody}
                 onChange={(e) => setMessageBody(e.target.value)}
                 rows={4}
