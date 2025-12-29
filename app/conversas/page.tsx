@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ConversasList } from "./ConversasList";
 
 export const dynamic = "force-dynamic";
@@ -103,11 +102,40 @@ type Conversation = {
     id: number;
     participant?: string;
     wa_id?: string;
+    last_message?: {
+        payload?: unknown;
+        created_at?: string;
+        direction?: string;
+    };
+    last_message_text?: string;
 };
 
 type CommunicationsMessage = {
     payload?: unknown;
 };
+
+function extractWhatsAppText(payload: unknown): string | null {
+    payload = parseJsonIfString(payload);
+    if (!isRecord(payload)) return null;
+
+    const entry = payload.entry;
+    if (!Array.isArray(entry) || !isRecord(entry[0])) return null;
+
+    const changes = entry[0].changes;
+    if (!Array.isArray(changes) || !isRecord(changes[0])) return null;
+
+    const value = changes[0].value;
+    if (!isRecord(value)) return null;
+
+    const messages = value.messages;
+    if (!Array.isArray(messages) || !isRecord(messages[0])) return null;
+
+    const text = messages[0].text;
+    if (!isRecord(text)) return null;
+
+    const body = text.body;
+    return typeof body === "string" ? body : null;
+}
 
 async function getConversations(): Promise<Conversation[]> {
     const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions`, {
@@ -124,10 +152,31 @@ async function getConversations(): Promise<Conversation[]> {
             if (!isRecord(c)) return null;
             if (typeof c.id !== "number") return null;
 
+            const lastMessageRaw = c.last_message;
+            const lastMessage = isRecord(lastMessageRaw)
+                ? {
+                    payload: lastMessageRaw.payload,
+                    created_at:
+                        typeof lastMessageRaw.created_at === "string"
+                            ? lastMessageRaw.created_at
+                            : undefined,
+                    direction:
+                        typeof lastMessageRaw.direction === "string"
+                            ? lastMessageRaw.direction
+                            : undefined,
+                }
+                : undefined;
+
+            const lastMessageText = lastMessage
+                ? extractWhatsAppText(lastMessage.payload) ?? undefined
+                : undefined;
+
             const conversation: Conversation = {
                 id: c.id,
                 participant: typeof c.participant === "string" ? c.participant : undefined,
                 wa_id: typeof c.wa_id === "string" ? c.wa_id : undefined,
+                last_message: lastMessage,
+                last_message_text: lastMessageText,
             };
 
             return conversation;
@@ -160,6 +209,17 @@ export default async function ConversasPage() {
             const needsName = !participant || participant.trim().length === 0 || participantIsNumber || participantEqualsWa;
 
             if (!needsName) return c;
+
+            const ctxFromLast = c.last_message?.payload
+                ? extractWhatsAppConversationContext(c.last_message.payload)
+                : null;
+            const inferredNameFromLast = ctxFromLast?.contactName;
+            if (inferredNameFromLast) {
+                return {
+                    ...c,
+                    participant: inferredNameFromLast,
+                };
+            }
 
             const messages = await getMessagesForConversation(c.id);
             const ctx = pickBestWhatsAppContext(

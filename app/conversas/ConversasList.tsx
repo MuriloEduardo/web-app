@@ -4,6 +4,7 @@ type Conversation = {
     id: number;
     participant?: string;
     wa_id?: string;
+    last_message_text?: string;
 };
 
 type Props = {
@@ -18,6 +19,7 @@ export function ConversasList({ conversations, selectedConversationId }: Props) 
                 {conversations.map((c) => {
                     const id = c.id;
                     const selected = id === selectedConversationId;
+                    const title = c.participant ?? c.wa_id ?? `Conversa ${id}`;
                     return (
                         <Link
                             key={id}
@@ -28,11 +30,18 @@ export function ConversasList({ conversations, selectedConversationId }: Props) 
                                     : "active:bg-gray-600 text-white"
                             }
                         >
-                            <div className="flex items-stretch gap-4">
-                                <div className="border border-white rounded-full py-2 px-3">
+                            <div className="flex items-stretch">
+                                <div className="border dark:bg-gray-700 dark:border-white rounded-full px-5 flex flex-col items-center justify-center text-lg font-semibold text-white shrink-0">
                                     {c.participant?.charAt(0).toUpperCase() ?? "C"}
                                 </div>
-                                <div className="grow border-b border-t border-gray-800 flex items-center">{c.participant ?? c.wa_id ?? `Conversa ${id}`}</div>
+                                <div className="grow min-w-0 border-b border-t border-gray-800 flex flex-col justify-center py-2 px-4">
+                                    <div className="truncate">{title}</div>
+                                    {c.last_message_text && (
+                                        <div className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+                                            {c.last_message_text}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </Link>
                     );

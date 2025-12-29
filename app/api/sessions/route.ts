@@ -9,6 +9,7 @@ type Conversation = {
     company_number?: string;
     wa_id?: string;
     participant?: string;
+    last_message?: unknown;
     created_at?: string;
     updated_at?: string;
 };

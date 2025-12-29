@@ -223,8 +223,9 @@ function normalizeMessages(messages: CommunicationsMessage[]) {
 
         const direction = typeof m.direction === "string" ? m.direction : "unknown";
         const text = extractWhatsAppText(m.payload) ?? "(mensagem sem texto)";
+        const createdAt = typeof m.created_at === "string" ? m.created_at : "";
 
-        return { id, direction, text };
+        return { id, direction, text, createdAt };
     });
 }
 
@@ -303,7 +304,10 @@ export default async function ConversaPage({ params }: PageProps) {
                                             : "wrap-anywhere rounded-2xl rounded-bl-md bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
                                     }
                                 >
-                                    {m.text}
+                                    <div className="flex flex-col">
+                                        <span>{m.text}</span>
+                                        <small>{m.createdAt}</small>
+                                    </div>
                                 </div>
                             </div>
                         );
