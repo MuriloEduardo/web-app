@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { sendMetaOutbound } from "@/app/actions/sendMetaOutbound";
 import {
     ArrowPathIcon,
     PaperAirplaneIcon,
     ExclamationTriangleIcon,
+    CheckCircleIcon,
 } from "@heroicons/react/24/solid";
 
 type Props = {
@@ -19,6 +20,12 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
     const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
     const [messageBody, setMessageBody] = useState("");
     const formRef = useRef<HTMLFormElement | null>(null);
+
+    useEffect(() => {
+        if (messageBody.trim().length > 0 && (status === "sent" || status === "error")) {
+            setStatus("idle");
+        }
+    }, [messageBody, status]);
 
     const canSend = useMemo(() => {
         return Boolean(
@@ -96,6 +103,11 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
                 id="messageBody"
                 value={messageBody}
                 onChange={(e) => setMessageBody(e.target.value)}
+                placeholder={
+                    !displayPhoneNumber || !phoneNumberId || !toWaId
+                        ? "Abra uma conversa do WhatsApp para enviar."
+                        : "Digite uma mensagem..."
+                }
                 onKeyDown={(e) => {
                     // Enter envia; Shift+Enter cria nova linha (comportamento típico de chat)
                     if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
@@ -110,12 +122,24 @@ export function SendMessage({ displayPhoneNumber, phoneNumberId, contactName, to
                 className="p-3 m-3 rounded-full border dark:bg-white whitespace-nowrap text-sm disabled:cursor-not-allowed disabled:opacity-60"
                 type="submit"
                 disabled={status === "sending" || !canSend}
+                aria-label={
+                    status === "sending"
+                        ? "Enviando"
+                        : status === "error"
+                            ? "Erro ao enviar"
+                            : status === "sent"
+                                ? "Enviado"
+                                : "Enviar"
+                }
             >
                 {status === "sending" && (
                     <ArrowPathIcon className="h-4 w-4 animate-spin" aria-hidden="true" />
                 )}
-                {(status === "idle" || status === "sent") && (
+                {status === "idle" && (
                     <PaperAirplaneIcon className="h-4 w-4" aria-hidden="true" />
+                )}
+                {status === "sent" && (
+                    <CheckCircleIcon className="h-4 w-4" aria-hidden="true" />
                 )}
                 {status === "error" && (
                     <ExclamationTriangleIcon className="h-4 w-4" aria-hidden="true" />
