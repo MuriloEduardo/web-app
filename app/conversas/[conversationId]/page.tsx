@@ -8,6 +8,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/app/lib/auth";
+import { MessageItem } from "@/app/components/MessageItem";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,7 @@ type CommunicationsMessage = {
     direction?: string;
     source?: string;
     target?: string;
+    status?: unknown;
     payload?: unknown;
     created_at?: string;
 };
@@ -178,6 +180,26 @@ function extractWhatsAppText(payload: unknown): string | null {
     return typeof body === "string" ? body : null;
 }
 
+function extractWhatsAppStatus(payload: unknown): string | null {
+    payload = parseJsonIfString(payload);
+    if (!isRecord(payload)) return null;
+
+    const entry = payload.entry;
+    if (!Array.isArray(entry) || !isRecord(entry[0])) return null;
+
+    const changes = entry[0].changes;
+    if (!Array.isArray(changes) || !isRecord(changes[0])) return null;
+
+    const value = changes[0].value;
+    if (!isRecord(value)) return null;
+
+    const statuses = value.statuses;
+    if (!Array.isArray(statuses) || !isRecord(statuses[0])) return null;
+
+    const status = statuses[0].status;
+    return typeof status === "string" ? status : null;
+}
+
 function extractWhatsAppConversationContext(payload: unknown): WhatsAppConversationContext | null {
     payload = parseJsonIfString(payload);
     if (!isRecord(payload)) return null;
@@ -248,6 +270,9 @@ function normalizeMessages(messages: CommunicationsMessage[]) {
 
         const direction = typeof m.direction === "string" ? m.direction : "unknown";
         const text = extractWhatsAppText(m.payload) ?? "(mensagem sem texto)";
+        const statusFromField = typeof m.status === "string" ? m.status : null;
+        const statusFromPayload = extractWhatsAppStatus(m.payload);
+        const status = statusFromField ?? statusFromPayload;
         const createdAt =
             typeof m.created_at === "string"
                 ? new Date(m.created_at).toLocaleTimeString("pt-BR", {
@@ -257,7 +282,7 @@ function normalizeMessages(messages: CommunicationsMessage[]) {
                 })
                 : "";
 
-        return { id, direction, text, createdAt };
+        return { id, direction, text, createdAt, status };
     });
 }
 
@@ -319,30 +344,15 @@ export default async function ConversaPage({ params }: PageProps) {
             <div className="grow flex flex-col">
                 <div className="grow flex flex-col gap-3 overflow-y-auto px-4 pt-14 pb-24 dark:bg-gray-900">
                     {messages.map((m) => {
-                        const isOutbound = m.direction === "outbound";
-
                         return (
-                            <div
+                            <MessageItem
                                 key={m.id}
-                                className={
-                                    isOutbound
-                                        ? "flex w-full justify-end"
-                                        : "flex w-full justify-start"
-                                }
-                            >
-                                <div
-                                    className={
-                                        isOutbound
-                                            ? "wrap-anywhere rounded-2xl rounded-br-md bg-zinc-200 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
-                                            : "wrap-anywhere rounded-2xl rounded-bl-md bg-zinc-50 px-3 py-2 text-sm text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
-                                    }
-                                >
-                                    <div className="flex flex-col">
-                                        <span>{m.text}</span>
-                                        <span className="opacity-25 text-xs">{m.createdAt}</span>
-                                    </div>
-                                </div>
-                            </div>
+                                id={m.id}
+                                direction={m.direction}
+                                text={m.text}
+                                createdAt={m.createdAt}
+                                status={m.status}
+                            />
                         );
                     })}
 
