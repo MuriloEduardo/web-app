@@ -73,7 +73,7 @@ export default function RegisterPage() {
 
                     <button
                         type="submit"
-                        className="rounded bg-black px-3 py-2 disabled:opacity-60"
+                        className="rounded bg-black text-white px-3 py-2 disabled:opacity-60"
                         disabled={loading}
                     >
                         {loading ? "Criando..." : "Criar conta"}

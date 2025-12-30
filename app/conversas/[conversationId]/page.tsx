@@ -331,7 +331,7 @@ export default async function ConversaPage({ params }: PageProps) {
                 <div className="flex items-center justify-between p-2 backdrop-blur-sm">
                     <Link
                         href="/conversas"
-                        className="leading-none text-sm p-2 hover:dark:bg-gray-800 active:dark:bg-gray-700 rounded-full"
+                        className="leading-none text-sm p-2 hover:bg-gray-100 hover:dark:bg-gray-800 active:bg-gray-200 active:dark:bg-gray-700 rounded-full"
                     >
                         <ChevronLeftIcon className="inline-block h-4 w-4" />
                     </Link>

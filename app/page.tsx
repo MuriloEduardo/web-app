@@ -10,10 +10,10 @@ export default function Home() {
             Crie sua conta para começar, ou entre se já tiver acesso.
           </p>
 
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row text-white">
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
             <Link
               href="/register"
-              className="rounded bg-black px-4 py-2 text-center"
+              className="rounded px-4 py-2 text-center bg-black text-white"
             >
               Criar conta
             </Link>

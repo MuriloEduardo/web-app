@@ -29,22 +29,22 @@ export function ConversationsList({ conversations, selectedConversationId }: Pro
                     <Link
                         key={id}
                         href={`/conversas/${id}`}
-                        className={selected ? "" : "active:bg-gray-600 text-white"}
+                        className={selected ? "" : "active:bg-gray-100 active:dark:bg-gray-600 text-white"}
                     >
                         <div className="flex items-center hover:dark:bg-gray-800">
-                            <div className="border dark:bg-gray-700 dark:border-white rounded-full px-4 py-3 flex flex-col items-center justify-center text-lg font-semibold text-white shrink-0">
+                            <div className="border dark:bg-gray-700 border-black text-black dark:border-white dark:text-white rounded-full px-4 py-3 flex flex-col items-center justify-center text-lg font-semibold shrink-0">
                                 {c.participant?.charAt(0).toUpperCase() ?? "C"}
                             </div>
                             <div className="grow min-w-0 border-b border-t border-gray-800 flex flex-col justify-center p-3">
-                                <div className="flex items-center justify-between gap-2">
+                                <div className="text-black dark:text-white flex items-center justify-between gap-2">
                                     <div className="truncate">{title}</div>
                                     <MessageTime
                                         utcIso={c.last_message_created_at}
-                                        className="shrink-0 text-xs text-zinc-500 dark:text-zinc-400"
+                                        className="shrink-0 text-xs"
                                     />
                                 </div>
                                 {c.last_message_text && (
-                                    <div className="min-w-0 flex items-center gap-1 text-xs text-zinc-500 dark:text-zinc-400">
+                                    <div className="min-w-0 flex items-center gap-1 text-xs text-black dark:text-white">
                                         <MessageStatusIcon
                                             direction={c.last_message_direction ?? "unknown"}
                                             status={c.last_message_status}
