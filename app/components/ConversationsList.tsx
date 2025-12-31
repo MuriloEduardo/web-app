@@ -19,7 +19,7 @@ type Props = {
 
 export function ConversationsList({ conversations, selectedConversationId }: Props) {
     return (
-        <div className="flex flex-col p-4">
+        <div className="flex flex-col py-4">
             {conversations.map((c) => {
                 const id = c.id;
                 const selected = id === selectedConversationId;
@@ -31,11 +31,11 @@ export function ConversationsList({ conversations, selectedConversationId }: Pro
                         href={`/conversas/${id}`}
                         className={selected ? "" : "active:bg-gray-100 active:dark:bg-gray-600 text-white truncate"}
                     >
-                        <div className="flex items-center hover:dark:bg-gray-800">
+                        <div className="flex items-center hover:dark:bg-gray-800 px-5">
                             <div className="border w-12 h-12 dark:bg-gray-700 border-black text-black dark:border-white dark:text-white rounded-full px-4 py-3 flex flex-col items-center justify-center text-lg font-semibold shrink-0">
                                 {c.participant?.charAt(0).toUpperCase() ?? "C"}
                             </div>
-                            <div className="border-b border-t border-gray-800 flex flex-col justify-center p-5">
+                            <div className="border-b border-t border-gray-800 flex flex-col justify-center p-5 grow">
                                 <div className="text-black dark:text-white flex items-center justify-between gap-2">
                                     <div>{title}</div>
                                     <MessageTime
