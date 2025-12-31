@@ -129,7 +129,7 @@ export function SendMessage({
             />
 
             <button
-                className="p-3 m-3 rounded-full border dark:bg-white dark:text-black whitespace-nowrap text-sm disabled:cursor-not-allowed disabled:opacity-60"
+                className="py-3 px-4 m-3 rounded-full border dark:bg-white dark:text-black whitespace-nowrap text-sm disabled:cursor-not-allowed disabled:opacity-60"
                 type="submit"
                 disabled={status === "sending" || !canSend}
                 aria-label={
