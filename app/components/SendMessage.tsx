@@ -125,7 +125,7 @@ export function SendMessage({
                         formRef.current?.requestSubmit();
                     }
                 }}
-                className="w-full py-3 px-8 text-sm dark:bg-transparent focus:outline-none resize-none"
+                className="w-full py-3 px-8 dark:bg-transparent focus:outline-none resize-none"
             />
 
             <button

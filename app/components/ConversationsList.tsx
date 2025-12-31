@@ -35,7 +35,7 @@ export function ConversationsList({ conversations, selectedConversationId }: Pro
                             <div className="border dark:bg-gray-700 border-black text-black dark:border-white dark:text-white rounded-full px-4 py-3 flex flex-col items-center justify-center text-lg font-semibold shrink-0">
                                 {c.participant?.charAt(0).toUpperCase() ?? "C"}
                             </div>
-                            <div className="grow min-w-0 border-b border-t border-gray-800 flex flex-col justify-center p-3">
+                            <div className="grow border-b border-t border-gray-800 flex flex-col justify-center p-5">
                                 <div className="text-black dark:text-white flex items-center justify-between gap-2">
                                     <div className="truncate">{title}</div>
                                     <MessageTime
