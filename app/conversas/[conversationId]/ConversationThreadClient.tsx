@@ -91,7 +91,12 @@ export function ConversationThreadClient({
         };
 
         setMessages((prev) => [...prev, optimistic]);
-    }, []);
+
+        requestAnimationFrame(() => {
+            scrollToBottom();
+            requestAnimationFrame(scrollToBottom);
+        });
+    }, [scrollToBottom]);
 
     return (
         <>
