@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { MessageItem } from "@/app/components/MessageItem";
 import { SendMessage } from "@/app/components/SendMessage";
@@ -30,6 +30,15 @@ export function ConversationThreadClient({
     phoneNumberId,
 }: Props) {
     const [messages, setMessages] = useState<Message[]>(initialMessages);
+    const bottomRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        const id = requestAnimationFrame(() => {
+            bottomRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+        });
+
+        return () => cancelAnimationFrame(id);
+    }, []);
 
     const handleOptimisticSend = useCallback((text: string) => {
         const now = new Date();
@@ -59,6 +68,8 @@ export function ConversationThreadClient({
                         status={m.status}
                     />
                 ))}
+
+                <div ref={bottomRef} />
 
                 {messages.length === 0 && (
                     <div className="text-sm text-zinc-500 dark:text-zinc-400">
