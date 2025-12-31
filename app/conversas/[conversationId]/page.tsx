@@ -10,6 +10,7 @@ import { authOptions } from "@/app/lib/auth";
 import { pickLatestStatusFromStatuses } from "@/app/lib/messageStatuses";
 import { ConversationThreadClient } from "./ConversationThreadClient";
 import { formatTimeBrazil } from "@/app/components/MessageTime";
+import { AutoPilotToggle } from "./AutoPilotToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -88,6 +89,7 @@ type Conversation = {
     participant?: string;
     wa_id?: string;
     company_number?: string;
+    skips_forwarding?: boolean;
     created_at?: string;
     updated_at?: string;
 };
@@ -178,6 +180,8 @@ async function getConversations(): Promise<Conversation[]> {
                 wa_id: typeof c.wa_id === "string" ? c.wa_id : undefined,
                 company_number:
                     typeof c.company_number === "string" ? c.company_number : undefined,
+                skips_forwarding:
+                    typeof c.skips_forwarding === "boolean" ? c.skips_forwarding : undefined,
                 created_at: typeof c.created_at === "string" ? c.created_at : undefined,
                 updated_at: typeof c.updated_at === "string" ? c.updated_at : undefined,
             };
@@ -335,9 +339,17 @@ export default async function ConversaPage({ params }: PageProps) {
                     >
                         <ChevronLeftIcon className="inline-block h-4 w-4" />
                     </Link>
-                    <h1 className="font-semibold px-2">
+                    <h1 className="font-semibold px-2 truncate">
                         {conversationLabel}
                     </h1>
+                    {Number.isFinite(selectedConversationId) ? (
+                        <AutoPilotToggle
+                            conversationId={selectedConversationId}
+                            initialSkipsForwarding={selectedConversation?.skips_forwarding}
+                        />
+                    ) : (
+                        <div />
+                    )}
                 </div>
             </div>
             <div className="grow flex flex-col">
