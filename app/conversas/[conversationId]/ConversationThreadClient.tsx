@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { MessageItem } from "@/app/components/MessageItem";
 import { SendMessage } from "@/app/components/SendMessage";
@@ -31,14 +31,16 @@ export function ConversationThreadClient({
 }: Props) {
     const [messages, setMessages] = useState<Message[]>(initialMessages);
     const listRef = useRef<HTMLDivElement | null>(null);
+    const bottomRef = useRef<HTMLDivElement | null>(null);
 
     const scrollToBottom = useCallback(() => {
         const el = listRef.current;
         if (!el) return;
-        el.scrollTop = el.scrollHeight;
+        el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+        bottomRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
     }, []);
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         let raf1 = 0;
         let raf2 = 0;
 
@@ -84,6 +86,8 @@ export function ConversationThreadClient({
                         status={m.status}
                     />
                 ))}
+
+                <div ref={bottomRef} className="h-0" />
 
                 {messages.length === 0 && (
                     <div className="text-sm text-zinc-500 dark:text-zinc-400">
