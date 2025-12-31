@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 import { MessageItem } from "@/app/components/MessageItem";
 import { SendMessage } from "@/app/components/SendMessage";
@@ -30,15 +30,28 @@ export function ConversationThreadClient({
     phoneNumberId,
 }: Props) {
     const [messages, setMessages] = useState<Message[]>(initialMessages);
-    const bottomRef = useRef<HTMLDivElement | null>(null);
+    const listRef = useRef<HTMLDivElement | null>(null);
 
-    useEffect(() => {
-        const id = requestAnimationFrame(() => {
-            bottomRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
+    const scrollToBottom = useCallback(() => {
+        const el = listRef.current;
+        if (!el) return;
+        el.scrollTop = el.scrollHeight;
+    }, []);
+
+    useLayoutEffect(() => {
+        let raf1 = 0;
+        let raf2 = 0;
+
+        raf1 = requestAnimationFrame(() => {
+            scrollToBottom();
+            raf2 = requestAnimationFrame(scrollToBottom);
         });
 
-        return () => cancelAnimationFrame(id);
-    }, []);
+        return () => {
+            if (raf1) cancelAnimationFrame(raf1);
+            if (raf2) cancelAnimationFrame(raf2);
+        };
+    }, [scrollToBottom]);
 
     const handleOptimisticSend = useCallback((text: string) => {
         const now = new Date();
@@ -57,7 +70,10 @@ export function ConversationThreadClient({
 
     return (
         <>
-            <div className="grow flex flex-col gap-3 overflow-y-auto px-4 pt-14 pb-24">
+            <div
+                ref={listRef}
+                className="grow flex flex-col gap-3 overflow-y-auto px-4 pt-14 pb-24"
+            >
                 {messages.map((m) => (
                     <MessageItem
                         key={m.id}
@@ -68,8 +84,6 @@ export function ConversationThreadClient({
                         status={m.status}
                     />
                 ))}
-
-                <div ref={bottomRef} />
 
                 {messages.length === 0 && (
                     <div className="text-sm text-zinc-500 dark:text-zinc-400">
