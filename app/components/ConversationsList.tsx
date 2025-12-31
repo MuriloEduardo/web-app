@@ -29,9 +29,9 @@ export function ConversationsList({ conversations, selectedConversationId }: Pro
                     <Link
                         key={id}
                         href={`/conversas/${id}`}
-                        className={selected ? "" : "active:bg-gray-100 active:dark:bg-gray-600 text-white truncate"}
+                        className={selected ? "" : "active:bg-gray-100 active:dark:bg-gray-600 text-white"}
                     >
-                        <div className="flex items-center hover:dark:bg-gray-800 px-5">
+                        <div className="flex items-center hover:dark:bg-gray-800 px-5 truncate">
                             <div className="border w-12 h-12 dark:bg-gray-700 border-black text-black dark:border-white dark:text-white rounded-full px-4 py-3 flex flex-col items-center justify-center text-lg font-semibold shrink-0">
                                 {c.participant?.charAt(0).toUpperCase() ?? "C"}
                             </div>
