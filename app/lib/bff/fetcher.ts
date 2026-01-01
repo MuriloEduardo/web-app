@@ -59,12 +59,16 @@ export async function bffPost<T>(
     return (payload ?? {}) as BffResponse<T>;
 }
 
-export async function bffGet<T>(path: string): Promise<BffResponse<T>> {
+export async function bffGet<T>(
+    path: string,
+    init?: { headers?: HeadersInit }
+): Promise<BffResponse<T>> {
+    const headers = new Headers(init?.headers);
+    if (!headers.has("accept")) headers.set("accept", "application/json");
+
     const res = await fetch(resolveUrl(path), {
         method: "GET",
-        headers: {
-            accept: "application/json",
-        },
+        headers,
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
