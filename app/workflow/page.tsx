@@ -13,7 +13,8 @@ type NodeDto = {
 };
 
 export default async function WorkflowPage() {
-    const cookie = headers().get("cookie");
+    const h = await headers();
+    const cookie = h.get("cookie");
     const payload = await bffGet<NodeDto[]>(
         "/api/nodes",
         cookie ? { headers: { cookie } } : undefined
