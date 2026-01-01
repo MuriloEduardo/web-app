@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 
+const CACHE_SECONDS = 30;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
 }
@@ -72,7 +74,7 @@ export async function GET(req: Request) {
     query.set("offset", offset);
 
     const res = await fetch(`${baseUrl}/conversations?${query.toString()}`, {
-        cache: "no-store",
+        next: { revalidate: CACHE_SECONDS },
         headers: { accept: "application/json" },
     });
 
@@ -98,7 +100,7 @@ export async function GET(req: Request) {
     // Sort desc by conversation id if present
     conversations.sort((a, b) => (b?.id ?? 0) - (a?.id ?? 0));
 
-    return NextResponse.json({
+    const response = NextResponse.json({
         data: conversations,
         meta: {
             total: isRecord(body) && typeof body.total === "number" ? body.total : undefined,
@@ -106,4 +108,11 @@ export async function GET(req: Request) {
             offset: isRecord(body) && typeof body.offset === "number" ? body.offset : undefined,
         },
     });
+
+    response.headers.set(
+        "Cache-Control",
+        `private, max-age=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS * 2}`
+    );
+    response.headers.set("Vary", "Cookie");
+    return response;
 }

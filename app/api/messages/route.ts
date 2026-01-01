@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/lib/auth";
 
+const CACHE_SECONDS = 30;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
 }
@@ -41,7 +43,7 @@ export async function GET(req: Request) {
     if (conversationId) query.set("conversation_id", conversationId);
 
     const res = await fetch(`${baseUrl}/messages?${query.toString()}`, {
-        cache: "no-store",
+        next: { revalidate: CACHE_SECONDS },
         headers: {
             accept: "application/json",
         },
@@ -75,5 +77,14 @@ export async function GET(req: Request) {
     const metaLimit = isRecord(responseBody) && typeof responseBody.limit === "number" ? responseBody.limit : undefined;
     const metaOffset = isRecord(responseBody) && typeof responseBody.offset === "number" ? responseBody.offset : undefined;
 
-    return NextResponse.json({ data: items, meta: { total, limit: metaLimit, offset: metaOffset } });
+    const response = NextResponse.json({
+        data: items,
+        meta: { total, limit: metaLimit, offset: metaOffset },
+    });
+    response.headers.set(
+        "Cache-Control",
+        `private, max-age=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS * 2}`
+    );
+    response.headers.set("Vary", "Cookie");
+    return response;
 }

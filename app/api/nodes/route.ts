@@ -3,12 +3,14 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/lib/auth";
 
+const CACHE_SECONDS = 30;
+
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
 }
 
 function resolveNodesUrlFromEnv(): string | null {
-    const raw = process.env.NODES_SERVICE_URL?.trim();
+    const raw = process.env.FLOW_MANAGER_SERVICE_URL?.trim();
     if (!raw) return null;
 
     try {
@@ -43,13 +45,13 @@ export async function GET() {
     const nodesUrl = resolveNodesUrlFromEnv();
     if (!nodesUrl) {
         return NextResponse.json(
-            { error: { code: "NODES_SERVICE_URL_NOT_CONFIGURED" } },
+            { error: { code: "FLOW_MANAGER_SERVICE_URL_NOT_CONFIGURED" } },
             { status: 500 }
         );
     }
 
     const res = await fetch(nodesUrl, {
-        cache: "no-store",
+        next: { revalidate: CACHE_SECONDS },
         headers: {
             accept: "application/json",
         },
@@ -78,5 +80,11 @@ export async function GET() {
             ? responseBody.items
             : [];
 
-    return NextResponse.json({ data: items });
+    const response = NextResponse.json({ data: items });
+    response.headers.set(
+        "Cache-Control",
+        `private, max-age=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS * 2}`
+    );
+    response.headers.set("Vary", "Cookie");
+    return response;
 }

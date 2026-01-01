@@ -47,7 +47,7 @@ Env vars:
 
 Env vars:
 
-- `NODES_SERVICE_URL` (base URL or full endpoint URL for Nodes)
+- `FLOW_MANAGER_SERVICE_URL` (base URL or full endpoint URL for Flow Manager Nodes)
 
 Generate a local secret:
 
