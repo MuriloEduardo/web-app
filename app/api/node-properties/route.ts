@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
 import {
     extractItems,
-    getCacheSeconds,
     getCompanyIdForEmail,
     readJsonOrText,
     resolveServiceUrlFromEnv,
@@ -118,7 +117,6 @@ export async function GET(req: Request) {
     upstreamUrl.searchParams.set("node_id", String(parsedNode.nodeId));
 
     const res = await fetch(upstreamUrl, {
-        next: { revalidate: getCacheSeconds() },
         headers: { accept: "application/json" },
     });
 
@@ -132,13 +130,7 @@ export async function GET(req: Request) {
 
     const items = extractItems(body);
 
-    const response = NextResponse.json({ data: items });
-    response.headers.set(
-        "Cache-Control",
-        `private, max-age=${getCacheSeconds()}, stale-while-revalidate=${getCacheSeconds() * 2}`
-    );
-    response.headers.set("Vary", "Cookie");
-    return response;
+    return NextResponse.json({ data: items });
 }
 
 function parseCreateBody(body: unknown):

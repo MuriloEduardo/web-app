@@ -5,8 +5,6 @@ import { prisma } from "@/app/lib/prisma";
 
 export const runtime = "nodejs";
 
-const CACHE_SECONDS = 5;
-
 function maskUrl(raw: string | undefined) {
     if (!raw) return null;
 
@@ -103,7 +101,7 @@ export async function GET() {
         const accelerateUrlInfo = maskUrl(process.env.DATABASE_PRISMA_DATABASE_URL);
         const directUrlInfo = maskUrl(process.env.DATABASE_POSTGRES_URL);
 
-        const response = NextResponse.json({
+        return NextResponse.json({
             ok: true,
             at: nowIso,
             runtime,
@@ -127,17 +125,11 @@ export async function GET() {
                 connections: connectionStats,
             },
         });
-
-        response.headers.set(
-            "Cache-Control",
-            `public, max-age=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS * 2}`
-        );
-        return response;
     } catch (error) {
         const totalLatencyMs = Date.now() - startedAt;
         const message = safeErrorMessage(error);
 
-        const response = NextResponse.json(
+        return NextResponse.json(
             {
                 ok: false,
                 at: nowIso,
@@ -147,11 +139,5 @@ export async function GET() {
             },
             { status: 500 },
         );
-
-        response.headers.set(
-            "Cache-Control",
-            `public, max-age=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS * 2}`
-        );
-        return response;
     }
 }

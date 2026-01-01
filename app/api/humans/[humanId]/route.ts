@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 
-const CACHE_SECONDS = 30;
-
 export async function GET(
     _req: Request,
     { params }: { params: Promise<{ humanId: string }> }
@@ -16,7 +14,7 @@ export async function GET(
         );
     }
 
-    const response = NextResponse.json(
+    return NextResponse.json(
         {
             error: {
                 code: "HUMANS_ENDPOINT_REMOVED",
@@ -28,10 +26,4 @@ export async function GET(
         },
         { status: 410 }
     );
-
-    response.headers.set(
-        "Cache-Control",
-        `public, max-age=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS * 2}`
-    );
-    return response;
 }

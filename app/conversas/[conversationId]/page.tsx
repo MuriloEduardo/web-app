@@ -12,8 +12,6 @@ import { ConversationThreadClient } from "./ConversationThreadClient";
 import { formatTimeBrazil } from "@/app/components/MessageTime";
 import { AutoPilotToggle } from "./AutoPilotToggle";
 
-export const dynamic = "force-dynamic";
-
 async function requireLogin() {
     const session = await getServerSession(authOptions);
     const email = session?.user?.email?.trim().toLowerCase();

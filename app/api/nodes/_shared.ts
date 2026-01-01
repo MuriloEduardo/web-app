@@ -2,14 +2,8 @@ import "server-only";
 
 import { prisma } from "@/app/lib/prisma";
 
-const CACHE_SECONDS = 30;
-
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
-}
-
-export function getCacheSeconds() {
-    return CACHE_SECONDS;
 }
 
 export function resolveServiceUrlFromEnv(resourcePath: string): string | null {
@@ -99,7 +93,6 @@ export async function getCompanyIdForEmail(email: string): Promise<CompanyIdResu
     companiesFetchUrl.searchParams.set("unique_identifier", uniqueIdentifier);
 
     const companiesRes = await fetch(companiesFetchUrl, {
-        next: { revalidate: CACHE_SECONDS },
         headers: { accept: "application/json" },
     });
 

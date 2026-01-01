@@ -3,10 +3,6 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/lib/auth";
 
-export const dynamic = "force-dynamic";
-
-const CACHE_SECONDS = 30;
-
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
 }
@@ -50,7 +46,6 @@ function batch<T>(items: T[], size: number): T[][] {
 
 async function fetchJson<T>(url: string, cookieHeader: string | null): Promise<Envelope<T>> {
     const res = await fetch(url, {
-        next: { revalidate: CACHE_SECONDS },
         headers: {
             accept: "application/json",
             ...(cookieHeader ? { cookie: cookieHeader } : {}),
@@ -163,7 +158,7 @@ export async function GET(req: Request) {
         (n) => n > 0
     ).length;
 
-    const response = NextResponse.json({
+    return NextResponse.json({
         data: {
             conversationsTotal,
             conversationsFetched,
@@ -176,11 +171,4 @@ export async function GET(req: Request) {
             generatedAt: new Date().toISOString(),
         },
     });
-
-    response.headers.set(
-        "Cache-Control",
-        `private, max-age=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS * 2}`
-    );
-    response.headers.set("Vary", "Cookie");
-    return response;
 }

@@ -4,7 +4,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/lib/auth";
 import {
     extractItems,
-    getCacheSeconds,
     getCompanyIdForEmail,
     parseCompanyIdFromRequestUrl,
     readJsonOrText,
@@ -57,7 +56,6 @@ export async function GET(req: Request) {
     nodesFetchUrl.searchParams.set("company_id", String(company_id));
 
     const res = await fetch(nodesFetchUrl, {
-        next: { revalidate: getCacheSeconds() },
         headers: {
             accept: "application/json",
         },
@@ -79,13 +77,7 @@ export async function GET(req: Request) {
 
     const items = extractItems(responseBody);
 
-    const response = NextResponse.json({ data: items });
-    response.headers.set(
-        "Cache-Control",
-        `private, max-age=${getCacheSeconds()}, stale-while-revalidate=${getCacheSeconds() * 2}`
-    );
-    response.headers.set("Vary", "Cookie");
-    return response;
+    return NextResponse.json({ data: items });
 }
 
 export async function POST(req: Request) {

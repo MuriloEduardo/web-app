@@ -5,8 +5,6 @@ import LogoutButton from "@/app/components/LogoutButton";
 import { authOptions } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 
-export const dynamic = "force-dynamic";
-
 export default async function ConfiguracoesPage() {
     const session = await getServerSession(authOptions);
     const email = session?.user?.email?.trim().toLowerCase();

@@ -6,8 +6,6 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/app/lib/auth";
 import { pickLatestStatusFromStatuses } from "@/app/lib/messageStatuses";
 
-export const dynamic = "force-dynamic";
-
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null;
 }

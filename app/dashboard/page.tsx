@@ -4,8 +4,6 @@ import { redirect } from "next/navigation";
 
 import { authOptions } from "@/app/lib/auth";
 
-export const dynamic = "force-dynamic";
-
 function getBaseUrlFromEnv(): string {
     const appUrl = process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL;
     if (appUrl) return appUrl.replace(/\/$/, "");

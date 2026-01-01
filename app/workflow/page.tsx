@@ -2,8 +2,6 @@ import { bffGet } from "@/app/lib/bff/fetcher";
 import { NodesListClient } from "@/app/workflow/NodesListClient";
 import { headers } from "next/headers";
 
-export const dynamic = "force-dynamic";
-
 type NodeDto = {
     id: number;
     company_id: number;
