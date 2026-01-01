@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
     HomeIcon,
     Cog6ToothIcon,
+    PuzzlePieceIcon,
     ChatBubbleBottomCenterIcon
 } from "@heroicons/react/24/solid";
 
@@ -52,6 +53,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                             }
                         >
                             <ChatBubbleBottomCenterIcon className="mx-auto h-5 w-5" />
+                        </Link>
+                        <Link href="/workflow" className={
+                            "flex-1 rounded px-3 py-2 text-center text-sm font-medium " +
+                            (isActive(pathname, "/workflow")
+                                ? "opacity-25"
+                                : "")
+                        }>
+                            <PuzzlePieceIcon className="mx-auto h-5 w-5" />
                         </Link>
                         <Link
                             href="/configuracoes"
