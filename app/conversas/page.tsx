@@ -173,16 +173,20 @@ function extractWhatsAppStatus(payload: unknown): string | null {
 
 async function getConversations(): Promise<Conversation[]> {
     const cookie = await getCookieHeader();
-    const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions`, {
-        cache: "no-store",
-        headers: {
-            ...(cookie ? { cookie } : {}),
-        },
-    });
+    let json: { data?: unknown } | null = null;
+    try {
+        const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions`, {
+            cache: "no-store",
+            headers: {
+                ...(cookie ? { cookie } : {}),
+            },
+        });
 
-    if (!res.ok) return [];
-
-    const json = (await res.json()) as { data?: unknown };
+        if (!res.ok) return [];
+        json = (await res.json()) as { data?: unknown };
+    } catch {
+        return [];
+    }
 
     const items = Array.isArray(json.data) ? (json.data as unknown[]) : [];
     return items
@@ -242,20 +246,24 @@ async function requireLogin() {
 
 async function getMessagesForConversation(conversationId: number): Promise<CommunicationsMessage[]> {
     const cookie = await getCookieHeader();
-    const res = await fetch(
-        `${getBaseUrlFromEnv()}/api/sessions/${conversationId}?limit=20`,
-        {
-            cache: "no-store",
-            headers: {
-                ...(cookie ? { cookie } : {}),
-            },
-        }
-    );
+    try {
+        const res = await fetch(
+            `${getBaseUrlFromEnv()}/api/sessions/${conversationId}?limit=20`,
+            {
+                cache: "no-store",
+                headers: {
+                    ...(cookie ? { cookie } : {}),
+                },
+            }
+        );
 
-    if (!res.ok) return [];
+        if (!res.ok) return [];
 
-    const json = (await res.json()) as { data?: unknown };
-    return Array.isArray(json.data) ? (json.data as CommunicationsMessage[]) : [];
+        const json = (await res.json()) as { data?: unknown };
+        return Array.isArray(json.data) ? (json.data as CommunicationsMessage[]) : [];
+    } catch {
+        return [];
+    }
 }
 
 export default async function ConversasPage() {

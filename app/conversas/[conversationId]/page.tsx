@@ -155,16 +155,20 @@ async function getCookieHeader(): Promise<string> {
 
 async function getConversations(): Promise<Conversation[]> {
     const cookie = await getCookieHeader();
-    const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions`, {
-        cache: "no-store",
-        headers: {
-            ...(cookie ? { cookie } : {}),
-        },
-    });
+    let json: { data?: unknown } | null = null;
+    try {
+        const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions`, {
+            cache: "no-store",
+            headers: {
+                ...(cookie ? { cookie } : {}),
+            },
+        });
 
-    if (!res.ok) return [];
-
-    const json = (await res.json()) as { data?: unknown };
+        if (!res.ok) return [];
+        json = (await res.json()) as { data?: unknown };
+    } catch {
+        return [];
+    }
     const data = Array.isArray(json.data) ? (json.data as unknown[]) : [];
 
     return data
@@ -191,17 +195,24 @@ async function getConversations(): Promise<Conversation[]> {
 
 async function getMessages(conversationId: string): Promise<CommunicationsMessage[]> {
     const cookie = await getCookieHeader();
-    const res = await fetch(`${getBaseUrlFromEnv()}/api/sessions/${conversationId}?limit=200`, {
-        cache: "no-store",
-        headers: {
-            ...(cookie ? { cookie } : {}),
-        },
-    });
+    try {
+        const res = await fetch(
+            `${getBaseUrlFromEnv()}/api/sessions/${conversationId}?limit=200`,
+            {
+                cache: "no-store",
+                headers: {
+                    ...(cookie ? { cookie } : {}),
+                },
+            }
+        );
 
-    if (!res.ok) return [];
+        if (!res.ok) return [];
 
-    const json = (await res.json()) as { data?: unknown };
-    return Array.isArray(json.data) ? (json.data as CommunicationsMessage[]) : [];
+        const json = (await res.json()) as { data?: unknown };
+        return Array.isArray(json.data) ? (json.data as CommunicationsMessage[]) : [];
+    } catch {
+        return [];
+    }
 }
 
 function extractWhatsAppConversationContext(payload: unknown): WhatsAppConversationContext | null {

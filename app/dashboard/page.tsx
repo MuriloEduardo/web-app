@@ -30,17 +30,21 @@ async function getInsights(): Promise<Insights | null> {
     const h = await headers();
     const cookie = h.get("cookie") ?? "";
 
-    const res = await fetch(`${getBaseUrlFromEnv()}/api/dashboard/insights`, {
-        cache: "no-store",
-        headers: {
-            ...(cookie ? { cookie } : {}),
-        },
-    });
+    try {
+        const res = await fetch(`${getBaseUrlFromEnv()}/api/dashboard/insights`, {
+            cache: "no-store",
+            headers: {
+                ...(cookie ? { cookie } : {}),
+            },
+        });
 
-    if (!res.ok) return null;
+        if (!res.ok) return null;
 
-    const json = (await res.json()) as { data?: Insights };
-    return json.data ?? null;
+        const json = (await res.json()) as { data?: Insights };
+        return json.data ?? null;
+    } catch {
+        return null;
+    }
 }
 
 function formatIsoToPtBr(iso: string | null): string {
