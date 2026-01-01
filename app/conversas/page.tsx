@@ -304,7 +304,7 @@ export default async function ConversasPage() {
     );
 
     return (
-        <main className="min-h-screen w-full">
+        <main className="w-full">
             <div className="flex items-center justify-between p-2">
                 <h1 className="text-xl font-semibold">
                     Conversas

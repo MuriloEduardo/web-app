@@ -40,7 +40,7 @@ function LoginForm() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center font-sans">
+        <div className="flex items-center justify-center font-sans">
             <main className="w-full max-w-sm rounded p-6">
                 <h1 className="text-lg font-semibold">Entrar</h1>
 
@@ -86,7 +86,7 @@ export default function LoginPage() {
     return (
         <Suspense
             fallback={
-                <div className="flex min-h-screen items-center justify-center font-sans" />
+                <div className="flex items-center justify-center font-sans" />
             }
         >
             <LoginForm />

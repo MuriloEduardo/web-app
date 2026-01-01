@@ -2,60 +2,14 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/lib/auth";
-import { prisma } from "@/app/lib/prisma";
-
-const CACHE_SECONDS = 30;
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-    return typeof value === "object" && value !== null;
-}
-
-function resolveServiceUrlFromEnv(resourcePath: string): string | null {
-    const raw = process.env.FLOW_MANAGER_SERVICE_URL?.trim();
-    if (!raw) return null;
-
-    try {
-        const url = new URL(raw);
-
-        // Allow either a full endpoint (ending with /nodes or /companies) or just a base URL.
-        // If a resource is already present, swap it instead of appending.
-        const cleanResource = resourcePath.replace(/\/+$/, "");
-        const path = url.pathname.replace(/\/+$/, "");
-
-        const basePath = path.replace(/\/(nodes|companies)$/i, "");
-
-        if (basePath === "" || basePath === "/") {
-            url.pathname = `${cleanResource}/`;
-        } else {
-            url.pathname = `${basePath}${cleanResource}/`;
-        }
-
-        return url.toString();
-    } catch {
-        return null;
-    }
-}
-
-function extractCompanyIdFromCompaniesResponse(body: unknown): number | null {
-    const items = Array.isArray(body)
-        ? body
-        : isRecord(body) && Array.isArray(body.items)
-            ? body.items
-            : [];
-
-    const first = items[0];
-    if (!isRecord(first)) return null;
-
-    const candidate = first.id ?? first.company_id;
-    if (typeof candidate === "number" && Number.isFinite(candidate)) return candidate;
-
-    if (typeof candidate === "string") {
-        const parsed = Number(candidate);
-        return Number.isFinite(parsed) ? parsed : null;
-    }
-
-    return null;
-}
+import {
+    extractItems,
+    getCacheSeconds,
+    getCompanyIdForEmail,
+    parseCompanyIdFromRequestUrl,
+    readJsonOrText,
+    resolveServiceUrlFromEnv,
+} from "@/app/api/nodes/_shared";
 
 export async function GET(req: Request) {
     const session = await getServerSession(authOptions);
@@ -75,78 +29,24 @@ export async function GET(req: Request) {
         );
     }
 
-    const companiesUrl = resolveServiceUrlFromEnv("/companies");
-    if (!companiesUrl) {
+    const queryCompanyId = parseCompanyIdFromRequestUrl(req);
+    if (!queryCompanyId.ok) {
         return NextResponse.json(
-            { error: { code: "FLOW_MANAGER_SERVICE_URL_NOT_CONFIGURED" } },
-            { status: 500 }
+            { error: { code: queryCompanyId.code } },
+            { status: queryCompanyId.status }
         );
     }
 
-    const url = new URL(req.url);
-    const companyIdFromQueryRaw = url.searchParams.get("company_id")?.trim() || null;
-    const companyIdFromQuery = companyIdFromQueryRaw ? Number(companyIdFromQueryRaw) : null;
-    if (companyIdFromQueryRaw && !Number.isFinite(companyIdFromQuery)) {
+    const companyIdResult = await getCompanyIdForEmail(email);
+    if (!companyIdResult.ok) {
         return NextResponse.json(
-            { error: { code: "INVALID_COMPANY_ID" } },
-            { status: 400 }
+            { error: { code: companyIdResult.code, details: companyIdResult.details } },
+            { status: companyIdResult.status }
         );
     }
 
-    const user = await prisma.user.findUnique({
-        where: { email },
-        select: { phone_number: true },
-    });
-
-    const uniqueIdentifier = user?.phone_number?.trim() || null;
-    if (!uniqueIdentifier) {
-        return NextResponse.json(
-            { error: { code: "COMPANY_NUMBER_REQUIRED" } },
-            { status: 400 }
-        );
-    }
-
-    const companiesFetchUrl = new URL(companiesUrl);
-    companiesFetchUrl.searchParams.set("unique_identifier", uniqueIdentifier);
-
-    const companiesRes = await fetch(companiesFetchUrl, {
-        next: { revalidate: CACHE_SECONDS },
-        headers: {
-            accept: "application/json",
-        },
-    });
-
-    const companiesContentType = companiesRes.headers.get("content-type") ?? "";
-    const companiesBody = companiesContentType.includes("application/json")
-        ? await companiesRes.json().catch(() => null)
-        : await companiesRes.text().catch(() => null);
-
-    if (!companiesRes.ok) {
-        return NextResponse.json(
-            {
-                error: {
-                    code: "COMPANIES_FETCH_FAILED",
-                    details: companiesBody,
-                },
-            },
-            { status: companiesRes.status }
-        );
-    }
-
-    const company_id = extractCompanyIdFromCompaniesResponse(companiesBody);
-    if (!company_id) {
-        return NextResponse.json(
-            {
-                error: {
-                    code: "COMPANY_ID_NOT_FOUND",
-                    details: companiesBody,
-                },
-            },
-            { status: 404 }
-        );
-    }
-
-    if (companyIdFromQuery !== null && companyIdFromQuery !== company_id) {
+    const company_id = companyIdResult.company_id;
+    if (queryCompanyId.companyId !== null && queryCompanyId.companyId !== company_id) {
         return NextResponse.json(
             { error: { code: "FORBIDDEN_COMPANY_ID" } },
             { status: 403 }
@@ -157,16 +57,13 @@ export async function GET(req: Request) {
     nodesFetchUrl.searchParams.set("company_id", String(company_id));
 
     const res = await fetch(nodesFetchUrl, {
-        next: { revalidate: CACHE_SECONDS },
+        next: { revalidate: getCacheSeconds() },
         headers: {
             accept: "application/json",
         },
     });
 
-    const contentType = res.headers.get("content-type") ?? "";
-    const responseBody = contentType.includes("application/json")
-        ? await res.json().catch(() => null)
-        : await res.text().catch(() => null);
+    const responseBody = await readJsonOrText(res);
 
     if (!res.ok) {
         return NextResponse.json(
@@ -180,17 +77,93 @@ export async function GET(req: Request) {
         );
     }
 
-    const items = Array.isArray(responseBody)
-        ? responseBody
-        : isRecord(responseBody) && Array.isArray(responseBody.items)
-            ? responseBody.items
-            : [];
+    const items = extractItems(responseBody);
 
     const response = NextResponse.json({ data: items });
     response.headers.set(
         "Cache-Control",
-        `private, max-age=${CACHE_SECONDS}, stale-while-revalidate=${CACHE_SECONDS * 2}`
+        `private, max-age=${getCacheSeconds()}, stale-while-revalidate=${getCacheSeconds() * 2}`
     );
     response.headers.set("Vary", "Cookie");
     return response;
+}
+
+export async function POST(req: Request) {
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email?.trim().toLowerCase();
+    if (!email) {
+        return NextResponse.json(
+            { error: { code: "UNAUTHORIZED" } },
+            { status: 401 }
+        );
+    }
+
+    const nodesUrl = resolveServiceUrlFromEnv("/nodes");
+    if (!nodesUrl) {
+        return NextResponse.json(
+            { error: { code: "FLOW_MANAGER_SERVICE_URL_NOT_CONFIGURED" } },
+            { status: 500 }
+        );
+    }
+
+    const companyIdResult = await getCompanyIdForEmail(email);
+    if (!companyIdResult.ok) {
+        return NextResponse.json(
+            { error: { code: companyIdResult.code, details: companyIdResult.details } },
+            { status: companyIdResult.status }
+        );
+    }
+
+    const body = (await req.json().catch(() => null)) as unknown;
+    const payload = (typeof body === "object" && body !== null ? body : {}) as Record<
+        string,
+        unknown
+    >;
+
+    const prompt = typeof payload.prompt === "string" ? payload.prompt.trim() : "";
+    if (!prompt) {
+        return NextResponse.json(
+            { error: { code: "PROMPT_REQUIRED" } },
+            { status: 400 }
+        );
+    }
+
+    const now = new Date().toISOString();
+    const upstreamBody = {
+        company_id: companyIdResult.company_id,
+        prompt,
+        created_at:
+            typeof payload.created_at === "string" && payload.created_at.trim()
+                ? payload.created_at
+                : now,
+        updated_at:
+            typeof payload.updated_at === "string" && payload.updated_at.trim()
+                ? payload.updated_at
+                : now,
+    };
+
+    const res = await fetch(nodesUrl, {
+        method: "POST",
+        headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(upstreamBody),
+    });
+
+    const responseBody = await readJsonOrText(res);
+
+    if (!res.ok) {
+        return NextResponse.json(
+            {
+                error: {
+                    code: "NODES_CREATE_FAILED",
+                    details: responseBody,
+                },
+            },
+            { status: res.status }
+        );
+    }
+
+    return NextResponse.json({ data: responseBody }, { status: 201 });
 }

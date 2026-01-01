@@ -26,7 +26,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         isConversationDetail;
 
     return (
-        <div className="min-h-screen">
+        <div className="pb-20">
             {children}
 
             {hideNav ? null : (
