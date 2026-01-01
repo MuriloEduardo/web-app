@@ -10,8 +10,19 @@ type NodeDto = {
     updated_at?: string;
 };
 
-type PropertyDto = Record<string, unknown>;
-type NodePropertyDto = Record<string, unknown>;
+type PropertyDto = {
+    id: number;
+    name: string;
+    type: string;
+    description?: string;
+    created_at?: string;
+    updated_at?: string;
+};
+
+type NodePropertyDto = {
+    node_id: number;
+    property_id: number;
+};
 
 type Envelope<T> = {
     data?: T;
@@ -78,35 +89,13 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
         return Array.from(map.entries()).sort(([a], [b]) => a - b);
     }, [nodes]);
 
-    function readNumericId(value: unknown): number | null {
-        if (typeof value === "number" && Number.isFinite(value)) return value;
-        if (typeof value === "string" && value.trim()) {
-            const parsed = Number(value);
-            return Number.isFinite(parsed) ? parsed : null;
+    const propertyById = useMemo(() => {
+        const map = new Map<number, PropertyDto>();
+        for (const p of properties ?? []) {
+            if (typeof p?.id === "number") map.set(p.id, p);
         }
-        return null;
-    }
-
-    function propertyIdFrom(dto: Record<string, unknown>): number | null {
-        return readNumericId(dto.id ?? dto.property_id);
-    }
-
-    function propertyLabelFrom(dto: Record<string, unknown>, fallbackId: number | null) {
-        const label =
-            (typeof dto.name === "string" && dto.name.trim())
-                ? dto.name
-                : (typeof dto.title === "string" && dto.title.trim())
-                    ? dto.title
-                    : (typeof dto.key === "string" && dto.key.trim())
-                        ? dto.key
-                        : null;
-        if (label) return label;
-        return fallbackId ? `Property #${fallbackId}` : "Property";
-    }
-
-    function nodePropertyPropertyIdFrom(dto: Record<string, unknown>): number | null {
-        return readNumericId(dto.property_id ?? dto.propertyId ?? dto.id);
-    }
+        return map;
+    }, [properties]);
 
     async function loadPropertiesIfNeeded(signal?: AbortSignal) {
         if (properties !== null) return;
@@ -577,16 +566,12 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
                                                         className="w-full rounded border px-2 py-1 text-sm text-black dark:text-white"
                                                     >
                                                         <option value="">Selecione uma property…</option>
-                                                        {(properties ?? []).map((p, idx) => {
-                                                            const pid = propertyIdFrom(p);
-                                                            if (!pid) return null;
-                                                            const label = propertyLabelFrom(p, pid);
-                                                            return (
-                                                                <option key={`${pid}-${idx}`} value={pid}>
-                                                                    {label}
-                                                                </option>
-                                                            );
-                                                        })}
+                                                        {(properties ?? []).map((p) => (
+                                                            <option key={p.id} value={p.id}>
+                                                                {p.name}
+                                                                {p.type ? ` (${p.type})` : ""}
+                                                            </option>
+                                                        ))}
                                                     </select>
                                                     <button
                                                         type="button"
@@ -609,23 +594,29 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
                                                         Vinculadas
                                                     </div>
                                                     <ul className="mt-2 divide-y rounded border">
-                                                        {(nodePropertiesByNodeId[n.id] ?? []).map((np, idx) => {
-                                                            const pid = nodePropertyPropertyIdFrom(np);
+                                                        {(nodePropertiesByNodeId[n.id] ?? []).map((np) => {
+                                                            const pid = np.property_id;
+                                                            const property = propertyById.get(pid);
                                                             return (
-                                                                <li key={`${pid ?? "x"}-${idx}`} className="flex items-center justify-between gap-2 px-3 py-2">
-                                                                    <div className="text-xs text-zinc-700 dark:text-zinc-200">
-                                                                        {pid ? `Property #${pid}` : "Property"}
+                                                                <li key={`${np.node_id}-${np.property_id}`} className="flex items-center justify-between gap-2 px-3 py-2">
+                                                                    <div className="min-w-0">
+                                                                        <div className="truncate text-xs font-semibold text-black dark:text-white">
+                                                                            {property?.name ?? `Property #${pid}`}
+                                                                        </div>
+                                                                        {property?.description ? (
+                                                                            <div className="mt-0.5 truncate text-xs text-zinc-600 dark:text-zinc-300">
+                                                                                {property.description}
+                                                                            </div>
+                                                                        ) : null}
                                                                     </div>
-                                                                    {pid ? (
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => unlinkProperty(n.id, pid)}
-                                                                            disabled={isMutatingPropsByNodeId[n.id]}
-                                                                            className="rounded border px-2 py-1 text-xs text-black disabled:opacity-60 dark:text-white"
-                                                                        >
-                                                                            Remover
-                                                                        </button>
-                                                                    ) : null}
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => unlinkProperty(n.id, pid)}
+                                                                        disabled={isMutatingPropsByNodeId[n.id]}
+                                                                        className="rounded border px-2 py-1 text-xs text-black disabled:opacity-60 dark:text-white"
+                                                                    >
+                                                                        Remover
+                                                                    </button>
                                                                 </li>
                                                             );
                                                         })}
