@@ -140,3 +140,104 @@ export async function GET(req: Request) {
     response.headers.set("Vary", "Cookie");
     return response;
 }
+
+function parseCreateBody(body: unknown):
+    | { ok: true; node_id: number; property_id: number }
+    | { ok: false; status: number; code: string } {
+    if (typeof body !== "object" || body === null) {
+        return { ok: false, status: 400, code: "INVALID_BODY" };
+    }
+
+    const record = body as Record<string, unknown>;
+    const node_id = Number(record.node_id);
+    const property_id = Number(record.property_id);
+
+    if (!Number.isFinite(node_id) || !Number.isInteger(node_id) || node_id <= 0) {
+        return { ok: false, status: 400, code: "INVALID_NODE_ID" };
+    }
+
+    if (!Number.isFinite(property_id) || !Number.isInteger(property_id) || property_id <= 0) {
+        return { ok: false, status: 400, code: "INVALID_PROPERTY_ID" };
+    }
+
+    return { ok: true, node_id, property_id };
+}
+
+export async function POST(req: Request) {
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email?.trim().toLowerCase();
+
+    if (!email) {
+        return NextResponse.json(
+            { error: { code: "UNAUTHORIZED" } },
+            { status: 401 }
+        );
+    }
+
+    const nodesBaseUrl = resolveServiceUrlFromEnv("/nodes");
+    if (!nodesBaseUrl) {
+        return NextResponse.json(
+            { error: { code: "FLOW_MANAGER_SERVICE_URL_NOT_CONFIGURED" } },
+            { status: 500 }
+        );
+    }
+
+    const nodePropertiesUrl = resolveServiceUrlFromEnv("/node-properties");
+    if (!nodePropertiesUrl) {
+        return NextResponse.json(
+            { error: { code: "FLOW_MANAGER_SERVICE_URL_NOT_CONFIGURED" } },
+            { status: 500 }
+        );
+    }
+
+    const companyIdResult = await getCompanyIdForEmail(email);
+    if (!companyIdResult.ok) {
+        return NextResponse.json(
+            { error: { code: companyIdResult.code, details: companyIdResult.details } },
+            { status: companyIdResult.status }
+        );
+    }
+
+    const body = await req.json().catch(() => null);
+    const parsedBody = parseCreateBody(body);
+    if (!parsedBody.ok) {
+        return NextResponse.json(
+            { error: { code: parsedBody.code } },
+            { status: parsedBody.status }
+        );
+    }
+
+    const ownership = await assertNodeBelongsToCompany(
+        nodesBaseUrl,
+        companyIdResult.company_id,
+        parsedBody.node_id
+    );
+    if (!ownership.ok) {
+        return NextResponse.json(
+            { error: { code: ownership.code, details: ownership.details } },
+            { status: ownership.status }
+        );
+    }
+
+    const res = await fetch(nodePropertiesUrl, {
+        method: "POST",
+        headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            node_id: parsedBody.node_id,
+            property_id: parsedBody.property_id,
+        }),
+    });
+
+    const responseBody = await readJsonOrText(res);
+    if (!res.ok) {
+        return NextResponse.json(
+            { error: { code: "NODE_PROPERTIES_CREATE_FAILED", details: responseBody } },
+            { status: res.status }
+        );
+    }
+
+    return NextResponse.json({ data: responseBody }, { status: 201 });
+}

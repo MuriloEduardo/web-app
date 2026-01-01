@@ -10,6 +10,9 @@ type NodeDto = {
     updated_at?: string;
 };
 
+type PropertyDto = Record<string, unknown>;
+type NodePropertyDto = Record<string, unknown>;
+
 type Envelope<T> = {
     data?: T;
     error?: {
@@ -48,6 +51,21 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [deleteError, setDeleteError] = useState<string | null>(null);
 
+    const [properties, setProperties] = useState<PropertyDto[] | null>(null);
+    const [propertiesError, setPropertiesError] = useState<string | null>(null);
+    const [nodePropertiesByNodeId, setNodePropertiesByNodeId] = useState<
+        Record<number, NodePropertyDto[]>
+    >({});
+    const [nodePropertiesErrorByNodeId, setNodePropertiesErrorByNodeId] = useState<
+        Record<number, string | null>
+    >({});
+    const [selectedPropertyIdByNodeId, setSelectedPropertyIdByNodeId] = useState<
+        Record<number, number | null>
+    >({});
+    const [isMutatingPropsByNodeId, setIsMutatingPropsByNodeId] = useState<
+        Record<number, boolean>
+    >({});
+
     const count = nodes.length;
 
     const groupedByCompany = useMemo(() => {
@@ -59,6 +77,173 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
         }
         return Array.from(map.entries()).sort(([a], [b]) => a - b);
     }, [nodes]);
+
+    function readNumericId(value: unknown): number | null {
+        if (typeof value === "number" && Number.isFinite(value)) return value;
+        if (typeof value === "string" && value.trim()) {
+            const parsed = Number(value);
+            return Number.isFinite(parsed) ? parsed : null;
+        }
+        return null;
+    }
+
+    function propertyIdFrom(dto: Record<string, unknown>): number | null {
+        return readNumericId(dto.id ?? dto.property_id);
+    }
+
+    function propertyLabelFrom(dto: Record<string, unknown>, fallbackId: number | null) {
+        const label =
+            (typeof dto.name === "string" && dto.name.trim())
+                ? dto.name
+                : (typeof dto.title === "string" && dto.title.trim())
+                    ? dto.title
+                    : (typeof dto.key === "string" && dto.key.trim())
+                        ? dto.key
+                        : null;
+        if (label) return label;
+        return fallbackId ? `Property #${fallbackId}` : "Property";
+    }
+
+    function nodePropertyPropertyIdFrom(dto: Record<string, unknown>): number | null {
+        return readNumericId(dto.property_id ?? dto.propertyId ?? dto.id);
+    }
+
+    async function loadPropertiesIfNeeded(signal?: AbortSignal) {
+        if (properties !== null) return;
+        setPropertiesError(null);
+        try {
+            const res = await fetch("/api/properties", {
+                method: "GET",
+                headers: { accept: "application/json" },
+                signal,
+            });
+            const payload = (await res
+                .json()
+                .catch(() => null)) as Envelope<PropertyDto[]> | null;
+
+            if (!res.ok) {
+                setPropertiesError(payload?.error?.code ?? "PROPERTIES_FETCH_FAILED");
+                setProperties([]);
+                return;
+            }
+
+            setProperties(Array.isArray(payload?.data) ? payload!.data! : []);
+        } catch {
+            if (signal?.aborted) return;
+            setPropertiesError("PROPERTIES_FETCH_FAILED");
+            setProperties([]);
+        }
+    }
+
+    async function loadNodeProperties(nodeId: number, signal?: AbortSignal) {
+        setNodePropertiesErrorByNodeId((prev) => ({ ...prev, [nodeId]: null }));
+        try {
+            const res = await fetch(`/api/node-properties?node_id=${nodeId}`, {
+                method: "GET",
+                headers: { accept: "application/json" },
+                signal,
+            });
+            const payload = (await res
+                .json()
+                .catch(() => null)) as Envelope<NodePropertyDto[]> | null;
+
+            if (!res.ok) {
+                setNodePropertiesErrorByNodeId((prev) => ({
+                    ...prev,
+                    [nodeId]: payload?.error?.code ?? "NODE_PROPERTIES_FETCH_FAILED",
+                }));
+                setNodePropertiesByNodeId((prev) => ({ ...prev, [nodeId]: [] }));
+                return;
+            }
+
+            setNodePropertiesByNodeId((prev) => ({
+                ...prev,
+                [nodeId]: Array.isArray(payload?.data) ? payload!.data! : [],
+            }));
+        } catch {
+            if (signal?.aborted) return;
+            setNodePropertiesErrorByNodeId((prev) => ({
+                ...prev,
+                [nodeId]: "NODE_PROPERTIES_FETCH_FAILED",
+            }));
+            setNodePropertiesByNodeId((prev) => ({ ...prev, [nodeId]: [] }));
+        }
+    }
+
+    async function linkProperty(nodeId: number) {
+        const property_id = selectedPropertyIdByNodeId[nodeId] ?? null;
+        if (!property_id) {
+            setNodePropertiesErrorByNodeId((prev) => ({
+                ...prev,
+                [nodeId]: "PROPERTY_ID_REQUIRED",
+            }));
+            return;
+        }
+
+        setIsMutatingPropsByNodeId((prev) => ({ ...prev, [nodeId]: true }))
+        setNodePropertiesErrorByNodeId((prev) => ({ ...prev, [nodeId]: null }));
+        try {
+            const res = await fetch("/api/node-properties", {
+                method: "POST",
+                headers: {
+                    accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ node_id: nodeId, property_id }),
+            });
+            const payload = (await res
+                .json()
+                .catch(() => null)) as Envelope<unknown> | null;
+            if (!res.ok) {
+                setNodePropertiesErrorByNodeId((prev) => ({
+                    ...prev,
+                    [nodeId]: payload?.error?.code ?? "NODE_PROPERTIES_CREATE_FAILED",
+                }));
+                return;
+            }
+
+            await loadNodeProperties(nodeId);
+        } catch {
+            setNodePropertiesErrorByNodeId((prev) => ({
+                ...prev,
+                [nodeId]: "NODE_PROPERTIES_CREATE_FAILED",
+            }));
+        } finally {
+            setIsMutatingPropsByNodeId((prev) => ({ ...prev, [nodeId]: false }));
+        }
+    }
+
+    async function unlinkProperty(nodeId: number, propertyId: number) {
+        if (!window.confirm(`Remover property #${propertyId} do node #${nodeId}?`)) return;
+
+        setIsMutatingPropsByNodeId((prev) => ({ ...prev, [nodeId]: true }));
+        setNodePropertiesErrorByNodeId((prev) => ({ ...prev, [nodeId]: null }));
+        try {
+            const res = await fetch(`/api/node-properties/${nodeId}/${propertyId}`, {
+                method: "DELETE",
+                headers: { accept: "application/json" },
+            });
+            const payload = (await res
+                .json()
+                .catch(() => null)) as Envelope<unknown> | null;
+            if (!res.ok) {
+                setNodePropertiesErrorByNodeId((prev) => ({
+                    ...prev,
+                    [nodeId]: payload?.error?.code ?? "NODE_PROPERTIES_DELETE_FAILED",
+                }));
+                return;
+            }
+
+            await loadNodeProperties(nodeId);
+        } catch {
+            setNodePropertiesErrorByNodeId((prev) => ({
+                ...prev,
+                [nodeId]: "NODE_PROPERTIES_DELETE_FAILED",
+            }));
+        } finally {
+            setIsMutatingPropsByNodeId((prev) => ({ ...prev, [nodeId]: false }));
+        }
+    }
 
     async function rehydrate(signal?: AbortSignal) {
         setIsRefreshing(true);
@@ -212,6 +397,13 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
         return () => controller.abort();
     }, []);
 
+    useEffect(() => {
+        const controller = new AbortController();
+        loadPropertiesIfNeeded(controller.signal);
+        return () => controller.abort();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return (
         <section className="flex flex-col gap-4">
             <div className="rounded border p-4">
@@ -348,6 +540,103 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
                                                 Ver prompt completo
                                             </summary>
                                             <pre className="mt-2 whitespace-pre-wrap rounded border p-3 text-xs text-black dark:text-white">{n.prompt}</pre>
+                                        </details>
+
+                                        <details
+                                            className="mt-3"
+                                            onToggle={(e) => {
+                                                const open = (e.currentTarget as HTMLDetailsElement).open;
+                                                if (!open) return;
+                                                if (nodePropertiesByNodeId[n.id]) return;
+                                                const controller = new AbortController();
+                                                loadNodeProperties(n.id, controller.signal);
+                                            }}
+                                        >
+                                            <summary className="cursor-pointer text-xs text-zinc-600 dark:text-zinc-300">
+                                                Gerenciar propriedades
+                                            </summary>
+                                            <div className="mt-2 rounded border p-3">
+                                                <div className="text-xs text-zinc-600 dark:text-zinc-300">
+                                                    {propertiesError
+                                                        ? `Erro ao carregar propriedades: ${propertiesError}`
+                                                        : properties === null
+                                                            ? "Carregando propriedades…"
+                                                            : `${properties.length} property(s) disponíveis`}
+                                                </div>
+
+                                                <div className="mt-2 flex items-center gap-2">
+                                                    <select
+                                                        value={selectedPropertyIdByNodeId[n.id] ?? ""}
+                                                        onChange={(e) => {
+                                                            const v = e.target.value;
+                                                            setSelectedPropertyIdByNodeId((prev) => ({
+                                                                ...prev,
+                                                                [n.id]: v ? Number(v) : null,
+                                                            }));
+                                                        }}
+                                                        className="w-full rounded border px-2 py-1 text-sm text-black dark:text-white"
+                                                    >
+                                                        <option value="">Selecione uma property…</option>
+                                                        {(properties ?? []).map((p, idx) => {
+                                                            const pid = propertyIdFrom(p);
+                                                            if (!pid) return null;
+                                                            const label = propertyLabelFrom(p, pid);
+                                                            return (
+                                                                <option key={`${pid}-${idx}`} value={pid}>
+                                                                    {label}
+                                                                </option>
+                                                            );
+                                                        })}
+                                                    </select>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => linkProperty(n.id)}
+                                                        disabled={isMutatingPropsByNodeId[n.id]}
+                                                        className="rounded border px-3 py-1 text-sm text-black disabled:opacity-60 dark:text-white"
+                                                    >
+                                                        Vincular
+                                                    </button>
+                                                </div>
+
+                                                {nodePropertiesErrorByNodeId[n.id] ? (
+                                                    <div className="mt-2 text-xs text-red-700 dark:text-red-300">
+                                                        Erro: {nodePropertiesErrorByNodeId[n.id]}
+                                                    </div>
+                                                ) : null}
+
+                                                <div className="mt-3">
+                                                    <div className="text-xs font-semibold text-black dark:text-white">
+                                                        Vinculadas
+                                                    </div>
+                                                    <ul className="mt-2 divide-y rounded border">
+                                                        {(nodePropertiesByNodeId[n.id] ?? []).map((np, idx) => {
+                                                            const pid = nodePropertyPropertyIdFrom(np);
+                                                            return (
+                                                                <li key={`${pid ?? "x"}-${idx}`} className="flex items-center justify-between gap-2 px-3 py-2">
+                                                                    <div className="text-xs text-zinc-700 dark:text-zinc-200">
+                                                                        {pid ? `Property #${pid}` : "Property"}
+                                                                    </div>
+                                                                    {pid ? (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => unlinkProperty(n.id, pid)}
+                                                                            disabled={isMutatingPropsByNodeId[n.id]}
+                                                                            className="rounded border px-2 py-1 text-xs text-black disabled:opacity-60 dark:text-white"
+                                                                        >
+                                                                            Remover
+                                                                        </button>
+                                                                    ) : null}
+                                                                </li>
+                                                            );
+                                                        })}
+                                                        {(nodePropertiesByNodeId[n.id] ?? []).length === 0 ? (
+                                                            <li className="px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                                                Nenhuma property vinculada.
+                                                            </li>
+                                                        ) : null}
+                                                    </ul>
+                                                </div>
+                                            </div>
                                         </details>
                                     </>
                                 )}
