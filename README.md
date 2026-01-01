@@ -43,6 +43,12 @@ Env vars:
 - `NEXTAUTH_SECRET`
 - `NEXTAUTH_URL` (local: `http://localhost:3000`)
 
+## External Services
+
+Env vars:
+
+- `NODES_SERVICE_URL` (base URL or full endpoint URL for Nodes)
+
 Generate a local secret:
 
 ```bash

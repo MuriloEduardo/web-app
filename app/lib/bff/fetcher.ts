@@ -58,3 +58,26 @@ export async function bffPost<T>(
 
     return (payload ?? {}) as BffResponse<T>;
 }
+
+export async function bffGet<T>(path: string): Promise<BffResponse<T>> {
+    const res = await fetch(resolveUrl(path), {
+        method: "GET",
+        headers: {
+            accept: "application/json",
+        },
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const payload = (await res.json().catch(() => null)) as any;
+
+    if (!res.ok) {
+        return {
+            error: payload?.error ?? {
+                code: "UNKNOWN_ERROR",
+                details: payload,
+            },
+        };
+    }
+
+    return (payload ?? {}) as BffResponse<T>;
+}
