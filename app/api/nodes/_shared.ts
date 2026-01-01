@@ -19,12 +19,15 @@ export function resolveServiceUrlFromEnv(resourcePath: string): string | null {
     try {
         const url = new URL(raw);
 
-        // Allow either a full endpoint (ending with /nodes or /companies) or just a base URL.
-        // If a resource is already present, swap it instead of appending.
+        // Allow either a full endpoint (ending with a resource) or just a base URL.
+        // If a known resource is already present, swap it instead of appending.
         const cleanResource = resourcePath.replace(/\/+$/, "");
         const path = url.pathname.replace(/\/+$/, "");
 
-        const basePath = path.replace(/\/(nodes|companies)$/i, "");
+        const basePath = path.replace(
+            /\/(nodes|companies|properties|node-properties)$/i,
+            ""
+        );
 
         if (basePath === "" || basePath === "/") {
             url.pathname = `${cleanResource}/`;
