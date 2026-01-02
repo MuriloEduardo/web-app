@@ -1,16 +1,17 @@
-import { bffGet } from "@/app/lib/bff/fetcher";
-import { WorkflowGraphClient } from "@/app/workflow/WorkflowGraphClient";
 import { headers } from "next/headers";
 
-type NodeDto = {
-    id: number;
-    company_id: number;
-    prompt: string;
-    created_at?: string;
-    updated_at?: string;
+import { bffGet } from "@/app/lib/bff/fetcher";
+import { WorkflowGraphClient } from "@/app/workflow/WorkflowGraphClient";
+import { WorkflowMobileClient } from "@/app/workflow/WorkflowMobileClient";
+
+import { type NodeDto } from "@/app/workflow/WorkflowTypes";
+
+type Props = {
+    searchParams?: { view?: string };
 };
 
-export default async function WorkflowPage() {
+export default async function WorkflowPage({ searchParams }: Props) {
+    const mode = searchParams?.view === "graph" ? "graph" : "mobile";
     const h = await headers();
     const cookie = h.get("cookie");
     const payload = await bffGet<NodeDto[]>(
@@ -20,20 +21,42 @@ export default async function WorkflowPage() {
     const initialNodes = Array.isArray(payload.data) ? payload.data : [];
     const initialErrorCode = payload.error?.code ?? null;
 
-    return (
-        <main className="mx-auto w-full max-w-6xl px-4 py-6">
-            <h1 className="text-xl font-semibold text-black dark:text-white">
-                Workflow
-            </h1>
-            <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
-                Página de Gerenciamento de Workflow
-            </p>
-
-            <div className="mt-6">
+    if (mode === "graph") {
+        return (
+            <main className="mx-auto w-full max-w-6xl px-4 py-6">
                 <WorkflowGraphClient
                     initialNodes={initialNodes}
                     initialErrorCode={initialErrorCode}
                 />
+            </main>
+        );
+    }
+
+    return (
+        <main className="mx-auto w-full max-w-6xl px-4 py-6">
+            <WorkflowMobileClient
+                initialNodes={initialNodes}
+                initialErrorCode={initialErrorCode}
+            />
+
+            <div className="mt-8 hidden lg:block">
+                <div className="rounded-3xl border bg-white p-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div className="text-sm font-semibold text-black">Editor avançado (desktop)</div>
+                        <a
+                            className="text-xs font-medium text-blue-600"
+                            href="/workflow?view=graph"
+                        >
+                            Abrir em modo grafo
+                        </a>
+                    </div>
+                    <div className="mt-4">
+                        <WorkflowGraphClient
+                            initialNodes={initialNodes}
+                            initialErrorCode={initialErrorCode}
+                        />
+                    </div>
+                </div>
             </div>
         </main>
     );

@@ -3,31 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type NodeDto = {
-    id: number;
-    company_id: number;
-    prompt: string;
-    created_at?: string;
-    updated_at?: string;
-};
-
-type EdgeDto = {
-    id: number;
-    source_node_id: number;
-    destination_node_id: number;
-    label: string;
-    priority: number;
-    created_at?: string;
-    updated_at?: string;
-};
-
-type Envelope<T> = {
-    data?: T;
-    error?: {
-        code: string;
-        details?: unknown;
-    };
-};
+import { type NodeDto, type EdgeDto, type Envelope } from "@/app/workflow/WorkflowTypes";
 
 type Props = {
     initialNodes: NodeDto[];
