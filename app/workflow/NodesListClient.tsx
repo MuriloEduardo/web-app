@@ -53,6 +53,94 @@ function preview(text: string, max = 140) {
     return normalized.slice(0, max - 1) + "…";
 }
 
+const GRAPH_NODE_W = 240;
+const GRAPH_NODE_H = 88;
+const GRAPH_COL_GAP = 300;
+const GRAPH_ROW_GAP = 140;
+const GRAPH_PADDING = 24;
+
+function computeGraphLayout(nodes: NodeDto[], edges: EdgeDto[]) {
+    const nodeIds = nodes.map((n) => n.id);
+    const nodeIdSet = new Set(nodeIds);
+
+    const outgoing = new Map<number, number[]>();
+    const indegree = new Map<number, number>();
+    for (const id of nodeIds) {
+        outgoing.set(id, []);
+        indegree.set(id, 0);
+    }
+
+    for (const e of edges) {
+        if (!nodeIdSet.has(e.source_node_id) || !nodeIdSet.has(e.destination_node_id)) continue;
+        outgoing.get(e.source_node_id)!.push(e.destination_node_id);
+        indegree.set(e.destination_node_id, (indegree.get(e.destination_node_id) ?? 0) + 1);
+    }
+
+    // Kahn + longest-path layering (best-effort, handles cycles gracefully).
+    const queue: number[] = [];
+    for (const [id, deg] of indegree.entries()) {
+        if (deg === 0) queue.push(id);
+    }
+    queue.sort((a, b) => a - b);
+
+    const layer = new Map<number, number>();
+    for (const id of nodeIds) layer.set(id, 0);
+
+    const remainingIndegree = new Map(indegree);
+    const processed = new Set<number>();
+    while (queue.length) {
+        const id = queue.shift()!;
+        processed.add(id);
+
+        const nexts = outgoing.get(id) ?? [];
+        for (const dest of nexts) {
+            layer.set(dest, Math.max(layer.get(dest) ?? 0, (layer.get(id) ?? 0) + 1));
+            remainingIndegree.set(dest, (remainingIndegree.get(dest) ?? 0) - 1);
+            if ((remainingIndegree.get(dest) ?? 0) === 0) {
+                queue.push(dest);
+                queue.sort((a, b) => a - b);
+            }
+        }
+    }
+
+    // Cycles: keep defaults (0) or already-updated values.
+    for (const id of nodeIds) {
+        if (!processed.has(id) && !layer.has(id)) layer.set(id, 0);
+    }
+
+    const layers = new Map<number, number[]>();
+    let maxLayer = 0;
+    for (const id of nodeIds) {
+        const l = layer.get(id) ?? 0;
+        maxLayer = Math.max(maxLayer, l);
+        const list = layers.get(l) ?? [];
+        list.push(id);
+        layers.set(l, list);
+    }
+    for (const [l, list] of layers.entries()) {
+        list.sort((a, b) => a - b);
+        layers.set(l, list);
+    }
+
+    const positions = new Map<number, { x: number; y: number; layer: number; row: number }>();
+    let maxRows = 0;
+    for (let l = 0; l <= maxLayer; l++) {
+        const list = layers.get(l) ?? [];
+        maxRows = Math.max(maxRows, list.length);
+        for (let row = 0; row < list.length; row++) {
+            const id = list[row];
+            const x = GRAPH_PADDING + l * GRAPH_COL_GAP;
+            const y = GRAPH_PADDING + row * GRAPH_ROW_GAP;
+            positions.set(id, { x, y, layer: l, row });
+        }
+    }
+
+    const width = GRAPH_PADDING * 2 + (maxLayer + 1) * GRAPH_COL_GAP + (GRAPH_NODE_W - GRAPH_COL_GAP);
+    const height = GRAPH_PADDING * 2 + Math.max(1, maxRows) * GRAPH_ROW_GAP + (GRAPH_NODE_H - GRAPH_ROW_GAP);
+
+    return { positions, width: Math.max(600, width), height: Math.max(360, height) };
+}
+
 export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
     const [nodes, setNodes] = useState<NodeDto[]>(initialNodes);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -90,6 +178,9 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
 
     const [deletingPropertyId, setDeletingPropertyId] = useState<number | null>(null);
     const [deletePropertyError, setDeletePropertyError] = useState<string | null>(null);
+
+    const [isLoadingGraph, setIsLoadingGraph] = useState(false);
+    const [graphError, setGraphError] = useState<string | null>(null);
 
     const [selectedEdgeSourceNodeId, setSelectedEdgeSourceNodeId] = useState<number | null>(
         initialNodes?.[0]?.id ?? null
@@ -149,6 +240,15 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
         for (const n of nodes) map.set(n.id, n);
         return map;
     }, [nodes]);
+
+    const allEdges = useMemo(() => {
+        const lists = Object.values(edgesBySourceNodeId);
+        const flat: EdgeDto[] = [];
+        for (const list of lists) flat.push(...list);
+        return flat;
+    }, [edgesBySourceNodeId]);
+
+    const graph = useMemo(() => computeGraphLayout(nodes, allEdges), [nodes, allEdges]);
 
     const propertyById = useMemo(() => {
         const map = new Map<number, PropertyDto>();
@@ -367,6 +467,62 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
             if (!signal?.aborted) {
                 setIsLoadingEdgesBySourceNodeId((prev) => ({ ...prev, [nodeId]: false }));
             }
+        }
+    }
+
+    async function loadGraphEdges(signal?: AbortSignal) {
+        if (nodes.length === 0) return;
+
+        setIsLoadingGraph(true);
+        setGraphError(null);
+
+        try {
+            const results = await Promise.all(
+                nodes.map(async (n) => {
+                    const res = await fetch(`/api/edges?source_node_id=${n.id}`, {
+                        method: "GET",
+                        headers: { accept: "application/json" },
+                        signal,
+                    });
+
+                    const payload = (await res
+                        .json()
+                        .catch(() => null)) as Envelope<EdgeDto[]> | null;
+
+                    if (!res.ok) {
+                        return {
+                            ok: false as const,
+                            nodeId: n.id,
+                            code: payload?.error?.code ?? "EDGES_FETCH_FAILED",
+                        };
+                    }
+
+                    return {
+                        ok: true as const,
+                        nodeId: n.id,
+                        edges: Array.isArray(payload?.data) ? payload!.data! : [],
+                    };
+                })
+            );
+
+            const nextMap: Record<number, EdgeDto[]> = {};
+            let firstError: string | null = null;
+            for (const r of results) {
+                if (!r.ok) {
+                    if (!firstError) firstError = r.code;
+                    nextMap[r.nodeId] = [];
+                    continue;
+                }
+                nextMap[r.nodeId] = r.edges;
+            }
+
+            setEdgesBySourceNodeId((prev) => ({ ...prev, ...nextMap }));
+            setGraphError(firstError);
+        } catch {
+            if (signal?.aborted) return;
+            setGraphError("EDGES_FETCH_FAILED");
+        } finally {
+            if (!signal?.aborted) setIsLoadingGraph(false);
         }
     }
 
@@ -674,6 +830,11 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
             const items = Array.isArray(payload?.data) ? payload!.data! : [];
             setNodes(items);
             setErrorCode(null);
+
+            setSelectedEdgeSourceNodeId((prev) => {
+                if (prev && items.some((n) => n.id === prev)) return prev;
+                return items?.[0]?.id ?? null;
+            });
         } catch {
             // Ignore abort.
             if (signal?.aborted) return;
@@ -805,6 +966,13 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
     }, []);
 
     useEffect(() => {
+        const controller = new AbortController();
+        loadGraphEdges(controller.signal);
+        return () => controller.abort();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [nodes.map((n) => n.id).join(",")]);
+
+    useEffect(() => {
         if (!selectedEdgeSourceNodeId) return;
         const controller = new AbortController();
         loadEdgesForSourceNode(selectedEdgeSourceNodeId, controller.signal);
@@ -820,6 +988,109 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
 
     return (
         <section className="flex flex-col gap-4">
+            <div className="rounded border p-4">
+                <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm font-semibold text-black dark:text-white">Grafo</div>
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                const controller = new AbortController();
+                                loadGraphEdges(controller.signal);
+                            }}
+                            className="rounded border px-3 py-1 text-sm text-black dark:text-white"
+                        >
+                            Recarregar grafo
+                        </button>
+                    </div>
+                </div>
+
+                <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
+                    {isLoadingGraph ? "Carregando edges…" : `${nodes.length} node(s) • ${allEdges.length} edge(s)`}
+                    {graphError ? ` • erro: ${graphError}` : ""}
+                </div>
+
+                <div className="mt-3 overflow-auto rounded border">
+                    <div
+                        className="relative"
+                        style={{ width: graph.width, height: graph.height }}
+                    >
+                        <svg
+                            className="absolute inset-0 h-full w-full text-zinc-400 dark:text-zinc-600"
+                            viewBox={`0 0 ${graph.width} ${graph.height}`}
+                            preserveAspectRatio="none"
+                        >
+                            <defs>
+                                <marker
+                                    id="arrow"
+                                    markerWidth="10"
+                                    markerHeight="10"
+                                    refX="10"
+                                    refY="5"
+                                    orient="auto"
+                                >
+                                    <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor" />
+                                </marker>
+                            </defs>
+
+                            {allEdges.map((e) => {
+                                const a = graph.positions.get(e.source_node_id);
+                                const b = graph.positions.get(e.destination_node_id);
+                                if (!a || !b) return null;
+
+                                const x1 = a.x + GRAPH_NODE_W;
+                                const y1 = a.y + GRAPH_NODE_H / 2;
+                                const x2 = b.x;
+                                const y2 = b.y + GRAPH_NODE_H / 2;
+
+                                const dx = Math.max(80, Math.min(220, Math.abs(x2 - x1) / 2));
+                                const c1x = x1 + dx;
+                                const c1y = y1;
+                                const c2x = x2 - dx;
+                                const c2y = y2;
+
+                                return (
+                                    <path
+                                        key={e.id}
+                                        d={`M ${x1} ${y1} C ${c1x} ${c1y}, ${c2x} ${c2y}, ${x2} ${y2}`}
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                        markerEnd="url(#arrow)"
+                                    />
+                                );
+                            })}
+                        </svg>
+
+                        {nodes.map((n) => {
+                            const p = graph.positions.get(n.id);
+                            if (!p) return null;
+
+                            return (
+                                <div
+                                    key={n.id}
+                                    className="absolute rounded border bg-white p-3 text-black dark:bg-transparent dark:text-white"
+                                    style={{ left: p.x, top: p.y, width: GRAPH_NODE_W, height: GRAPH_NODE_H }}
+                                >
+                                    <div className="absolute left-[-6px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border bg-white dark:bg-transparent" />
+                                    <div className="absolute right-[-6px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border bg-white dark:bg-transparent" />
+
+                                    <div className="flex items-center justify-between gap-2">
+                                        <div className="text-sm font-semibold">Node #{n.id}</div>
+                                        <div className="text-[10px] text-zinc-600 dark:text-zinc-300">
+                                            {n.updated_at ?? n.created_at ?? ""}
+                                        </div>
+                                    </div>
+                                    <div className="mt-1 line-clamp-2 text-xs text-zinc-700 dark:text-zinc-200">
+                                        {preview(n.prompt, 120)}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
             <div className="rounded border p-4">
                 <div className="text-sm font-semibold text-black dark:text-white">Edges</div>
 

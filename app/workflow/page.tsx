@@ -21,7 +21,7 @@ export default async function WorkflowPage() {
     const initialErrorCode = payload.error?.code ?? null;
 
     return (
-        <main className="mx-auto w-full max-w-3xl px-4 py-6">
+        <main className="mx-auto w-full max-w-6xl px-4 py-6">
             <h1 className="text-xl font-semibold text-black dark:text-white">
                 Workflow
             </h1>
