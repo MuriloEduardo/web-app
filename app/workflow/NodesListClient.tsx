@@ -24,6 +24,16 @@ type NodePropertyDto = {
     property_id: number;
 };
 
+type EdgeDto = {
+    id: number;
+    source_node_id: number;
+    destination_node_id: number;
+    label: string;
+    priority: number;
+    created_at?: string;
+    updated_at?: string;
+};
+
 type Envelope<T> = {
     data?: T;
     error?: {
@@ -80,6 +90,35 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
 
     const [deletingPropertyId, setDeletingPropertyId] = useState<number | null>(null);
     const [deletePropertyError, setDeletePropertyError] = useState<string | null>(null);
+
+    const [selectedEdgeSourceNodeId, setSelectedEdgeSourceNodeId] = useState<number | null>(
+        initialNodes?.[0]?.id ?? null
+    );
+    const [edgesBySourceNodeId, setEdgesBySourceNodeId] = useState<Record<number, EdgeDto[]>>(
+        {}
+    );
+    const [edgesErrorBySourceNodeId, setEdgesErrorBySourceNodeId] = useState<
+        Record<number, string | null>
+    >({});
+    const [isLoadingEdgesBySourceNodeId, setIsLoadingEdgesBySourceNodeId] = useState<
+        Record<number, boolean>
+    >({});
+
+    const [newEdgeDestinationNodeId, setNewEdgeDestinationNodeId] = useState<number | null>(null);
+    const [newEdgeLabel, setNewEdgeLabel] = useState("");
+    const [newEdgePriority, setNewEdgePriority] = useState("0");
+    const [isCreatingEdge, setIsCreatingEdge] = useState(false);
+    const [createEdgeError, setCreateEdgeError] = useState<string | null>(null);
+
+    const [editingEdgeId, setEditingEdgeId] = useState<number | null>(null);
+    const [editEdgeDestinationNodeId, setEditEdgeDestinationNodeId] = useState<number | null>(null);
+    const [editEdgeLabel, setEditEdgeLabel] = useState("");
+    const [editEdgePriority, setEditEdgePriority] = useState("0");
+    const [isSavingEdge, setIsSavingEdge] = useState(false);
+    const [saveEdgeError, setSaveEdgeError] = useState<string | null>(null);
+
+    const [deletingEdgeId, setDeletingEdgeId] = useState<number | null>(null);
+    const [deleteEdgeError, setDeleteEdgeError] = useState<string | null>(null);
     const [nodePropertiesByNodeId, setNodePropertiesByNodeId] = useState<
         Record<number, NodePropertyDto[]>
     >({});
@@ -103,6 +142,12 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
             map.set(n.company_id, list);
         }
         return Array.from(map.entries()).sort(([a], [b]) => a - b);
+    }, [nodes]);
+
+    const nodeById = useMemo(() => {
+        const map = new Map<number, NodeDto>();
+        for (const n of nodes) map.set(n.id, n);
+        return map;
     }, [nodes]);
 
     const propertyById = useMemo(() => {
@@ -284,6 +329,216 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
             setDeletePropertyError("PROPERTIES_DELETE_FAILED");
         } finally {
             setDeletingPropertyId(null);
+        }
+    }
+
+    async function loadEdgesForSourceNode(nodeId: number, signal?: AbortSignal) {
+        setIsLoadingEdgesBySourceNodeId((prev) => ({ ...prev, [nodeId]: true }));
+        setEdgesErrorBySourceNodeId((prev) => ({ ...prev, [nodeId]: null }));
+        try {
+            const res = await fetch(`/api/edges?source_node_id=${nodeId}`, {
+                method: "GET",
+                headers: { accept: "application/json" },
+                signal,
+            });
+
+            const payload = (await res
+                .json()
+                .catch(() => null)) as Envelope<EdgeDto[]> | null;
+
+            if (!res.ok) {
+                setEdgesErrorBySourceNodeId((prev) => ({
+                    ...prev,
+                    [nodeId]: payload?.error?.code ?? "EDGES_FETCH_FAILED",
+                }));
+                setEdgesBySourceNodeId((prev) => ({ ...prev, [nodeId]: [] }));
+                return;
+            }
+
+            setEdgesBySourceNodeId((prev) => ({
+                ...prev,
+                [nodeId]: Array.isArray(payload?.data) ? payload!.data! : [],
+            }));
+        } catch {
+            if (signal?.aborted) return;
+            setEdgesErrorBySourceNodeId((prev) => ({ ...prev, [nodeId]: "EDGES_FETCH_FAILED" }));
+            setEdgesBySourceNodeId((prev) => ({ ...prev, [nodeId]: [] }));
+        } finally {
+            if (!signal?.aborted) {
+                setIsLoadingEdgesBySourceNodeId((prev) => ({ ...prev, [nodeId]: false }));
+            }
+        }
+    }
+
+    async function reloadSelectedEdges(signal?: AbortSignal) {
+        const sourceNodeId = selectedEdgeSourceNodeId;
+        if (!sourceNodeId) return;
+        await loadEdgesForSourceNode(sourceNodeId, signal);
+    }
+
+    async function createEdge() {
+        const source_node_id = selectedEdgeSourceNodeId;
+        if (!source_node_id) {
+            setCreateEdgeError("SOURCE_NODE_ID_REQUIRED");
+            return;
+        }
+
+        const destination_node_id = newEdgeDestinationNodeId;
+        if (!destination_node_id) {
+            setCreateEdgeError("DESTINATION_NODE_ID_REQUIRED");
+            return;
+        }
+
+        const label = newEdgeLabel.trim();
+        if (!label) {
+            setCreateEdgeError("LABEL_REQUIRED");
+            return;
+        }
+
+        const priority = Number(newEdgePriority);
+        if (!Number.isFinite(priority) || !Number.isInteger(priority)) {
+            setCreateEdgeError("INVALID_PRIORITY");
+            return;
+        }
+
+        setIsCreatingEdge(true);
+        setCreateEdgeError(null);
+        try {
+            const res = await fetch("/api/edges", {
+                method: "POST",
+                headers: {
+                    accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    source_node_id,
+                    destination_node_id,
+                    label,
+                    priority,
+                }),
+            });
+
+            const payload = (await res
+                .json()
+                .catch(() => null)) as Envelope<unknown> | null;
+
+            if (!res.ok) {
+                setCreateEdgeError(payload?.error?.code ?? "EDGES_CREATE_FAILED");
+                return;
+            }
+
+            setNewEdgeLabel("");
+            setNewEdgePriority("0");
+            setNewEdgeDestinationNodeId(null);
+            await reloadSelectedEdges();
+        } catch {
+            setCreateEdgeError("EDGES_CREATE_FAILED");
+        } finally {
+            setIsCreatingEdge(false);
+        }
+    }
+
+    function beginEditEdge(edge: EdgeDto) {
+        setEditingEdgeId(edge.id);
+        setEditEdgeDestinationNodeId(edge.destination_node_id);
+        setEditEdgeLabel(edge.label ?? "");
+        setEditEdgePriority(String(edge.priority ?? 0));
+        setSaveEdgeError(null);
+    }
+
+    function cancelEditEdge() {
+        setEditingEdgeId(null);
+        setEditEdgeDestinationNodeId(null);
+        setEditEdgeLabel("");
+        setEditEdgePriority("0");
+        setSaveEdgeError(null);
+    }
+
+    async function saveEdge(edgeId: number) {
+        const destination_node_id = editEdgeDestinationNodeId;
+        if (!destination_node_id) {
+            setSaveEdgeError("DESTINATION_NODE_ID_REQUIRED");
+            return;
+        }
+
+        const label = editEdgeLabel.trim();
+        if (!label) {
+            setSaveEdgeError("LABEL_REQUIRED");
+            return;
+        }
+
+        const priority = Number(editEdgePriority);
+        if (!Number.isFinite(priority) || !Number.isInteger(priority)) {
+            setSaveEdgeError("INVALID_PRIORITY");
+            return;
+        }
+
+        setIsSavingEdge(true);
+        setSaveEdgeError(null);
+        try {
+            const res = await fetch(`/api/edges/${edgeId}`, {
+                method: "PUT",
+                headers: {
+                    accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    destination_node_id,
+                    label,
+                    priority,
+                }),
+            });
+
+            const payload = (await res
+                .json()
+                .catch(() => null)) as Envelope<unknown> | null;
+
+            if (!res.ok) {
+                setSaveEdgeError(payload?.error?.code ?? "EDGES_UPDATE_FAILED");
+                return;
+            }
+
+            cancelEditEdge();
+            await reloadSelectedEdges();
+        } catch {
+            setSaveEdgeError("EDGES_UPDATE_FAILED");
+        } finally {
+            setIsSavingEdge(false);
+        }
+    }
+
+    async function deleteEdge(edgeId: number) {
+        const source_node_id = selectedEdgeSourceNodeId;
+        if (!source_node_id) {
+            setDeleteEdgeError("SOURCE_NODE_ID_REQUIRED");
+            return;
+        }
+
+        if (!window.confirm(`Deletar edge #${edgeId}?`)) return;
+
+        setDeletingEdgeId(edgeId);
+        setDeleteEdgeError(null);
+        try {
+            const res = await fetch(`/api/edges/${edgeId}?source_node_id=${source_node_id}`, {
+                method: "DELETE",
+                headers: { accept: "application/json" },
+            });
+
+            const payload = (await res
+                .json()
+                .catch(() => null)) as Envelope<unknown> | null;
+
+            if (!res.ok) {
+                setDeleteEdgeError(payload?.error?.code ?? "EDGES_DELETE_FAILED");
+                return;
+            }
+
+            if (editingEdgeId === edgeId) cancelEditEdge();
+            await reloadSelectedEdges();
+        } catch {
+            setDeleteEdgeError("EDGES_DELETE_FAILED");
+        } finally {
+            setDeletingEdgeId(null);
         }
     }
 
@@ -550,6 +805,13 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
     }, []);
 
     useEffect(() => {
+        if (!selectedEdgeSourceNodeId) return;
+        const controller = new AbortController();
+        loadEdgesForSourceNode(selectedEdgeSourceNodeId, controller.signal);
+        return () => controller.abort();
+    }, [selectedEdgeSourceNodeId]);
+
+    useEffect(() => {
         const controller = new AbortController();
         loadPropertiesIfNeeded(controller.signal);
         return () => controller.abort();
@@ -558,6 +820,226 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
 
     return (
         <section className="flex flex-col gap-4">
+            <div className="rounded border p-4">
+                <div className="text-sm font-semibold text-black dark:text-white">Edges</div>
+
+                <div className="mt-2 grid gap-2">
+                    <select
+                        value={selectedEdgeSourceNodeId ?? ""}
+                        onChange={(e) => {
+                            const v = e.target.value;
+                            setSelectedEdgeSourceNodeId(v ? Number(v) : null);
+                            cancelEditEdge();
+                            setCreateEdgeError(null);
+                            setDeleteEdgeError(null);
+                        }}
+                        className="w-full rounded border px-2 py-2 text-sm text-black dark:text-white"
+                    >
+                        <option value="">Selecione o node de origem…</option>
+                        {nodes.map((n) => (
+                            <option key={n.id} value={n.id}>
+                                Node #{n.id}
+                            </option>
+                        ))}
+                    </select>
+
+                    <div className="grid gap-2 md:grid-cols-3">
+                        <select
+                            value={newEdgeDestinationNodeId ?? ""}
+                            onChange={(e) => {
+                                const v = e.target.value;
+                                setNewEdgeDestinationNodeId(v ? Number(v) : null);
+                            }}
+                            className="w-full rounded border px-2 py-2 text-sm text-black dark:text-white"
+                            disabled={!selectedEdgeSourceNodeId}
+                        >
+                            <option value="">Destino…</option>
+                            {nodes
+                                .filter((n) => n.id !== selectedEdgeSourceNodeId)
+                                .map((n) => (
+                                    <option key={n.id} value={n.id}>
+                                        Node #{n.id}
+                                    </option>
+                                ))}
+                        </select>
+                        <input
+                            value={newEdgeLabel}
+                            onChange={(e) => setNewEdgeLabel(e.target.value)}
+                            placeholder="Label…"
+                            className="w-full rounded border px-3 py-2 text-sm text-black dark:text-white"
+                            disabled={!selectedEdgeSourceNodeId}
+                        />
+                        <input
+                            value={newEdgePriority}
+                            onChange={(e) => setNewEdgePriority(e.target.value)}
+                            placeholder="Priority (ex: 0)"
+                            className="w-full rounded border px-3 py-2 text-sm text-black dark:text-white"
+                            disabled={!selectedEdgeSourceNodeId}
+                        />
+                    </div>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                        <button
+                            type="button"
+                            onClick={() => createEdge()}
+                            disabled={isCreatingEdge || !selectedEdgeSourceNodeId}
+                            className="rounded border px-3 py-1 text-sm text-black disabled:opacity-60 dark:text-white"
+                        >
+                            {isCreatingEdge ? "Criando…" : "Criar edge"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => reloadSelectedEdges()}
+                            disabled={!selectedEdgeSourceNodeId}
+                            className="rounded border px-3 py-1 text-sm text-black disabled:opacity-60 dark:text-white"
+                        >
+                            Recarregar
+                        </button>
+                    </div>
+                    {createEdgeError ? (
+                        <div className="text-xs text-red-700 dark:text-red-300">
+                            Erro: {createEdgeError}
+                        </div>
+                    ) : null}
+                </div>
+
+                {selectedEdgeSourceNodeId ? (
+                    <div className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
+                        {isLoadingEdgesBySourceNodeId[selectedEdgeSourceNodeId]
+                            ? "Carregando edges…"
+                            : `${(edgesBySourceNodeId[selectedEdgeSourceNodeId] ?? []).length} edge(s)`}
+                    </div>
+                ) : (
+                    <div className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
+                        Selecione um node de origem para ver as edges.
+                    </div>
+                )}
+
+                {selectedEdgeSourceNodeId && edgesErrorBySourceNodeId[selectedEdgeSourceNodeId] ? (
+                    <div className="mt-2 text-xs text-red-700 dark:text-red-300">
+                        Erro ao carregar edges: {edgesErrorBySourceNodeId[selectedEdgeSourceNodeId]}
+                    </div>
+                ) : null}
+
+                {deleteEdgeError ? (
+                    <div className="mt-2 text-xs text-red-700 dark:text-red-300">
+                        Erro ao deletar edge: {deleteEdgeError}
+                    </div>
+                ) : null}
+
+                {selectedEdgeSourceNodeId ? (
+                    <div className="mt-3">
+                        <div className="text-xs font-semibold text-black dark:text-white">Existentes</div>
+                        <ul className="mt-2 divide-y rounded border">
+                            {(edgesBySourceNodeId[selectedEdgeSourceNodeId] ?? [])
+                                .slice()
+                                .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0))
+                                .map((e) => {
+                                    const dest = nodeById.get(e.destination_node_id);
+                                    return (
+                                        <li key={e.id} className="px-3 py-2">
+                                            {editingEdgeId === e.id ? (
+                                                <div>
+                                                    <div className="grid gap-2 md:grid-cols-3">
+                                                        <select
+                                                            value={editEdgeDestinationNodeId ?? ""}
+                                                            onChange={(ev) => {
+                                                                const v = ev.target.value;
+                                                                setEditEdgeDestinationNodeId(v ? Number(v) : null);
+                                                            }}
+                                                            className="w-full rounded border px-2 py-2 text-sm text-black dark:text-white"
+                                                        >
+                                                            <option value="">Destino…</option>
+                                                            {nodes
+                                                                .filter((n) => n.id !== selectedEdgeSourceNodeId)
+                                                                .map((n) => (
+                                                                    <option key={n.id} value={n.id}>
+                                                                        Node #{n.id}
+                                                                    </option>
+                                                                ))}
+                                                        </select>
+                                                        <input
+                                                            value={editEdgeLabel}
+                                                            onChange={(ev) => setEditEdgeLabel(ev.target.value)}
+                                                            className="w-full rounded border px-3 py-2 text-sm text-black dark:text-white"
+                                                        />
+                                                        <input
+                                                            value={editEdgePriority}
+                                                            onChange={(ev) => setEditEdgePriority(ev.target.value)}
+                                                            className="w-full rounded border px-3 py-2 text-sm text-black dark:text-white"
+                                                        />
+                                                    </div>
+                                                    <div className="mt-2 flex items-center justify-between gap-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => saveEdge(e.id)}
+                                                                disabled={isSavingEdge}
+                                                                className="rounded border px-3 py-1 text-sm text-black disabled:opacity-60 dark:text-white"
+                                                            >
+                                                                {isSavingEdge ? "Salvando…" : "Salvar"}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => cancelEditEdge()}
+                                                                disabled={isSavingEdge}
+                                                                className="rounded border px-3 py-1 text-sm text-black disabled:opacity-60 dark:text-white"
+                                                            >
+                                                                Cancelar
+                                                            </button>
+                                                        </div>
+                                                        {saveEdgeError ? (
+                                                            <div className="text-xs text-red-700 dark:text-red-300">
+                                                                Erro: {saveEdgeError}
+                                                            </div>
+                                                        ) : null}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-between gap-3">
+                                                    <div className="min-w-0">
+                                                        <div className="truncate text-sm font-semibold text-black dark:text-white">
+                                                            Node #{e.source_node_id} → Node #{e.destination_node_id}
+                                                        </div>
+                                                        <div className="mt-0.5 truncate text-xs text-zinc-600 dark:text-zinc-300">
+                                                            {e.label} • priority {e.priority}
+                                                            {dest ? "" : ""}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => beginEditEdge(e)}
+                                                            className="rounded border px-2 py-1 text-xs text-black dark:text-white"
+                                                        >
+                                                            Editar
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => deleteEdge(e.id)}
+                                                            disabled={deletingEdgeId === e.id}
+                                                            className="rounded border px-2 py-1 text-xs text-black disabled:opacity-60 dark:text-white"
+                                                        >
+                                                            {deletingEdgeId === e.id ? "Deletando…" : "Deletar"}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </li>
+                                    );
+                                })}
+                            {(edgesBySourceNodeId[selectedEdgeSourceNodeId] ?? []).length === 0 ? (
+                                <li className="px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                    Nenhuma edge cadastrada para este node.
+                                </li>
+                            ) : null}
+                        </ul>
+                    </div>
+                ) : null}
+            </div>
+
             <div className="rounded border p-4">
                 <div className="text-sm font-semibold text-black dark:text-white">
                     Catálogo de properties
