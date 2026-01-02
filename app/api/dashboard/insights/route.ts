@@ -45,12 +45,22 @@ function batch<T>(items: T[], size: number): T[][] {
 }
 
 async function fetchJson<T>(url: string, cookieHeader: string | null): Promise<Envelope<T>> {
-    const res = await fetch(url, {
-        headers: {
-            accept: "application/json",
-            ...(cookieHeader ? { cookie: cookieHeader } : {}),
-        },
-    });
+    let res: Response;
+    try {
+        res = await fetch(url, {
+            headers: {
+                accept: "application/json",
+                ...(cookieHeader ? { cookie: cookieHeader } : {}),
+            },
+        });
+    } catch (error) {
+        return {
+            error: {
+                code: "FETCH_FAILED",
+                details: error instanceof Error ? error.message : error,
+            },
+        };
+    }
 
     const contentType = res.headers.get("content-type") ?? "";
     const body = contentType.includes("application/json")

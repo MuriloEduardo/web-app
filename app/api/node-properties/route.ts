@@ -35,9 +35,19 @@ async function assertNodeBelongsToCompany(
     const listUrl = new URL(nodesBaseUrl);
     listUrl.searchParams.set("company_id", String(company_id));
 
-    const res = await fetch(listUrl, {
-        headers: { accept: "application/json" },
-    });
+    let res: Response;
+    try {
+        res = await fetch(listUrl, {
+            headers: { accept: "application/json" },
+        });
+    } catch (error) {
+        return {
+            ok: false,
+            status: 502,
+            code: "NODES_FETCH_FAILED",
+            details: error instanceof Error ? error.message : error,
+        };
+    }
 
     const body = await readJsonOrText(res);
     if (!res.ok) {
@@ -116,9 +126,22 @@ export async function GET(req: Request) {
     const upstreamUrl = new URL(nodePropertiesUrl);
     upstreamUrl.searchParams.set("node_id", String(parsedNode.nodeId));
 
-    const res = await fetch(upstreamUrl, {
-        headers: { accept: "application/json" },
-    });
+    let res: Response;
+    try {
+        res = await fetch(upstreamUrl, {
+            headers: { accept: "application/json" },
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                error: {
+                    code: "NODE_PROPERTIES_FETCH_FAILED",
+                    details: error instanceof Error ? error.message : error,
+                },
+            },
+            { status: 502 }
+        );
+    }
 
     const body = await readJsonOrText(res);
     if (!res.ok) {
@@ -211,17 +234,30 @@ export async function POST(req: Request) {
         );
     }
 
-    const res = await fetch(nodePropertiesUrl, {
-        method: "POST",
-        headers: {
-            accept: "application/json",
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-            node_id: parsedBody.node_id,
-            property_id: parsedBody.property_id,
-        }),
-    });
+    let res: Response;
+    try {
+        res = await fetch(nodePropertiesUrl, {
+            method: "POST",
+            headers: {
+                accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                node_id: parsedBody.node_id,
+                property_id: parsedBody.property_id,
+            }),
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                error: {
+                    code: "NODE_PROPERTIES_CREATE_FAILED",
+                    details: error instanceof Error ? error.message : error,
+                },
+            },
+            { status: 502 }
+        );
+    }
 
     const responseBody = await readJsonOrText(res);
     if (!res.ok) {

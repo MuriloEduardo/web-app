@@ -71,9 +71,22 @@ export async function GET(req: Request) {
     query.set("limit", limit);
     query.set("offset", offset);
 
-    const res = await fetch(`${baseUrl}/conversations?${query.toString()}`, {
-        headers: { accept: "application/json" },
-    });
+    let res: Response;
+    try {
+        res = await fetch(`${baseUrl}/conversations?${query.toString()}`, {
+            headers: { accept: "application/json" },
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                error: {
+                    code: "CONVERSATIONS_FETCH_FAILED",
+                    details: error instanceof Error ? error.message : error,
+                },
+            },
+            { status: 502 }
+        );
+    }
 
     const contentType = res.headers.get("content-type") ?? "";
     const body = contentType.includes("application/json")

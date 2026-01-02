@@ -50,9 +50,22 @@ export async function GET(
     query.set("limit", limit);
     query.set("offset", offset);
 
-    const res = await fetch(`${baseUrl}/messages?${query.toString()}`, {
-        headers: { accept: "application/json" },
-    });
+    let res: Response;
+    try {
+        res = await fetch(`${baseUrl}/messages?${query.toString()}`, {
+            headers: { accept: "application/json" },
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                error: {
+                    code: "MESSAGES_FETCH_FAILED",
+                    details: error instanceof Error ? error.message : error,
+                },
+            },
+            { status: 502 }
+        );
+    }
 
     const contentType = res.headers.get("content-type") ?? "";
     const body = contentType.includes("application/json")
@@ -123,14 +136,27 @@ export async function PATCH(
         );
     }
 
-    const res = await fetch(`${baseUrl}/conversations/${numericSessionId}`, {
-        method: "PATCH",
-        headers: {
-            accept: "application/json",
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ skips_forwarding: payload.skips_forwarding }),
-    });
+    let res: Response;
+    try {
+        res = await fetch(`${baseUrl}/conversations/${numericSessionId}`, {
+            method: "PATCH",
+            headers: {
+                accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ skips_forwarding: payload.skips_forwarding }),
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                error: {
+                    code: "CONVERSATION_PATCH_FAILED",
+                    details: error instanceof Error ? error.message : error,
+                },
+            },
+            { status: 502 }
+        );
+    }
 
     const contentType = res.headers.get("content-type") ?? "";
     const body = contentType.includes("application/json")

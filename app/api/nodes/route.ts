@@ -55,11 +55,24 @@ export async function GET(req: Request) {
     const nodesFetchUrl = new URL(nodesUrl);
     nodesFetchUrl.searchParams.set("company_id", String(company_id));
 
-    const res = await fetch(nodesFetchUrl, {
-        headers: {
-            accept: "application/json",
-        },
-    });
+    let res: Response;
+    try {
+        res = await fetch(nodesFetchUrl, {
+            headers: {
+                accept: "application/json",
+            },
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                error: {
+                    code: "NODES_FETCH_FAILED",
+                    details: error instanceof Error ? error.message : error,
+                },
+            },
+            { status: 502 }
+        );
+    }
 
     const responseBody = await readJsonOrText(res);
 

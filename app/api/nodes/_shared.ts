@@ -92,9 +92,19 @@ export async function getCompanyIdForEmail(email: string): Promise<CompanyIdResu
     const companiesFetchUrl = new URL(companiesUrl);
     companiesFetchUrl.searchParams.set("unique_identifier", uniqueIdentifier);
 
-    const companiesRes = await fetch(companiesFetchUrl, {
-        headers: { accept: "application/json" },
-    });
+    let companiesRes: Response;
+    try {
+        companiesRes = await fetch(companiesFetchUrl, {
+            headers: { accept: "application/json" },
+        });
+    } catch (error) {
+        return {
+            ok: false,
+            status: 502,
+            code: "COMPANIES_FETCH_FAILED",
+            details: error instanceof Error ? error.message : error,
+        };
+    }
 
     const companiesBody = await readJsonOrText(companiesRes);
 

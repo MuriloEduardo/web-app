@@ -40,11 +40,24 @@ export async function GET(req: Request) {
     query.set("offset", offset);
     if (conversationId) query.set("conversation_id", conversationId);
 
-    const res = await fetch(`${baseUrl}/messages?${query.toString()}`, {
-        headers: {
-            accept: "application/json",
-        },
-    });
+    let res: Response;
+    try {
+        res = await fetch(`${baseUrl}/messages?${query.toString()}`, {
+            headers: {
+                accept: "application/json",
+            },
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                error: {
+                    code: "MESSAGES_FETCH_FAILED",
+                    details: error instanceof Error ? error.message : error,
+                },
+            },
+            { status: 502 }
+        );
+    }
 
     const contentType = res.headers.get("content-type") ?? "";
     const responseBody = contentType.includes("application/json")
