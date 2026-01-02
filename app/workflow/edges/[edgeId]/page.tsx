@@ -48,22 +48,39 @@ export default async function EdgeConditionsPage({ params, searchParams }: { par
     const cookie = h.get("cookie");
 
     const edgeId = Number(params.edgeId);
-    const source_node_id = Number(searchParams?.source_node_id ?? "0");
+    const source_node_id = Number(searchParams?.source_node_id ?? "");
     const initialEdgeError = !Number.isInteger(edgeId) || edgeId <= 0 ? "INVALID_EDGE_ID" : null;
     const initialSourceError = !Number.isInteger(source_node_id) || source_node_id <= 0 ? "INVALID_SOURCE_NODE_ID" : null;
+
+    if (initialEdgeError || initialSourceError) {
+        const message = initialEdgeError ? "Edge inválida" : "source_node_id ausente";
+        return (
+            <main className="mx-auto w-full max-w-3xl px-4 py-6">
+                <div className="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-800">
+                    {message}. Abra esta tela a partir do modo grafo clicando em "Condições" da edge.
+                </div>
+                <div className="mt-4">
+                    <a
+                        href="/workflow?view=graph"
+                        className="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow"
+                    >
+                        Voltar ao grafo
+                    </a>
+                </div>
+            </main>
+        );
+    }
 
     let conditionsPayload: Awaited<ReturnType<typeof fetchConditions>> | null = null;
     let conditionPropsPayload: Awaited<ReturnType<typeof fetchConditionProperties>> | null = null;
     let propertiesPayload: Awaited<ReturnType<typeof fetchProperties>> | null = null;
 
-    if (!initialEdgeError && !initialSourceError) {
-        conditionsPayload = await fetchConditions(cookie, edgeId, source_node_id);
-        const conditionIds = Array.isArray(conditionsPayload.data)
-            ? conditionsPayload.data.map((c) => c.id)
-            : [];
-        conditionPropsPayload = await fetchConditionProperties(cookie, edgeId, source_node_id, conditionIds);
-        propertiesPayload = await fetchProperties(cookie);
-    }
+    conditionsPayload = await fetchConditions(cookie, edgeId, source_node_id);
+    const conditionIds = Array.isArray(conditionsPayload.data)
+        ? conditionsPayload.data.map((c) => c.id)
+        : [];
+    conditionPropsPayload = await fetchConditionProperties(cookie, edgeId, source_node_id, conditionIds);
+    propertiesPayload = await fetchProperties(cookie);
 
     return (
         <main className="mx-auto w-full max-w-3xl px-4 py-6">
@@ -73,7 +90,7 @@ export default async function EdgeConditionsPage({ params, searchParams }: { par
                 initialConditions={conditionsPayload?.data ?? []}
                 initialConditionProps={conditionPropsPayload?.map ?? {}}
                 initialProperties={propertiesPayload?.data ?? []}
-                initialErrorCode={initialEdgeError || initialSourceError || conditionsPayload?.error?.code || null}
+                initialErrorCode={conditionsPayload?.error?.code || conditionPropsPayload?.error?.code || null}
             />
         </main>
     );

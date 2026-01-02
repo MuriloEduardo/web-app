@@ -49,6 +49,14 @@ export function EdgeConditionsClient({
     initialProperties,
     initialErrorCode,
 }: Props) {
+    if (!Number.isInteger(edgeId) || edgeId <= 0 || !Number.isInteger(sourceNodeId) || sourceNodeId <= 0) {
+        return (
+            <section className="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-800">
+                Parâmetros inválidos para edge/Source. Volte pelo modo grafo.
+            </section>
+        );
+    }
+
     const [conditions, setConditions] = useState<ConditionDto[]>(initialConditions);
     const [conditionProps, setConditionProps] = useState<ConditionMap>(initialConditionProps);
     const [properties, setProperties] = useState<PropertyDto[]>(initialProperties);
