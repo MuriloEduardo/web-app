@@ -601,6 +601,13 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                                     {e.label} • priority {e.priority}
                                                 </div>
                                             </div>
+                                            <div className="flex items-center gap-2">
+                                                <Link
+                                                    href={`/workflow/edges/${e.id}?source_node_id=${activeNodeId ?? ""}`}
+                                                    className="rounded border px-2 py-1 text-[11px] text-black dark:text-white"
+                                                >
+                                                    Condições
+                                                </Link>
                                             <button
                                                 type="button"
                                                 onClick={() => deleteEdge(e)}
@@ -609,6 +616,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                             >
                                                 {isDeletingEdgeId === e.id ? "…" : "Deletar"}
                                             </button>
+                                            </div>
                                         </li>
                                     ))}
                                     {outgoingEdgesForActive.length === 0 ? (

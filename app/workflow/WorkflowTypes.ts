@@ -23,3 +23,28 @@ export type Envelope<T> = {
         details?: unknown;
     };
 };
+
+export type ConditionDto = {
+    id: number;
+    edge_id: number;
+    operator: string;
+    compare_value: string;
+    created_at?: string;
+    updated_at?: string;
+};
+
+export type ConditionPropertyDto = {
+    id: number;
+    condition_id: number;
+    property_id: number;
+    created_at?: string;
+    updated_at?: string;
+};
+
+export type PropertyDto = {
+    id: number;
+    company_id?: number;
+    name?: string;
+    key?: string;
+    type?: string;
+};
