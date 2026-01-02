@@ -603,7 +603,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Link
-                                                    href={`/workflow/edges/${e.id}?source_node_id=${activeNodeId ?? ""}`}
+                                                    href={`/workflow/edges/${e.id}?source_node_id=${e.source_node_id}`}
                                                     className="rounded border px-2 py-1 text-[11px] text-black dark:text-white"
                                                 >
                                                     Condições
