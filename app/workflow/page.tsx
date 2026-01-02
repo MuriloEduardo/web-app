@@ -1,5 +1,5 @@
 import { bffGet } from "@/app/lib/bff/fetcher";
-import { NodesListClient } from "@/app/workflow/NodesListClient";
+import { WorkflowGraphClient } from "@/app/workflow/WorkflowGraphClient";
 import { headers } from "next/headers";
 
 type NodeDto = {
@@ -30,7 +30,7 @@ export default async function WorkflowPage() {
             </p>
 
             <div className="mt-6">
-                <NodesListClient
+                <WorkflowGraphClient
                     initialNodes={initialNodes}
                     initialErrorCode={initialErrorCode}
                 />
