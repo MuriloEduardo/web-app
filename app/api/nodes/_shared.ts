@@ -19,7 +19,7 @@ export function resolveServiceUrlFromEnv(resourcePath: string): string | null {
         const path = url.pathname.replace(/\/+$/, "");
 
         const basePath = path.replace(
-            /\/(nodes|companies|properties|node-properties)$/i,
+            /\/(nodes|companies|properties|node-properties|edges)$/i,
             ""
         );
 
