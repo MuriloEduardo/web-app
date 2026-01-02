@@ -40,7 +40,7 @@ export default async function WorkflowPage({ searchParams }: Props) {
             />
 
             <div className="mt-8 hidden lg:block">
-                <div className="rounded-3xl border bg-white p-4 shadow-sm">
+                <div className="rounded-3xl border p-4 shadow-sm">
                     <div className="flex items-center justify-between">
                         <div className="text-sm font-semibold text-black">Editor avançado (desktop)</div>
                         <a
