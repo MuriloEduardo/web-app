@@ -53,6 +53,79 @@ async function assertNodeBelongsToCompany(
     return { ok: true };
 }
 
+export async function GET(
+    _req: Request,
+    context: { params: Promise<{ nodeId: string }> }
+) {
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email?.trim().toLowerCase();
+    if (!email) {
+        return NextResponse.json(
+            { error: { code: "UNAUTHORIZED" } },
+            { status: 401 }
+        );
+    }
+
+    const params = await context.params;
+    const parsedNodeId = parseNodeId(params);
+    if (!parsedNodeId.ok) {
+        return NextResponse.json(
+            { error: { code: parsedNodeId.code } },
+            { status: parsedNodeId.status }
+        );
+    }
+
+    const nodesBaseUrl = resolveServiceUrlFromEnv("/nodes");
+    if (!nodesBaseUrl) {
+        return NextResponse.json(
+            { error: { code: "FLOW_MANAGER_SERVICE_URL_NOT_CONFIGURED" } },
+            { status: 500 }
+        );
+    }
+
+    const companyIdResult = await getCompanyIdForEmail(email);
+    if (!companyIdResult.ok) {
+        return NextResponse.json(
+            { error: { code: companyIdResult.code, details: companyIdResult.details } },
+            { status: companyIdResult.status }
+        );
+    }
+
+    const ownership = await assertNodeBelongsToCompany(
+        nodesBaseUrl,
+        companyIdResult.company_id,
+        parsedNodeId.nodeId
+    );
+    if (!ownership.ok) {
+        return NextResponse.json(
+            { error: { code: ownership.code, details: ownership.details } },
+            { status: ownership.status }
+        );
+    }
+
+    const nodeUrl = buildNodeIdUrl(nodesBaseUrl, parsedNodeId.nodeId);
+
+    let res: Response;
+    try {
+        res = await fetch(nodeUrl, { headers: { accept: "application/json" } });
+    } catch (error) {
+        return NextResponse.json(
+            { error: { code: "NODES_FETCH_FAILED", details: error instanceof Error ? error.message : error } },
+            { status: 502 }
+        );
+    }
+
+    const body = await readJsonOrText(res);
+    if (!res.ok) {
+        return NextResponse.json(
+            { error: { code: "NODES_FETCH_FAILED", details: body } },
+            { status: res.status }
+        );
+    }
+
+    return NextResponse.json({ data: body });
+}
+
 export async function PUT(
     req: Request,
     context: { params: Promise<{ nodeId: string }> }
