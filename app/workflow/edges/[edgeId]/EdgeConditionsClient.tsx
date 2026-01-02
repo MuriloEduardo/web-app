@@ -167,6 +167,38 @@ export function EdgeConditionsClient({
         }
     }
 
+    async function editCondition(condition: ConditionDto) {
+        const operator = window.prompt("Operador", condition.operator)?.trim() ?? "";
+        if (!operator) return;
+        const compare_value = window.prompt("Valor de comparação", condition.compare_value)?.trim() ?? "";
+        if (!compare_value) return;
+
+        setIsSaving(true);
+        try {
+            const res = await fetch(
+                `/api/conditions/${condition.id}?edge_id=${edgeId}&source_node_id=${sourceNodeId}`,
+                {
+                    method: "PUT",
+                    headers: {
+                        accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ operator, compare_value }),
+                }
+            );
+            const payload = (await res.json().catch(() => null)) as Envelope<ConditionDto> | null;
+            if (!res.ok) {
+                setErrorCode(payload?.error?.code ?? "CONDITIONS_UPDATE_FAILED");
+                return;
+            }
+            await refreshConditions();
+        } catch {
+            setErrorCode("CONDITIONS_UPDATE_FAILED");
+        } finally {
+            setIsSaving(false);
+        }
+    }
+
     async function addProperty(conditionId: number) {
         const propertyOptions = properties
             .map((p) => `${p.id} - ${p.name ?? p.key ?? "(sem nome)"}`)
@@ -287,6 +319,14 @@ export function EdgeConditionsClient({
                                     className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-50"
                                 >
                                     {isDeleting === c.id ? "..." : "Excluir"}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => editCondition(c)}
+                                    disabled={isSaving}
+                                    className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-50"
+                                >
+                                    {isSaving ? "..." : "Editar"}
                                 </button>
                             </div>
 
