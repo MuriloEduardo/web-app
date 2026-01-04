@@ -167,9 +167,9 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
             <div className="flex items-center justify-between gap-3">
                 <div>
                     <div className="text-xs text-slate-600">Workflow / Properties</div>
-                    <h1 className="text-xl font-semibold text-slate-900">Properties</h1>
+                    <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Properties</h1>
                 </div>
-                <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900">
+                <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
                     Voltar para nodes
                 </Link>
             </div>
@@ -179,14 +179,14 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
             ) : null}
 
             <div className="rounded border p-4">
-                <div className="text-sm font-semibold text-slate-900">Nova property</div>
+                <div className="text-sm font-semibold text-slate-900 dark:text-white">Nova property</div>
                 <div className="mt-3 grid gap-2 md:grid-cols-3">
                     <label className="text-xs text-slate-700">
                         Nome
                         <input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         />
                     </label>
                     <label className="text-xs text-slate-700">
@@ -194,7 +194,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                         <input
                             value={type}
                             onChange={(e) => setType(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         />
                     </label>
                     <label className="text-xs text-slate-700 md:col-span-3">
@@ -202,7 +202,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                         <input
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         />
                     </label>
                 </div>
@@ -211,7 +211,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                         type="button"
                         onClick={() => createProperty()}
                         disabled={isCreating}
-                        className="rounded border px-3 py-2 text-sm text-slate-900 disabled:opacity-60"
+                        className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60"
                     >
                         {isCreating ? "Criando..." : "Criar"}
                     </button>
@@ -221,15 +221,15 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
 
             <div className="rounded border p-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="text-sm font-semibold text-slate-900">Catálogo</div>
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">Catálogo</div>
                     <div className="flex flex-wrap items-center gap-2">
                         <input
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder="Filtrar por nome ou id"
-                            className="w-full max-w-xs rounded border px-3 py-2 text-sm text-slate-900"
+                            className="w-full max-w-xs rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         />
-                        <button type="button" onClick={() => reload()} className="rounded border px-3 py-2 text-xs text-slate-900">
+                        <button type="button" onClick={() => reload()} className="rounded border px-3 py-2 text-xs text-slate-900 dark:text-white">
                             Recarregar
                         </button>
                     </div>
@@ -249,35 +249,35 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                         <tbody>
                             {filtered.map((p) => (
                                 <tr key={p.id} className="border-t">
-                                    <td className="px-3 py-2 align-top text-slate-900">{p.id}</td>
-                                    <td className="px-3 py-2 align-top text-slate-900">
+                                    <td className="px-3 py-2 align-top text-slate-900 dark:text-white">{p.id}</td>
+                                    <td className="px-3 py-2 align-top text-slate-900 dark:text-white">
                                         {editingId === p.id ? (
                                             <input
                                                 value={editName}
                                                 onChange={(e) => setEditName(e.target.value)}
-                                                className="w-full rounded border px-2 py-1 text-sm text-slate-900"
+                                                className="w-full rounded border px-2 py-1 text-sm text-slate-900 dark:text-white"
                                             />
                                         ) : (
                                             p.name
                                         )}
                                     </td>
-                                    <td className="px-3 py-2 align-top text-slate-900">
+                                    <td className="px-3 py-2 align-top text-slate-900 dark:text-white">
                                         {editingId === p.id ? (
                                             <input
                                                 value={editType}
                                                 onChange={(e) => setEditType(e.target.value)}
-                                                className="w-full rounded border px-2 py-1 text-sm text-slate-900"
+                                                className="w-full rounded border px-2 py-1 text-sm text-slate-900 dark:text-white"
                                             />
                                         ) : (
                                             p.type
                                         )}
                                     </td>
-                                    <td className="px-3 py-2 align-top text-slate-900">
+                                    <td className="px-3 py-2 align-top text-slate-900 dark:text-white">
                                         {editingId === p.id ? (
                                             <input
                                                 value={editDescription}
                                                 onChange={(e) => setEditDescription(e.target.value)}
-                                                className="w-full rounded border px-2 py-1 text-sm text-slate-900"
+                                                className="w-full rounded border px-2 py-1 text-sm text-slate-900 dark:text-white"
                                             />
                                         ) : (
                                             p.description || ""
@@ -290,14 +290,14 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                                                     type="button"
                                                     onClick={() => saveProperty(p.id as number)}
                                                     disabled={isSaving}
-                                                    className="rounded border px-2 py-1 text-slate-900 disabled:opacity-60"
+                                                    className="rounded border px-2 py-1 text-slate-900 dark:text-white disabled:opacity-60"
                                                 >
                                                     {isSaving ? "Salvando..." : "Salvar"}
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => cancelEdit()}
-                                                    className="rounded border px-2 py-1 text-slate-900"
+                                                    className="rounded border px-2 py-1 text-slate-900 dark:text-white"
                                                 >
                                                     Cancelar
                                                 </button>
@@ -307,7 +307,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                                                 <button
                                                     type="button"
                                                     onClick={() => startEdit(p)}
-                                                    className="rounded border px-2 py-1 text-slate-900"
+                                                    className="rounded border px-2 py-1 text-slate-900 dark:text-white"
                                                 >
                                                     Editar
                                                 </button>

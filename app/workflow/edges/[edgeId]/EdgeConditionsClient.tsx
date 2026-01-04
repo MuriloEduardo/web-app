@@ -228,10 +228,10 @@ export function EdgeConditionsClient({
             <div className="flex items-center justify-between gap-3">
                 <div>
                     <div className="text-xs text-slate-600">Workflow / Edges / {edgeId} / Condições</div>
-                    <h1 className="text-xl font-semibold text-slate-900">Edge #{edgeId}</h1>
+                    <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Edge #{edgeId}</h1>
                     <div className="text-xs text-slate-600">source_node_id {sourceNodeId}</div>
                 </div>
-                <Link href={`/workflow/edges?source_node_id=${sourceNodeId}`} className="rounded border px-3 py-1 text-sm text-slate-900">
+                <Link href={`/workflow/edges?source_node_id=${sourceNodeId}`} className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
                     Voltar
                 </Link>
             </div>
@@ -243,8 +243,8 @@ export function EdgeConditionsClient({
 
             <div className="rounded border p-4">
                 <div className="flex items-center justify-between gap-2">
-                    <div className="text-sm font-semibold text-slate-900">{editingCondition ? `Editar condição #${editingCondition.id}` : "Nova condição"}</div>
-                    <button type="button" onClick={() => startNewCondition()} className="rounded border px-3 py-1 text-xs text-slate-900">
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">{editingCondition ? `Editar condição #${editingCondition.id}` : "Nova condição"}</div>
+                    <button type="button" onClick={() => startNewCondition()} className="rounded border px-3 py-1 text-xs text-slate-900 dark:text-white">
                         Limpar formulário
                     </button>
                 </div>
@@ -254,7 +254,7 @@ export function EdgeConditionsClient({
                         <input
                             value={operatorInput}
                             onChange={(e) => setOperatorInput(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                             placeholder="ex: ="
                         />
                     </label>
@@ -263,7 +263,7 @@ export function EdgeConditionsClient({
                         <input
                             value={compareInput}
                             onChange={(e) => setCompareInput(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         />
                     </label>
                 </div>
@@ -272,7 +272,7 @@ export function EdgeConditionsClient({
                         type="button"
                         onClick={() => submitCondition()}
                         disabled={isSaving}
-                        className="rounded border px-3 py-2 text-sm text-slate-900 disabled:opacity-60"
+                        className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60"
                     >
                         {isSaving ? "Salvando..." : editingCondition ? "Salvar" : "Criar"}
                     </button>
@@ -281,8 +281,8 @@ export function EdgeConditionsClient({
 
             <div className="rounded border p-4">
                 <div className="flex items-center justify-between gap-2">
-                    <div className="text-sm font-semibold text-slate-900">Condições</div>
-                    <button type="button" onClick={() => refreshConditions()} className="rounded border px-3 py-1 text-xs text-slate-900">
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">Condições</div>
+                    <button type="button" onClick={() => refreshConditions()} className="rounded border px-3 py-1 text-xs text-slate-900 dark:text-white">
                         Recarregar
                     </button>
                 </div>
@@ -298,14 +298,14 @@ export function EdgeConditionsClient({
                             <div key={c.id} className="rounded border px-3 py-3">
                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                     <div>
-                                        <div className="text-sm font-semibold text-slate-900">Condição #{c.id}</div>
+                                        <div className="text-sm font-semibold text-slate-900 dark:text-white">Condição #{c.id}</div>
                                         <div className="text-xs text-slate-600">{c.operator} • {c.compare_value}</div>
                                     </div>
                                     <div className="flex flex-wrap gap-2 text-xs">
                                         <button
                                             type="button"
                                             onClick={() => startEditCondition(c)}
-                                            className="rounded border px-2 py-1 text-slate-900"
+                                            className="rounded border px-2 py-1 text-slate-900 dark:text-white"
                                         >
                                             Editar
                                         </button>
@@ -322,14 +322,14 @@ export function EdgeConditionsClient({
 
                                 <div className="mt-3 rounded border p-3">
                                     <div className="flex flex-wrap items-center gap-2">
-                                        <div className="text-sm font-semibold text-slate-900">Properties</div>
+                                        <div className="text-sm font-semibold text-slate-900 dark:text-white">Properties</div>
                                         <select
                                             value={propertyTargetId === c.id ? selectedPropertyId : ""}
                                             onChange={(e) => {
                                                 setPropertyTargetId(c.id);
                                                 setSelectedPropertyId(e.target.value);
                                             }}
-                                            className="rounded border px-3 py-2 text-sm text-slate-900"
+                                            className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                                         >
                                             <option value="">Selecionar property</option>
                                             {properties.map((p) => (
@@ -345,7 +345,7 @@ export function EdgeConditionsClient({
                                                 addProperty(c.id);
                                             }}
                                             disabled={isSaving}
-                                            className="rounded border px-3 py-2 text-sm text-slate-900 disabled:opacity-60"
+                                            className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60"
                                         >
                                             Adicionar property
                                         </button>
@@ -359,12 +359,12 @@ export function EdgeConditionsClient({
                                             const refProp = propertiesById[p.property_id];
                                             return (
                                                 <div key={p.id ?? `${c.id}-${p.property_id}`} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
-                                                    <div className="text-slate-900">{refProp?.name || refProp?.key || `Property #${p.property_id}`}</div>
+                                                    <div className="text-slate-900 dark:text-white">{refProp?.name || refProp?.key || `Property #${p.property_id}`}</div>
                                                     <button
                                                         type="button"
                                                         onClick={() => deleteProperty(c.id, p.id!)}
                                                         disabled={isDeletingProp === p.id}
-                                                        className="rounded border px-2 py-1 text-xs text-slate-900 disabled:opacity-60"
+                                                        className="rounded border px-2 py-1 text-xs text-slate-900 dark:text-white disabled:opacity-60"
                                                     >
                                                         {isDeletingProp === p.id ? "Removendo..." : "Remover"}
                                                     </button>

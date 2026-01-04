@@ -96,14 +96,14 @@ export default async function EdgeConditionsPage({ params, searchParams }: Props
     if (initialEdgeError || initialSourceError) {
         const message = initialEdgeError ? "Edge inválida" : "Informe o source_node_id";
         return (
-            <main className="mx-auto w-full max-w-3xl px-4 py-6">
+            <main className="mx-auto w-full max-w-3xl px-4 py-6 text-slate-900 dark:text-white">
                 <div className="rounded border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-800">
                     {message}. Abra esta tela a partir da lista de edges.
                 </div>
                 <div className="mt-4 flex gap-3">
                     <a
                         href="/workflow/edges"
-                        className="rounded border px-3 py-2 text-sm text-slate-900"
+                        className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                     >
                         Voltar para edges
                     </a>
@@ -123,7 +123,7 @@ export default async function EdgeConditionsPage({ params, searchParams }: Props
                             />
                             <button
                                 type="submit"
-                                className="rounded border px-3 py-2 text-sm text-slate-900"
+                                className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                             >
                                 Ir
                             </button>
@@ -146,7 +146,7 @@ export default async function EdgeConditionsPage({ params, searchParams }: Props
     propertiesPayload = await fetchProperties(cookie);
 
     return (
-        <main className="mx-auto w-full max-w-5xl px-4 py-6 min-h-screen bg-white text-slate-900">
+        <main className="mx-auto w-full max-w-5xl px-4 py-6 min-h-screen text-slate-900 dark:text-white">
             <EdgeConditionsClient
                 edgeId={edgeId}
                 sourceNodeId={source_node_id}

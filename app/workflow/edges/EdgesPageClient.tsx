@@ -230,9 +230,9 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
             <div className="flex items-center justify-between gap-3">
                 <div>
                     <div className="text-xs text-slate-600">Workflow / Edges</div>
-                    <h1 className="text-xl font-semibold text-slate-900">Edges</h1>
+                    <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Edges</h1>
                 </div>
-                <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900">
+                <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
                     Nodes
                 </Link>
             </div>
@@ -243,7 +243,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                     <select
                         value={sourceId ?? ""}
                         onChange={(e) => handleChangeSource(e.target.value)}
-                        className="mt-1 w-full max-w-sm rounded border px-3 py-2 text-sm text-slate-900"
+                        className="mt-1 w-full max-w-sm rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                     >
                         <option value="">Selecione um node</option>
                         {nodes.map((n) => (
@@ -261,11 +261,11 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
             {sourceId ? (
                 <div className="rounded border p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                        <div className="text-sm font-semibold text-slate-900">Criar edge</div>
+                        <div className="text-sm font-semibold text-slate-900 dark:text-white">Criar edge</div>
                         <button
                             type="button"
                             onClick={() => reloadEdges(sourceId)}
-                            className="rounded border px-3 py-1 text-xs text-slate-900"
+                            className="rounded border px-3 py-1 text-xs text-slate-900 dark:text-white"
                         >
                             Recarregar
                         </button>
@@ -276,7 +276,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                             <input
                                 value={createDestination}
                                 onChange={(e) => setCreateDestination(e.target.value)}
-                                className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                                className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                                 placeholder="id"
                                 inputMode="numeric"
                             />
@@ -286,7 +286,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                             <input
                                 value={createLabel}
                                 onChange={(e) => setCreateLabel(e.target.value)}
-                                className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                                className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                             />
                         </label>
                         <label className="text-xs text-slate-700">
@@ -294,7 +294,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                             <input
                                 value={createPriority}
                                 onChange={(e) => setCreatePriority(e.target.value)}
-                                className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                                className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                                 inputMode="numeric"
                             />
                         </label>
@@ -304,7 +304,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                             type="button"
                             onClick={() => createEdge()}
                             disabled={isCreating}
-                            className="rounded border px-3 py-2 text-sm text-slate-900 disabled:opacity-60"
+                            className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60"
                         >
                             {isCreating ? "Salvando..." : "Criar"}
                         </button>
@@ -316,7 +316,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
             {sourceId ? (
                 <div className="rounded border p-4">
                     <div className="flex items-center justify-between gap-2">
-                        <div className="text-sm font-semibold text-slate-900">Edges do node {sourceId}</div>
+                        <div className="text-sm font-semibold text-slate-900 dark:text-white">Edges do node {sourceId}</div>
                         {isLoading ? <span className="text-xs text-slate-600">Carregando...</span> : null}
                     </div>
                     {edgeError ? (
@@ -337,35 +337,35 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                             <tbody>
                                 {edges.map((e) => (
                                     <tr key={e.id} className="border-t">
-                                        <td className="px-3 py-2 align-top text-slate-900">{e.id}</td>
-                                        <td className="px-3 py-2 align-top text-slate-900">
+                                        <td className="px-3 py-2 align-top text-slate-900 dark:text-white">{e.id}</td>
+                                        <td className="px-3 py-2 align-top text-slate-900 dark:text-white">
                                             {editingId === e.id ? (
                                                 <input
                                                     value={editDestination}
                                                     onChange={(ev) => setEditDestination(ev.target.value)}
-                                                    className="w-full rounded border px-2 py-1 text-sm text-slate-900"
+                                                    className="w-full rounded border px-2 py-1 text-sm text-slate-900 dark:text-white"
                                                 />
                                             ) : (
                                                 e.destination_node_id
                                             )}
                                         </td>
-                                        <td className="px-3 py-2 align-top text-slate-900">
+                                        <td className="px-3 py-2 align-top text-slate-900 dark:text-white">
                                             {editingId === e.id ? (
                                                 <input
                                                     value={editLabel}
                                                     onChange={(ev) => setEditLabel(ev.target.value)}
-                                                    className="w-full rounded border px-2 py-1 text-sm text-slate-900"
+                                                    className="w-full rounded border px-2 py-1 text-sm text-slate-900 dark:text-white"
                                                 />
                                             ) : (
                                                 e.label
                                             )}
                                         </td>
-                                        <td className="px-3 py-2 align-top text-slate-900">
+                                        <td className="px-3 py-2 align-top text-slate-900 dark:text-white">
                                             {editingId === e.id ? (
                                                 <input
                                                     value={editPriority}
                                                     onChange={(ev) => setEditPriority(ev.target.value)}
-                                                    className="w-full rounded border px-2 py-1 text-sm text-slate-900"
+                                                    className="w-full rounded border px-2 py-1 text-sm text-slate-900 dark:text-white"
                                                     inputMode="numeric"
                                                 />
                                             ) : (
@@ -379,14 +379,14 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                                                         type="button"
                                                         onClick={() => saveEdge(e.id)}
                                                         disabled={isSaving}
-                                                        className="rounded border px-2 py-1 text-slate-900 disabled:opacity-60"
+                                                        className="rounded border px-2 py-1 text-slate-900 dark:text-white disabled:opacity-60"
                                                     >
                                                         {isSaving ? "Salvando..." : "Salvar"}
                                                     </button>
                                                     <button
                                                         type="button"
                                                         onClick={() => cancelEdit()}
-                                                        className="rounded border px-2 py-1 text-slate-900"
+                                                        className="rounded border px-2 py-1 text-slate-900 dark:text-white"
                                                     >
                                                         Cancelar
                                                     </button>
@@ -395,14 +395,14 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                                                 <div className="flex flex-wrap gap-2 text-xs">
                                                     <Link
                                                         href={`/workflow/edges/${e.id}?source_node_id=${sourceId}`}
-                                                        className="rounded border px-2 py-1 text-slate-900"
+                                                        className="rounded border px-2 py-1 text-slate-900 dark:text-white"
                                                     >
                                                         Condições
                                                     </Link>
                                                     <button
                                                         type="button"
                                                         onClick={() => startEdit(e)}
-                                                        className="rounded border px-2 py-1 text-slate-900"
+                                                        className="rounded border px-2 py-1 text-slate-900 dark:text-white"
                                                     >
                                                         Editar
                                                     </button>

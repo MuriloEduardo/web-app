@@ -28,7 +28,7 @@ export default async function EdgesPage({ searchParams }: Props) {
         : { data: [], error: null };
 
     return (
-        <main className="mx-auto w-full max-w-6xl px-4 py-6 min-h-screen bg-white text-slate-900">
+        <main className="mx-auto w-full max-w-6xl px-4 py-6 min-h-screen text-slate-900 dark:text-white">
             <EdgesPageClient
                 nodes={nodes}
                 nodesErrorCode={nodesPayload.error?.code ?? null}

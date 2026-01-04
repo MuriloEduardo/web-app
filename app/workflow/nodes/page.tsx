@@ -35,13 +35,13 @@ export default async function NodesPage({ searchParams }: Props) {
         : nodes;
 
     return (
-        <main className="mx-auto w-full max-w-6xl px-4 py-6 min-h-screen bg-white text-slate-900">
+        <main className="mx-auto w-full max-w-6xl px-4 py-6 min-h-screen text-slate-900 dark:text-white">
             <div className="text-xs text-slate-600">Workflow / Nodes</div>
             <div className="mt-1 flex items-center justify-between gap-3">
-                <h1 className="text-xl font-semibold text-slate-900">Nodes</h1>
+                <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Nodes</h1>
                 <Link
                     href="/workflow/nodes/new"
-                    className="rounded border px-3 py-1 text-sm text-slate-900"
+                    className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white"
                 >
                     Novo node
                 </Link>
@@ -52,12 +52,12 @@ export default async function NodesPage({ searchParams }: Props) {
                     name="q"
                     defaultValue={query}
                     placeholder="Buscar por id ou trecho do prompt"
-                    className="w-full max-w-md rounded border px-3 py-2 text-sm text-slate-900"
+                    className="w-full max-w-md rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                 />
-                <button type="submit" className="rounded border px-3 py-2 text-sm text-slate-900">
+                <button type="submit" className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white">
                     Filtrar
                 </button>
-                <Link href="/workflow/nodes" className="rounded border px-3 py-2 text-sm text-slate-900">
+                <Link href="/workflow/nodes" className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white">
                     Limpar
                 </Link>
             </form>
@@ -81,17 +81,17 @@ export default async function NodesPage({ searchParams }: Props) {
                     <tbody>
                         {filtered.map((n) => (
                             <tr key={n.id} className="border-t">
-                                <td className="px-3 py-2 align-top text-slate-900">{n.id}</td>
-                                <td className="px-3 py-2 align-top text-slate-900">{n.prompt}</td>
+                                <td className="px-3 py-2 align-top text-slate-900 dark:text-white">{n.id}</td>
+                                <td className="px-3 py-2 align-top text-slate-900 dark:text-white">{n.prompt}</td>
                                 <td className="px-3 py-2 align-top text-slate-600">{n.updated_at ?? n.created_at ?? ""}</td>
                                 <td className="px-3 py-2 align-top">
                                     <div className="flex flex-wrap gap-2 text-xs">
-                                        <Link href={`/workflow/nodes/${n.id}`} className="rounded border px-2 py-1 text-slate-900">
+                                        <Link href={`/workflow/nodes/${n.id}`} className="rounded border px-2 py-1 text-slate-900 dark:text-white">
                                             Detalhes
                                         </Link>
                                         <Link
                                             href={`/workflow/edges?source_node_id=${n.id}`}
-                                            className="rounded border px-2 py-1 text-slate-900"
+                                            className="rounded border px-2 py-1 text-slate-900 dark:text-white"
                                         >
                                             Edges
                                         </Link>

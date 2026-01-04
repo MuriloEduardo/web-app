@@ -18,7 +18,7 @@ export default async function PropertiesPage({ searchParams }: Props) {
     const properties = Array.isArray(payload.data) ? payload.data : [];
 
     return (
-        <main className="mx-auto w-full max-w-5xl px-4 py-6 min-h-screen bg-white text-slate-900">
+        <main className="mx-auto w-full max-w-5xl px-4 py-6 min-h-screen text-slate-900 dark:text-white">
             <PropertiesPageClient
                 initialProperties={properties}
                 initialErrorCode={payload.error?.code ?? null}

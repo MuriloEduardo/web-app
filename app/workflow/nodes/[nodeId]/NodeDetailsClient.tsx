@@ -320,10 +320,10 @@ export function NodeDetailsClient({
                 <div className="flex items-start justify-between gap-3">
                     <div>
                         <div className="text-sm text-slate-600">Workflow / Nodes / {node.id}</div>
-                        <div className="text-xl font-semibold text-slate-900">Node #{node.id}</div>
+                        <div className="text-xl font-semibold text-slate-900 dark:text-white">Node #{node.id}</div>
                         <div className="text-xs text-slate-600">Atualizado: {node.updated_at ?? node.created_at ?? ""}</div>
                     </div>
-                    <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900">
+                    <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
                         Voltar
                     </Link>
                 </div>
@@ -333,7 +333,7 @@ export function NodeDetailsClient({
                     <textarea
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                        className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         rows={6}
                     />
                 </label>
@@ -342,7 +342,7 @@ export function NodeDetailsClient({
                         type="button"
                         onClick={() => saveNode()}
                         disabled={isSavingNode}
-                        className="rounded border px-3 py-1 text-sm text-slate-900 disabled:opacity-60"
+                        className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white disabled:opacity-60"
                     >
                         {isSavingNode ? "Salvando..." : "Salvar alterações"}
                     </button>
@@ -361,13 +361,13 @@ export function NodeDetailsClient({
             <div className="rounded border p-4">
                 <div className="flex items-center justify-between gap-2">
                     <div>
-                        <div className="text-sm font-semibold text-slate-900">Properties vinculadas</div>
+                        <div className="text-sm font-semibold text-slate-900 dark:text-white">Properties vinculadas</div>
                         <div className="text-xs text-slate-600">Escolha uma property e vincule ao node.</div>
                     </div>
                     <button
                         type="button"
                         onClick={() => reloadProperties()}
-                        className="rounded border px-3 py-1 text-xs text-slate-900"
+                        className="rounded border px-3 py-1 text-xs text-slate-900 dark:text-white"
                     >
                         Recarregar catálogo
                     </button>
@@ -377,7 +377,7 @@ export function NodeDetailsClient({
                     <select
                         value={selectedPropertyId}
                         onChange={(e) => setSelectedPropertyId(e.target.value)}
-                        className="min-w-[200px] rounded border px-3 py-2 text-sm text-slate-900"
+                        className="min-w-[200px] rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                     >
                         <option value="">Selecione uma property</option>
                         {availableProperties.map((p) => (
@@ -390,7 +390,7 @@ export function NodeDetailsClient({
                         type="button"
                         onClick={() => linkProperty()}
                         disabled={isLinking}
-                        className="rounded border px-3 py-2 text-sm text-slate-900 disabled:opacity-60"
+                        className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60"
                     >
                         {isLinking ? "Vinculando..." : "Vincular"}
                     </button>
@@ -407,12 +407,12 @@ export function NodeDetailsClient({
                     ) : null}
                     {linkedProps.map((p) => (
                         <div key={`${p.node_id}-${p.property_id}`} className="flex items-center justify-between px-3 py-2 text-sm">
-                            <div className="text-slate-900">Property #{p.property_id}</div>
+                            <div className="text-slate-900 dark:text-white">Property #{p.property_id}</div>
                             <button
                                 type="button"
                                 onClick={() => unlinkProperty(p.property_id)}
                                 disabled={isUnlinking === p.property_id}
-                                className="rounded border px-2 py-1 text-xs text-slate-900 disabled:opacity-60"
+                                className="rounded border px-2 py-1 text-xs text-slate-900 dark:text-white disabled:opacity-60"
                             >
                                 {isUnlinking === p.property_id ? "Removendo..." : "Remover"}
                             </button>
@@ -424,13 +424,13 @@ export function NodeDetailsClient({
             <div className="rounded border p-4">
                 <div className="flex items-center justify-between gap-2">
                     <div>
-                        <div className="text-sm font-semibold text-slate-900">Edges de saída</div>
+                        <div className="text-sm font-semibold text-slate-900 dark:text-white">Edges de saída</div>
                         <div className="text-xs text-slate-600">Crie edges a partir deste node.</div>
                     </div>
                     <button
                         type="button"
                         onClick={() => reloadEdges()}
-                        className="rounded border px-3 py-1 text-xs text-slate-900"
+                        className="rounded border px-3 py-1 text-xs text-slate-900 dark:text-white"
                     >
                         Recarregar edges
                     </button>
@@ -442,7 +442,7 @@ export function NodeDetailsClient({
                         <input
                             value={newEdgeDestination}
                             onChange={(e) => setNewEdgeDestination(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                             placeholder="node id"
                             inputMode="numeric"
                         />
@@ -452,7 +452,7 @@ export function NodeDetailsClient({
                         <input
                             value={newEdgeLabel}
                             onChange={(e) => setNewEdgeLabel(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         />
                     </label>
                     <label className="text-xs text-slate-700">
@@ -460,7 +460,7 @@ export function NodeDetailsClient({
                         <input
                             value={newEdgePriority}
                             onChange={(e) => setNewEdgePriority(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                             inputMode="numeric"
                         />
                     </label>
@@ -470,7 +470,7 @@ export function NodeDetailsClient({
                         type="button"
                         onClick={() => createEdge()}
                         disabled={isSavingEdge}
-                        className="rounded border px-3 py-2 text-sm text-slate-900 disabled:opacity-60"
+                        className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60"
                     >
                         {isSavingEdge ? "Salvando..." : "Criar edge"}
                     </button>
@@ -485,14 +485,14 @@ export function NodeDetailsClient({
                     {edgeList.map((e) => (
                         <div key={e.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
                             <div className="space-y-1">
-                                <div className="text-slate-900">Edge #{e.id}</div>
+                                <div className="text-slate-900 dark:text-white">Edge #{e.id}</div>
                                 <div className="text-slate-700">{e.label}</div>
                                 <div className="text-xs text-slate-500">destino {e.destination_node_id} • prioridade {e.priority}</div>
                             </div>
                             <div className="flex gap-2 text-xs">
                                 <Link
                                     href={`/workflow/edges/${e.id}?source_node_id=${nodeId}`}
-                                    className="rounded border px-2 py-1 text-slate-900"
+                                    className="rounded border px-2 py-1 text-slate-900 dark:text-white"
                                 >
                                     Ver condições
                                 </Link>

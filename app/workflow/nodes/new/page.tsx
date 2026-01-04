@@ -43,11 +43,11 @@ export default function NewNodePage() {
     }
 
     return (
-        <main className="mx-auto w-full max-w-3xl px-4 py-6 min-h-screen bg-white text-slate-900">
+        <main className="mx-auto w-full max-w-3xl px-4 py-6 min-h-screen text-slate-900 dark:text-white">
             <div className="text-xs text-slate-600">Workflow / Nodes / Novo</div>
             <div className="mt-1 flex items-center justify-between gap-3">
-                <h1 className="text-xl font-semibold text-slate-900">Criar node</h1>
-                <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900">
+                <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Criar node</h1>
+                <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
                     Voltar
                 </Link>
             </div>
@@ -58,7 +58,7 @@ export default function NewNodePage() {
                     <textarea
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
-                        className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900"
+                        className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         rows={6}
                         placeholder="Descreva o comportamento do node"
                     />
@@ -68,7 +68,7 @@ export default function NewNodePage() {
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="rounded border px-3 py-2 text-sm text-slate-900 disabled:opacity-60"
+                        className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60"
                     >
                         {isSubmitting ? "Salvando..." : "Salvar"}
                     </button>

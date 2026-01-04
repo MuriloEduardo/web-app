@@ -33,7 +33,7 @@ export default async function NodeDetailsPage({ params }: Props) {
         : { data: [], error: { code: "INVALID_NODE_ID" } };
 
     return (
-        <main className="mx-auto w-full max-w-6xl px-4 py-6 min-h-screen bg-white text-slate-900">
+        <main className="mx-auto w-full max-w-6xl px-4 py-6 min-h-screen text-slate-900 dark:text-white">
             <NodeDetailsClient
                 node={nodePayload.data ?? null}
                 nodeErrorCode={nodePayload.error?.code ?? null}
