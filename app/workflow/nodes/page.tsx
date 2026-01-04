@@ -28,10 +28,10 @@ export default async function NodesPage({ searchParams }: Props) {
 
     const filtered = query
         ? nodes.filter((n) => {
-              const idMatch = String(n.id) === query;
-              const promptMatch = normalize(n.prompt ?? "").includes(normalize(query));
-              return idMatch || promptMatch;
-          })
+            const idMatch = String(n.id) === query;
+            const promptMatch = normalize(n.prompt ?? "").includes(normalize(query));
+            return idMatch || promptMatch;
+        })
         : nodes;
 
     return (
