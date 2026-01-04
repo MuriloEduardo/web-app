@@ -21,13 +21,64 @@ type Props = {
     edges?: Edge[];
 };
 
+function sortNodesByEdges(nodes: Node[], edges: Edge[]): Node[] {
+    if (edges.length === 0) return nodes;
+
+    const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+    const visited = new Set<number>();
+    const sorted: Node[] = [];
+
+    // Identifica nodes que são destino (não são raiz)
+    const destinationIds = new Set(edges.map((e) => e.destination_node_id));
+
+    // Encontra nodes raiz (que não são destino de nenhuma edge)
+    const rootNodes = nodes.filter((n) => !destinationIds.has(n.id));
+
+    // Função DFS para ordenação topológica
+    function visit(nodeId: number) {
+        if (visited.has(nodeId)) return;
+        visited.add(nodeId);
+
+        const node = nodeMap.get(nodeId);
+        if (!node) return;
+
+        // Processa as edges deste node ordenadas por prioridade
+        const nodeEdges = edges
+            .filter((e) => e.source_node_id === nodeId)
+            .sort((a, b) => a.priority - b.priority);
+
+        // Visita os destinos primeiro (DFS)
+        for (const edge of nodeEdges) {
+            visit(edge.destination_node_id);
+        }
+
+        // Adiciona o node atual
+        sorted.unshift(node);
+    }
+
+    // Visita todos os nodes raiz primeiro
+    for (const rootNode of rootNodes) {
+        visit(rootNode.id);
+    }
+
+    // Adiciona nodes não visitados (nodes isolados sem edges)
+    for (const node of nodes) {
+        if (!visited.has(node.id)) {
+            sorted.push(node);
+        }
+    }
+
+    return sorted;
+}
+
 export async function GraphNodes({ edges = [] }: Props) {
     const nodes = await fetchNodes();
+    const sortedNodes = sortNodesByEdges(nodes, edges);
 
     return (
         <div>
             <div className="space-y-4">
-                {nodes.map((node) => {
+                {sortedNodes.map((node) => {
                     const nodeEdges = edges.filter((e) => e.source_node_id === node.id);
 
                     return (
