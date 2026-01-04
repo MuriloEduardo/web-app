@@ -132,6 +132,47 @@ async function assertNodeBelongsToCompany(
     return { ok: true };
 }
 
+export async function GET(_req: Request, ctx: { params: Promise<{ edgeId: string }> }) {
+    const params = await ctx.params;
+    const parsedId = parseEdgeId(params);
+    if (!parsedId.ok) {
+        return NextResponse.json({ error: { code: parsedId.code } }, { status: parsedId.status });
+    }
+
+    const edgesBaseUrl = resolveServiceUrlFromEnv("/edges");
+    if (!edgesBaseUrl) {
+        return NextResponse.json(
+            { error: { code: "FLOW_MANAGER_SERVICE_URL_NOT_CONFIGURED" } },
+            { status: 500 }
+        );
+    }
+
+    const upstreamUrl = `${edgesBaseUrl}/${encodeURIComponent(parsedId.edgeId)}`;
+
+    let res: Response;
+    try {
+        res = await fetch(upstreamUrl, {
+            method: "GET",
+            headers: { accept: "application/json" },
+        });
+    } catch (error) {
+        return NextResponse.json(
+            { error: { code: "EDGE_FETCH_FAILED", details: error instanceof Error ? error.message : error } },
+            { status: 502 }
+        );
+    }
+
+    const responseBody = await readJsonOrText(res);
+    if (!res.ok) {
+        return NextResponse.json(
+            { error: { code: "EDGE_FETCH_FAILED", details: responseBody } },
+            { status: res.status }
+        );
+    }
+
+    return NextResponse.json({ data: responseBody });
+}
+
 export async function PUT(req: Request, ctx: { params: Promise<{ edgeId: string }> }) {
     const session = await getServerSession(authOptions);
     const email = session?.user?.email?.trim().toLowerCase();

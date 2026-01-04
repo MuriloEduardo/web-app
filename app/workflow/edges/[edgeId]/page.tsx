@@ -5,18 +5,13 @@ import { bffGet } from "@/app/lib/bff/fetcher";
 import { type EdgeDto, type ConditionDto } from "@/app/workflow/WorkflowTypes";
 
 type Params = Promise<{ edgeId: string }>;
-type SearchParams = Promise<{ source_node_id?: string }>;
 
 export default async function EdgeDetailsPage({
     params,
-    searchParams,
 }: {
     params: Params;
-    searchParams: SearchParams;
 }) {
     const { edgeId } = await params;
-    const search = await searchParams;
-    const sourceNodeId = search?.source_node_id;
 
     const idNum = Number(edgeId);
     const h = await headers();
@@ -27,9 +22,9 @@ export default async function EdgeDetailsPage({
     const edge = edgePayload.data;
 
     let conditions: ConditionDto[] = [];
-    if (edge && sourceNodeId) {
+    if (edge) {
         const conditionsPayload = await bffGet<ConditionDto[]>(
-            `/api/conditions?edge_id=${idNum}&source_node_id=${sourceNodeId}`,
+            `/api/conditions?edge_id=${idNum}&source_node_id=${edge.source_node_id}`,
             opts
         );
         conditions = Array.isArray(conditionsPayload.data) ? conditionsPayload.data : [];
@@ -102,7 +97,7 @@ export default async function EdgeDetailsPage({
                     <div className="flex items-center justify-between">
                         <h2 className="text-lg font-semibold">Conditions ({conditions.length})</h2>
                         <Link
-                            href={`/workflow/edges/${edge.id}/conditions/new?source_node_id=${sourceNodeId}`}
+                            href={`/workflow/edges/${edge.id}/conditions/new?source_node_id=${edge.source_node_id}`}
                             className="rounded-lg bg-orange-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-700"
                         >
                             + Nova condition

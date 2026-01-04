@@ -16,11 +16,17 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
 
     const nodePayload = await bffGet<NodeDto>(`/api/nodes/${idNum}`, opts);
     const edgesPayload = await bffGet<EdgeDto[]>(`/api/edges?source_node_id=${idNum}`, opts);
-    const propertiesPayload = await bffGet<PropertyDto[]>(`/api/node-properties?node_id=${idNum}`, opts);
+    const nodePropertiesPayload = await bffGet<Array<{node_id: number; property_id: number}>>(`/api/node-properties?node_id=${idNum}`, opts);
+    const allPropertiesPayload = await bffGet<PropertyDto[]>(`/api/properties`, opts);
 
     const node = nodePayload.data;
     const edges = Array.isArray(edgesPayload.data) ? edgesPayload.data : [];
-    const properties = Array.isArray(propertiesPayload.data) ? propertiesPayload.data : [];
+    const nodePropertyIds = Array.isArray(nodePropertiesPayload.data) ? nodePropertiesPayload.data : [];
+    const allProperties = Array.isArray(allPropertiesPayload.data) ? allPropertiesPayload.data : [];
+    
+    // Match properties by ID
+    const propertyIds = new Set(nodePropertyIds.map(np => np.property_id));
+    const properties = allProperties.filter(p => propertyIds.has(p.id));
 
     if (!node) {
         return (
