@@ -6,6 +6,7 @@ import { type NodeDto, type EdgeDto, type PropertyDto } from "@/app/workflow/Wor
 import NodeActions from "./NodeActions";
 import DeleteEdgeButton from "./DeleteEdgeButton";
 import DeletePropertyButton from "./DeletePropertyButton";
+import EditPropertyButton from "@/app/workflow/components/EditPropertyButton";
 
 type Params = Promise<{ nodeId: string }>;
 
@@ -171,7 +172,15 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
                                             </p>
                                         )}
                                     </div>
-                                    <DeletePropertyButton nodeId={node.id} propertyId={property.id} />
+                                    <div className="flex gap-2">
+                                        <EditPropertyButton 
+                                            propertyId={property.id}
+                                            name={property.name}
+                                            type={property.type}
+                                            propertyKey={property.key}
+                                        />
+                                        <DeletePropertyButton nodeId={node.id} propertyId={property.id} />
+                                    </div>
                                 </div>
                             </div>
                         ))}

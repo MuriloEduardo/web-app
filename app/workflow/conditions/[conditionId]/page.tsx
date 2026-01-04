@@ -5,6 +5,7 @@ import { bffGet } from "@/app/lib/bff/fetcher";
 import { type ConditionDto, type PropertyDto, type EdgeDto } from "@/app/workflow/WorkflowTypes";
 import ConditionActions from "./ConditionActions";
 import DeletePropertyButton from "./DeletePropertyButton";
+import EditPropertyButton from "@/app/workflow/components/EditPropertyButton";
 
 type Params = Promise<{ conditionId: string }>;
 
@@ -136,12 +137,20 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                                             </p>
                                         )}
                                     </div>
-                                    <DeletePropertyButton
-                                        conditionId={condition.id}
-                                        edgeId={condition.edge_id}
-                                        sourceNodeId={edge.source_node_id}
-                                        propertyId={property.id}
-                                    />
+                                    <div className="flex gap-2">
+                                        <EditPropertyButton 
+                                            propertyId={property.id}
+                                            name={property.name}
+                                            type={property.type}
+                                            propertyKey={property.key}
+                                        />
+                                        <DeletePropertyButton 
+                                            conditionId={condition.id} 
+                                            edgeId={condition.edge_id}
+                                            sourceNodeId={edge.source_node_id}
+                                            propertyId={property.id} 
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         ))}
