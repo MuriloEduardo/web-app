@@ -2,7 +2,9 @@ import Link from "next/link";
 import { headers } from "next/headers";
 
 import { bffGet } from "@/app/lib/bff/fetcher";
-import { type ConditionDto, type PropertyDto } from "@/app/workflow/WorkflowTypes";
+import { type ConditionDto, type PropertyDto, type EdgeDto } from "@/app/workflow/WorkflowTypes";
+import ConditionActions from "./ConditionActions";
+import DeletePropertyButton from "./DeletePropertyButton";
 
 type Params = Promise<{ conditionId: string }>;
 
@@ -18,7 +20,13 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
     const condition = conditionPayload.data;
 
     let properties: PropertyDto[] = [];
+    let edge: EdgeDto | null = null;
+    
     if (condition) {
+        // Get the edge to find source_node_id
+        const edgePayload = await bffGet<EdgeDto>(`/api/edges/${condition.edge_id}`, opts);
+        edge = edgePayload.data;
+
         const conditionPropertiesPayload = await bffGet<Array<{ condition_id: number; property_id: number }>>(
             `/api/condition-properties?condition_id=${idNum}`,
             opts
@@ -32,7 +40,7 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
         properties = allProperties.filter(p => propertyIds.has(p.id));
     }
 
-    if (!condition) {
+    if (!condition || !edge) {
         return (
             <main className="min-h-screen px-3 py-4 sm:px-4 sm:py-6">
                 <div className="mx-auto max-w-4xl">
@@ -79,23 +87,12 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                 </div>
 
                 {/* Condition Details Card */}
-                <div className="mt-6 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800 sm:p-6">
-                    <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Detalhes da Condição</h2>
-                    <div className="mt-3 space-y-2">
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-slate-600 dark:text-slate-400">Operador:</span>
-                            <code className="rounded bg-slate-100 px-2 py-1 text-sm font-mono text-slate-900 dark:bg-slate-700 dark:text-slate-100">
-                                {condition.operator}
-                            </code>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-slate-600 dark:text-slate-400">Valor de Comparação:</span>
-                            <span className="text-sm font-medium text-slate-900 dark:text-white">
-                                {condition.compare_value}
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                <ConditionActions 
+                    conditionId={condition.id} 
+                    edgeId={condition.edge_id}
+                    operator={condition.operator}
+                    compareValue={condition.compare_value}
+                />
 
                 {/* Properties Section */}
                 <div className="mt-6">
@@ -118,22 +115,32 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                                 key={`property-${property.id}-${index}`}
                                 className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
                             >
-                                <div className="flex items-center gap-2">
-                                    <span className="rounded bg-purple-100 px-2 py-0.5 text-xs font-mono font-semibold text-purple-700 dark:bg-purple-900 dark:text-purple-300">
-                                        #{property.id}
-                                    </span>
-                                    <span className="font-semibold text-slate-900 dark:text-white">
-                                        {property.name}
-                                    </span>
-                                    <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-700 dark:text-slate-400">
-                                        {property.type}
-                                    </span>
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="rounded bg-purple-100 px-2 py-0.5 text-xs font-mono font-semibold text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                                                #{property.id}
+                                            </span>
+                                            <span className="font-semibold text-slate-900 dark:text-white">
+                                                {property.name}
+                                            </span>
+                                            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-700 dark:text-slate-400">
+                                                {property.type}
+                                            </span>
+                                        </div>
+                                        {property.key && (
+                                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                Key: {property.key}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <DeletePropertyButton 
+                                        conditionId={condition.id} 
+                                        edgeId={condition.edge_id}
+                                        sourceNodeId={edge.source_node_id}
+                                        propertyId={property.id} 
+                                    />
                                 </div>
-                                {property.key && (
-                                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                        Key: {property.key}
-                                    </p>
-                                )}
                             </div>
                         ))}
                         {properties.length === 0 ? (
