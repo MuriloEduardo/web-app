@@ -30,12 +30,12 @@ export default function Modal({ open, title, children, onClose, footer }: Props)
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+                        className="rounded px-2 py-1 text-xs text-slate-500 hover:bg-slate-100 dark:text-gray-300 dark:hover:bg-slate-800"
                     >
                         Fechar
                     </button>
                 </div>
-                <div className="px-4 py-3 text-sm text-slate-800 dark:text-slate-200">{children}</div>
+                <div className="px-4 py-3 text-sm text-gray-100 dark:text-slate-200">{children}</div>
                 {footer ? <div className="flex justify-end gap-2 border-t border-slate-200 px-4 py-3 dark:border-slate-800">{footer}</div> : null}
             </div>
         </div>

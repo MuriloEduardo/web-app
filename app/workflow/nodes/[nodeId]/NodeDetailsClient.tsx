@@ -310,7 +310,7 @@ export function NodeDetailsClient({
 
     if (!node) {
         return (
-            <div className="rounded border p-3 text-sm text-slate-700">Node não encontrado.</div>
+            <div className="rounded border p-3 text-sm text-gray-100">Node não encontrado.</div>
         );
     }
 
@@ -319,16 +319,16 @@ export function NodeDetailsClient({
             <div className="rounded border p-4">
                 <div className="flex items-start justify-between gap-3">
                     <div>
-                        <div className="text-sm text-slate-600">Workflow / Nodes / {node.id}</div>
+                        <div className="text-sm text-slate-500 dark:text-gray-300">Workflow / Nodes / {node.id}</div>
                         <div className="text-xl font-semibold text-slate-900 dark:text-white">Node #{node.id}</div>
-                        <div className="text-xs text-slate-600">Atualizado: {node.updated_at ?? node.created_at ?? ""}</div>
+                        <div className="text-xs text-slate-500 dark:text-gray-300">Atualizado: {node.updated_at ?? node.created_at ?? ""}</div>
                     </div>
                     <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
                         Voltar
                     </Link>
                 </div>
 
-                <label className="mt-4 block text-sm font-medium text-slate-800">
+                <label className="mt-4 block text-sm font-medium text-gray-100">
                     Prompt
                     <textarea
                         value={prompt}
@@ -362,7 +362,7 @@ export function NodeDetailsClient({
                 <div className="flex items-center justify-between gap-2">
                     <div>
                         <div className="text-sm font-semibold text-slate-900 dark:text-white">Properties vinculadas</div>
-                        <div className="text-xs text-slate-600">Escolha uma property e vincule ao node.</div>
+                        <div className="text-xs text-slate-500 dark:text-gray-300">Escolha uma property e vincule ao node.</div>
                     </div>
                     <button
                         type="button"
@@ -403,7 +403,7 @@ export function NodeDetailsClient({
 
                 <div className="mt-3 divide-y rounded border">
                     {linkedProps.length === 0 ? (
-                        <div className="px-3 py-3 text-sm text-slate-600">Nenhuma property vinculada.</div>
+                        <div className="px-3 py-3 text-sm text-slate-500 dark:text-gray-300">Nenhuma property vinculada.</div>
                     ) : null}
                     {linkedProps.map((p) => (
                         <div key={`${p.node_id}-${p.property_id}`} className="flex items-center justify-between px-3 py-2 text-sm">
@@ -425,7 +425,7 @@ export function NodeDetailsClient({
                 <div className="flex items-center justify-between gap-2">
                     <div>
                         <div className="text-sm font-semibold text-slate-900 dark:text-white">Edges de saída</div>
-                        <div className="text-xs text-slate-600">Crie edges a partir deste node.</div>
+                        <div className="text-xs text-slate-500 dark:text-gray-300">Crie edges a partir deste node.</div>
                     </div>
                     <button
                         type="button"
@@ -437,7 +437,7 @@ export function NodeDetailsClient({
                 </div>
 
                 <div className="mt-3 grid gap-2 md:grid-cols-4">
-                    <label className="text-xs text-slate-700">
+                    <label className="text-xs text-gray-100">
                         Destino
                         <input
                             value={newEdgeDestination}
@@ -447,7 +447,7 @@ export function NodeDetailsClient({
                             inputMode="numeric"
                         />
                     </label>
-                    <label className="text-xs text-slate-700 md:col-span-2">
+                    <label className="text-xs text-gray-100 md:col-span-2">
                         Label
                         <input
                             value={newEdgeLabel}
@@ -455,7 +455,7 @@ export function NodeDetailsClient({
                             className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         />
                     </label>
-                    <label className="text-xs text-slate-700">
+                    <label className="text-xs text-gray-100">
                         Prioridade
                         <input
                             value={newEdgePriority}
@@ -480,13 +480,13 @@ export function NodeDetailsClient({
 
                 <div className="mt-3 divide-y rounded border">
                     {edgeList.length === 0 ? (
-                        <div className="px-3 py-3 text-sm text-slate-600">Nenhuma edge cadastrada.</div>
+                        <div className="px-3 py-3 text-sm text-slate-500 dark:text-gray-300">Nenhuma edge cadastrada.</div>
                     ) : null}
                     {edgeList.map((e) => (
                         <div key={e.id} className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 text-sm">
                             <div className="space-y-1">
                                 <div className="text-slate-900 dark:text-white">Edge #{e.id}</div>
-                                <div className="text-slate-700">{e.label}</div>
+                                <div className="text-gray-100">{e.label}</div>
                                 <div className="text-xs text-slate-500">destino {e.destination_node_id} • prioridade {e.priority}</div>
                             </div>
                             <div className="flex gap-2 text-xs">

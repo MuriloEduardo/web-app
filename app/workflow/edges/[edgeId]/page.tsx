@@ -109,7 +109,7 @@ export default async function EdgeConditionsPage({ params, searchParams }: Props
                     </a>
                     {initialEdgeError ? null : (
                         <form className="flex items-center gap-2" method="get">
-                            <label className="text-sm text-slate-700" htmlFor="source_node_id">
+                            <label className="text-sm text-gray-100" htmlFor="source_node_id">
                                 source_node_id
                             </label>
                             <input

@@ -43,7 +43,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
                         <button
                             type="button"
                             onClick={() => handleClose(false)}
-                            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                            className="rounded border border-slate-300 px-3 py-1 text-sm text-gray-100 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                         >
                             Cancelar
                         </button>

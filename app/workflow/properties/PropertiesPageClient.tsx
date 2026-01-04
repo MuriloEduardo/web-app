@@ -166,7 +166,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
         <section className="space-y-5">
             <div className="flex items-center justify-between gap-3">
                 <div>
-                    <div className="text-xs text-slate-600">Workflow / Properties</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-300">Workflow / Properties</div>
                     <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Properties</h1>
                 </div>
                 <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
@@ -181,7 +181,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
             <div className="rounded border p-4">
                 <div className="text-sm font-semibold text-slate-900 dark:text-white">Nova property</div>
                 <div className="mt-3 grid gap-2 md:grid-cols-3">
-                    <label className="text-xs text-slate-700">
+                    <label className="text-xs text-gray-100">
                         Nome
                         <input
                             value={name}
@@ -189,7 +189,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                             className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         />
                     </label>
-                    <label className="text-xs text-slate-700">
+                    <label className="text-xs text-gray-100">
                         Tipo
                         <input
                             value={type}
@@ -197,7 +197,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                             className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                         />
                     </label>
-                    <label className="text-xs text-slate-700 md:col-span-3">
+                    <label className="text-xs text-gray-100 md:col-span-3">
                         Descrição (opcional)
                         <input
                             value={description}
@@ -237,7 +237,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
 
                 <div className="mt-3 overflow-hidden rounded border">
                     <table className="w-full text-sm">
-                        <thead className="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                        <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500 dark:text-gray-300">
                             <tr>
                                 <th className="px-3 py-2">ID</th>
                                 <th className="px-3 py-2">Nome</th>
@@ -326,7 +326,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                             ))}
                             {filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-3 py-6 text-center text-sm text-slate-600">
+                                    <td colSpan={5} className="px-3 py-6 text-center text-sm text-slate-500 dark:text-gray-300">
                                         Nenhuma property encontrada.
                                     </td>
                                 </tr>

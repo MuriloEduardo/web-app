@@ -44,7 +44,7 @@ export default function NewNodePage() {
 
     return (
         <main className="mx-auto w-full max-w-3xl px-4 py-6 min-h-screen text-slate-900 dark:text-white">
-            <div className="text-xs text-slate-600">Workflow / Nodes / Novo</div>
+            <div className="text-xs text-slate-500 dark:text-gray-300">Workflow / Nodes / Novo</div>
             <div className="mt-1 flex items-center justify-between gap-3">
                 <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Criar node</h1>
                 <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
@@ -53,7 +53,7 @@ export default function NewNodePage() {
             </div>
 
             <form onSubmit={handleSubmit} className="mt-6 space-y-3">
-                <label className="block text-sm font-medium text-slate-800">
+                <label className="block text-sm font-medium text-gray-100">
                     Prompt
                     <textarea
                         value={prompt}

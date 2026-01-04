@@ -227,9 +227,9 @@ export function EdgeConditionsClient({
         <section className="space-y-4">
             <div className="flex items-center justify-between gap-3">
                 <div>
-                    <div className="text-xs text-slate-600">Workflow / Edges / {edgeId} / Condições</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-300">Workflow / Edges / {edgeId} / Condições</div>
                     <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Edge #{edgeId}</h1>
-                    <div className="text-xs text-slate-600">source_node_id {sourceNodeId}</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-300">source_node_id {sourceNodeId}</div>
                 </div>
                 <Link href={`/workflow/edges?source_node_id=${sourceNodeId}`} className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
                     Voltar
@@ -239,7 +239,7 @@ export function EdgeConditionsClient({
             {errorCode ? (
                 <div className="rounded border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800">Erro: {errorCode}</div>
             ) : null}
-            {isLoading ? <div className="text-xs text-slate-600">Carregando...</div> : null}
+            {isLoading ? <div className="text-xs text-slate-500 dark:text-gray-300">Carregando...</div> : null}
 
             <div className="rounded border p-4">
                 <div className="flex items-center justify-between gap-2">
@@ -249,7 +249,7 @@ export function EdgeConditionsClient({
                     </button>
                 </div>
                 <div className="mt-3 grid gap-2 md:grid-cols-2">
-                    <label className="text-xs text-slate-700">
+                    <label className="text-xs text-gray-100">
                         Operador
                         <input
                             value={operatorInput}
@@ -258,7 +258,7 @@ export function EdgeConditionsClient({
                             placeholder="ex: ="
                         />
                     </label>
-                    <label className="text-xs text-slate-700">
+                    <label className="text-xs text-gray-100">
                         Valor de comparação
                         <input
                             value={compareInput}
@@ -288,9 +288,9 @@ export function EdgeConditionsClient({
                 </div>
 
                 <div className="mt-3 space-y-3">
-                    {sortedConditions.length === 0 ? (
-                        <div className="rounded border border-dashed px-3 py-4 text-sm text-slate-600">Nenhuma condição cadastrada.</div>
-                    ) : null}
+                        {sortedConditions.length === 0 ? (
+                            <div className="rounded border border-dashed px-3 py-4 text-sm text-slate-500 dark:text-gray-300">Nenhuma condição cadastrada.</div>
+                        ) : null}
 
                     {sortedConditions.map((c) => {
                         const props = conditionProps[c.id] ?? [];
@@ -299,7 +299,7 @@ export function EdgeConditionsClient({
                                 <div className="flex flex-wrap items-center justify-between gap-2">
                                     <div>
                                         <div className="text-sm font-semibold text-slate-900 dark:text-white">Condição #{c.id}</div>
-                                        <div className="text-xs text-slate-600">{c.operator} • {c.compare_value}</div>
+                                        <div className="text-xs text-slate-500 dark:text-gray-300">{c.operator} • {c.compare_value}</div>
                                     </div>
                                     <div className="flex flex-wrap gap-2 text-xs">
                                         <button
@@ -353,7 +353,7 @@ export function EdgeConditionsClient({
 
                                     <div className="mt-2 divide-y rounded border">
                                         {props.length === 0 ? (
-                                            <div className="px-3 py-2 text-sm text-slate-600">Nenhuma property vinculada.</div>
+                                            <div className="px-3 py-2 text-sm text-slate-500 dark:text-gray-300">Nenhuma property vinculada.</div>
                                         ) : null}
                                         {props.map((p) => {
                                             const refProp = propertiesById[p.property_id];

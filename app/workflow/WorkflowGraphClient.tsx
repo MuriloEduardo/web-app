@@ -436,7 +436,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                     </div>
                 </div>
 
-                <div className="text-xs text-slate-600 dark:text-slate-300">
+                <div className="text-xs text-slate-600 dark:text-gray-300">
                     {nodes.length} node(s) • {allEdges.length} edge(s)
                     {graphError ? ` • erro: ${graphError}` : ""}
                     {connectingFromNodeId ? " • modo: criando edge (ESC cancela)" : ""}
@@ -567,9 +567,9 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                         </button>
                                         <div className="flex items-center justify-between gap-2 text-xs">
                                             <div className="font-semibold">Node #{n.id}</div>
-                                            <div className="text-[10px] text-slate-500 dark:text-slate-300">{n.updated_at ?? n.created_at ?? ""}</div>
+                                            <div className="text-[10px] text-slate-500 dark:text-gray-300">{n.updated_at ?? n.created_at ?? ""}</div>
                                         </div>
-                                        <div className="mt-1 text-xs text-slate-700 line-clamp-2 dark:text-slate-200">
+                                        <div className="mt-1 text-xs text-gray-100 line-clamp-2 dark:text-slate-200">
                                             {preview(n.prompt)}
                                         </div>
                                         <div className="mt-2 flex items-center justify-between gap-2 text-[11px]">
@@ -580,7 +580,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                             >
                                                 Propriedades
                                             </Link>
-                                            <div className="text-slate-500 dark:text-slate-300">{connectingFromNodeId === n.id ? "Selecionar destino…" : ""}</div>
+                                            <div className="text-slate-500 dark:text-gray-300">{connectingFromNodeId === n.id ? "Selecionar destino…" : ""}</div>
                                         </div>
                                     </div>
                                 );
@@ -598,17 +598,17 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                 title="Criar novo node"
                             >
                                 <div className="font-semibold">{isCreatingNode ? "Criando…" : "+ Novo node"}</div>
-                                <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">Ao lado do último node</div>
+                                <div className="mt-1 text-xs text-slate-600 dark:text-gray-300">Ao lado do último node</div>
                             </button>
                         </div>
                     </div>
 
                     <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
                         <div className="text-sm font-semibold">Edge(s) do node</div>
-                        <div className="text-xs text-slate-600 dark:text-slate-300">{activeNodeId ? `Node #${activeNodeId}` : "Selecione um node"}</div>
+                        <div className="text-xs text-slate-600 dark:text-gray-300">{activeNodeId ? `Node #${activeNodeId}` : "Selecione um node"}</div>
 
                         {activeNodeId ? (
-                            <div className="mt-2 space-y-2 text-xs text-slate-700 dark:text-slate-200">
+                            <div className="mt-2 space-y-2 text-xs text-gray-100 dark:text-slate-200">
                                 <div>Clique no botão “+” do node para criar uma edge.</div>
 
                                 <ul className="divide-y divide-slate-200 overflow-hidden rounded border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
@@ -616,7 +616,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                         <li key={e.id} className="flex items-center justify-between gap-2 px-2 py-2">
                                             <div className="min-w-0">
                                                 <div className="truncate font-semibold">→ Node #{e.destination_node_id}</div>
-                                                <div className="truncate text-[11px] text-slate-500 dark:text-slate-300">{e.label} • priority {e.priority}</div>
+                                                <div className="truncate text-[11px] text-slate-500 dark:text-gray-300">{e.label} • priority {e.priority}</div>
                                             </div>
                                             <div className="flex items-center gap-2 text-[11px]">
                                                 <Link
@@ -636,13 +636,13 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                             </div>
                                         </li>
                                     ))}
-                                    {outgoingEdgesForActive.length === 0 ? <li className="px-2 py-2 text-slate-500 dark:text-slate-300">Nenhuma edge.</li> : null}
+                                    {outgoingEdgesForActive.length === 0 ? <li className="px-2 py-2 text-slate-500 dark:text-gray-300">Nenhuma edge.</li> : null}
                                 </ul>
 
                                 {isCreatingEdge ? <div>Criando edge…</div> : null}
                             </div>
                         ) : (
-                            <div className="mt-2 text-xs text-slate-500 dark:text-slate-300">Clique em um node para ver as edges.</div>
+                            <div className="mt-2 text-xs text-slate-500 dark:text-gray-300">Clique em um node para ver as edges.</div>
                         )}
                     </div>
                 </div>
@@ -657,7 +657,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                         <button
                             type="button"
                             onClick={() => setNodeModalOpen(false)}
-                            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                            className="rounded border border-slate-300 px-3 py-1 text-sm text-gray-100 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                         >
                             Cancelar
                         </button>
@@ -673,7 +673,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                 }
             >
                 <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Prompt</label>
+                    <label className="text-xs font-semibold text-gray-100 dark:text-slate-200">Prompt</label>
                     <textarea
                         value={nodePrompt}
                         onChange={(e) => setNodePrompt(e.target.value)}
@@ -706,7 +706,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                 setEdgePriority("0");
                                 setCreateEdgeError(null);
                             }}
-                            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                            className="rounded border border-slate-300 px-3 py-1 text-sm text-gray-100 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
                         >
                             Cancelar
                         </button>
@@ -723,7 +723,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
             >
                 <div className="space-y-3">
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Label</label>
+                        <label className="text-xs font-semibold text-gray-100 dark:text-slate-200">Label</label>
                         <input
                             value={edgeLabel}
                             onChange={(e) => setEdgeLabel(e.target.value)}
@@ -732,7 +732,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                         />
                     </div>
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Prioridade (inteiro)</label>
+                        <label className="text-xs font-semibold text-gray-100 dark:text-slate-200">Prioridade (inteiro)</label>
                         <input
                             value={edgePriority}
                             onChange={(e) => setEdgePriority(e.target.value)}

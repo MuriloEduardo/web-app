@@ -229,7 +229,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
         <section className="space-y-5">
             <div className="flex items-center justify-between gap-3">
                 <div>
-                    <div className="text-xs text-slate-600">Workflow / Edges</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-300">Workflow / Edges</div>
                     <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Edges</h1>
                 </div>
                 <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
@@ -238,7 +238,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
             </div>
 
             <div className="rounded border p-4">
-                <label className="text-sm font-medium text-slate-800">
+                <label className="text-sm font-medium text-gray-100">
                     Node de origem
                     <select
                         value={sourceId ?? ""}
@@ -271,7 +271,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                         </button>
                     </div>
                     <div className="mt-3 grid gap-2 md:grid-cols-4">
-                        <label className="text-xs text-slate-700">
+                        <label className="text-xs text-gray-100">
                             Destino
                             <input
                                 value={createDestination}
@@ -281,7 +281,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                                 inputMode="numeric"
                             />
                         </label>
-                        <label className="text-xs text-slate-700 md:col-span-2">
+                        <label className="text-xs text-gray-100 md:col-span-2">
                             Label
                             <input
                                 value={createLabel}
@@ -289,7 +289,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                                 className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
                             />
                         </label>
-                        <label className="text-xs text-slate-700">
+                        <label className="text-xs text-gray-100">
                             Prioridade
                             <input
                                 value={createPriority}
@@ -317,7 +317,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                 <div className="rounded border p-4">
                     <div className="flex items-center justify-between gap-2">
                         <div className="text-sm font-semibold text-slate-900 dark:text-white">Edges do node {sourceId}</div>
-                        {isLoading ? <span className="text-xs text-slate-600">Carregando...</span> : null}
+                        {isLoading ? <span className="text-xs text-slate-500 dark:text-gray-300">Carregando...</span> : null}
                     </div>
                     {edgeError ? (
                         <div className="mt-2 text-sm text-red-700">Erro: {edgeError}</div>
@@ -325,7 +325,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
 
                     <div className="mt-3 overflow-hidden rounded border">
                         <table className="w-full text-sm">
-                            <thead className="bg-slate-100 text-left text-xs uppercase text-slate-600">
+                            <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500 dark:text-gray-300">
                                 <tr>
                                     <th className="px-3 py-2">ID</th>
                                     <th className="px-3 py-2">Destino</th>
@@ -421,7 +421,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                                 ))}
                                 {edges.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="px-3 py-6 text-center text-sm text-slate-600">
+                                        <td colSpan={5} className="px-3 py-6 text-center text-sm text-slate-500 dark:text-gray-300">
                                             Nenhuma edge para este node.
                                         </td>
                                     </tr>
@@ -431,7 +431,7 @@ export function EdgesPageClient({ nodes, nodesErrorCode, selectedSourceId, initi
                     </div>
                 </div>
             ) : (
-                <div className="rounded border p-4 text-sm text-slate-700">Selecione um node para ver edges.</div>
+                <div className="rounded border p-4 text-sm text-gray-100">Selecione um node para ver edges.</div>
             )}
         </section>
     );
