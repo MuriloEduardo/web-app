@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation";
+import Nodes from "./Nodes";
 
 export default function WorkflowPage() {
-    redirect("/workflow/nodes");
+    return <main>
+        <Nodes />
+    </main>;
 }
