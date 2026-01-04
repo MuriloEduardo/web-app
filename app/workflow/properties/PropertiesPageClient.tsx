@@ -163,71 +163,71 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
     }
 
     return (
-        <section className="space-y-5">
-            <div className="flex items-center justify-between gap-3">
+        <section className="space-y-4 sm:space-y-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                 <div>
                     <div className="text-xs text-slate-500 dark:text-gray-300">Workflow / Properties</div>
-                    <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Properties</h1>
+                    <h1 className="text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">Properties</h1>
                 </div>
-                <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
+                <Link href="/workflow/nodes" className="rounded border px-3 py-1.5 text-center text-sm text-slate-900 dark:text-white">
                     Voltar para nodes
                 </Link>
             </div>
 
             {errorCode ? (
-                <div className="rounded border border-rose-300 bg-rose-50 px-3 py-2 text-sm text-rose-800">Erro: {errorCode}</div>
+                <div className="rounded border border-rose-300 bg-rose-50 px-3 py-2 text-xs text-rose-800 sm:text-sm">Erro: {errorCode}</div>
             ) : null}
 
-            <div className="rounded border p-4">
+            <div className="rounded border p-3 sm:p-4">
                 <div className="text-sm font-semibold text-slate-900 dark:text-white">Nova property</div>
-                <div className="mt-3 grid gap-2 md:grid-cols-3">
-                    <label className="text-xs text-gray-100">
+                <div className="mt-3 grid gap-2 sm:grid-cols-2 md:grid-cols-3">
+                    <label className="text-xs text-gray-700 dark:text-gray-100">
                         Nome
                         <input
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
+                            className="mt-1 w-full rounded border px-2 py-2 text-sm text-slate-900 dark:text-white sm:px-3"
                         />
                     </label>
-                    <label className="text-xs text-gray-100">
+                    <label className="text-xs text-gray-700 dark:text-gray-100">
                         Tipo
                         <input
                             value={type}
                             onChange={(e) => setType(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
+                            className="mt-1 w-full rounded border px-2 py-2 text-sm text-slate-900 dark:text-white sm:px-3"
                         />
                     </label>
-                    <label className="text-xs text-gray-100 md:col-span-3">
+                    <label className="text-xs text-gray-700 dark:text-gray-100 sm:col-span-2 md:col-span-3">
                         Descrição (opcional)
                         <input
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            className="mt-1 w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
+                            className="mt-1 w-full rounded border px-2 py-2 text-sm text-slate-900 dark:text-white sm:px-3"
                         />
                     </label>
                 </div>
-                <div className="mt-2 flex items-center gap-2">
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
                     <button
                         type="button"
                         onClick={() => createProperty()}
                         disabled={isCreating}
-                        className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60"
+                        className="w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60 sm:w-auto"
                     >
                         {isCreating ? "Criando..." : "Criar"}
                     </button>
-                    {createError ? <span className="text-sm text-red-700">Erro: {createError}</span> : null}
+                    {createError ? <span className="text-xs text-red-700 sm:text-sm">Erro: {createError}</span> : null}
                 </div>
             </div>
 
-            <div className="rounded border p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="rounded border p-3 sm:p-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                     <div className="text-sm font-semibold text-slate-900 dark:text-white">Catálogo</div>
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                         <input
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                             placeholder="Filtrar por nome ou id"
-                            className="w-full max-w-xs rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
+                            className="w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white sm:max-w-xs"
                         />
                         <button type="button" onClick={() => reload()} className="rounded border px-3 py-2 text-xs text-slate-900 dark:text-white">
                             Recarregar
@@ -235,15 +235,15 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                     </div>
                 </div>
 
-                <div className="mt-3 overflow-hidden rounded border">
-                    <table className="w-full text-sm">
+                <div className="mt-3 overflow-x-auto rounded border">
+                    <table className="w-full min-w-[640px] text-sm">
                         <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500 dark:text-gray-300">
                             <tr>
-                                <th className="px-3 py-2">ID</th>
-                                <th className="px-3 py-2">Nome</th>
-                                <th className="px-3 py-2">Tipo</th>
-                                <th className="px-3 py-2">Descrição</th>
-                                <th className="px-3 py-2">Ações</th>
+                                <th className="px-2 py-2 sm:px-3">ID</th>
+                                <th className="px-2 py-2 sm:px-3">Nome</th>
+                                <th className="px-2 py-2 sm:px-3">Tipo</th>
+                                <th className="px-2 py-2 sm:px-3">Descrição</th>
+                                <th className="px-2 py-2 sm:px-3">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -283,31 +283,31 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                                             p.description || ""
                                         )}
                                     </td>
-                                    <td className="px-3 py-2 align-top">
+                                    <td className="px-2 py-2 align-top sm:px-3">
                                         {editingId === p.id ? (
-                                            <div className="flex flex-wrap gap-2 text-xs">
+                                            <div className="flex flex-col gap-1 text-xs sm:flex-row sm:flex-wrap sm:gap-2">
                                                 <button
                                                     type="button"
                                                     onClick={() => saveProperty(p.id as number)}
                                                     disabled={isSaving}
-                                                    className="rounded border px-2 py-1 text-slate-900 dark:text-white disabled:opacity-60"
+                                                    className="rounded border px-2 py-1 text-center text-slate-900 dark:text-white disabled:opacity-60"
                                                 >
                                                     {isSaving ? "Salvando..." : "Salvar"}
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => cancelEdit()}
-                                                    className="rounded border px-2 py-1 text-slate-900 dark:text-white"
+                                                    className="rounded border px-2 py-1 text-center text-slate-900 dark:text-white"
                                                 >
                                                     Cancelar
                                                 </button>
                                             </div>
                                         ) : (
-                                            <div className="flex flex-wrap gap-2 text-xs">
+                                            <div className="flex flex-col gap-1 text-xs sm:flex-row sm:flex-wrap sm:gap-2">
                                                 <button
                                                     type="button"
                                                     onClick={() => startEdit(p)}
-                                                    className="rounded border px-2 py-1 text-slate-900 dark:text-white"
+                                                    className="rounded border px-2 py-1 text-center text-slate-900 dark:text-white"
                                                 >
                                                     Editar
                                                 </button>
@@ -315,7 +315,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                                                     type="button"
                                                     onClick={() => deleteProperty(p.id as number)}
                                                     disabled={deleteId === p.id}
-                                                    className="rounded border border-red-300 px-2 py-1 text-red-700 disabled:opacity-60"
+                                                    className="rounded border border-red-300 px-2 py-1 text-center text-red-700 disabled:opacity-60"
                                                 >
                                                     {deleteId === p.id ? "Removendo..." : "Excluir"}
                                                 </button>
@@ -326,7 +326,7 @@ export function PropertiesPageClient({ initialProperties, initialErrorCode, init
                             ))}
                             {filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-3 py-6 text-center text-sm text-slate-500 dark:text-gray-300">
+                                    <td colSpan={5} className="px-3 py-6 text-center text-xs text-slate-500 dark:text-gray-300 sm:text-sm">
                                         Nenhuma property encontrada.
                                     </td>
                                 </tr>

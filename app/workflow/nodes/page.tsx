@@ -4,110 +4,67 @@ import { headers } from "next/headers";
 import { bffGet } from "@/app/lib/bff/fetcher";
 import { type NodeDto } from "@/app/workflow/WorkflowTypes";
 
-type Props = {
-    searchParams: Promise<{ q?: string }>;
-};
-
-function normalize(text: string) {
-    return text.normalize("NFKD").toLowerCase();
-}
-
-export default async function NodesPage({ searchParams }: Props) {
+export default async function NodesPage() {
     const h = await headers();
     const cookie = h.get("cookie");
-    const awaitedSearch = await searchParams;
-    const query = awaitedSearch?.q?.trim() ?? "";
+    const opts = cookie ? { headers: { cookie } } : undefined;
 
-    const payload = await bffGet<NodeDto[]>(
-        "/api/nodes",
-        cookie ? { headers: { cookie } } : undefined
-    );
-
+    const payload = await bffGet<NodeDto[]>("/api/nodes", opts);
     const nodes = Array.isArray(payload.data) ? payload.data : [];
     const errorCode = payload.error?.code ?? null;
 
-    const filtered = query
-        ? nodes.filter((n) => {
-            const idMatch = String(n.id) === query;
-            const promptMatch = normalize(n.prompt ?? "").includes(normalize(query));
-            return idMatch || promptMatch;
-        })
-        : nodes;
-
     return (
-        <main className="mx-auto w-full max-w-6xl px-4 py-6 min-h-screen text-slate-900 dark:text-white">
-            <div className="text-xs text-slate-500 dark:text-gray-300">Workflow / Nodes</div>
-            <div className="mt-1 flex items-center justify-between gap-3">
-                <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Nodes</h1>
-                <Link
-                    href="/workflow/nodes/new"
-                    className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white"
-                >
-                    Novo node
-                </Link>
-            </div>
-
-            <form className="mt-4 flex flex-wrap items-center gap-2" method="get">
-                <input
-                    name="q"
-                    defaultValue={query}
-                    placeholder="Buscar por id ou trecho do prompt"
-                    className="w-full max-w-md rounded border px-3 py-2 text-sm text-slate-900 dark:text-white"
-                />
-                <button type="submit" className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white">
-                    Filtrar
-                </button>
-                <Link href="/workflow/nodes" className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white">
-                    Limpar
-                </Link>
-            </form>
-
-            {errorCode ? (
-                <div className="mt-4 rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
-                    Erro ao carregar nodes: {errorCode}
+        <main className="min-h-screen px-3 py-4 text-slate-900 dark:text-white sm:px-4 sm:py-6">
+            <div className="mx-auto w-full max-w-5xl">
+                <div className="text-xs text-slate-500 dark:text-gray-300">Workflow / Nodes</div>
+                <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    <h1 className="text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">Nodes</h1>
+                    <Link
+                        href="/workflow"
+                        className="rounded-lg border border-slate-300 px-4 py-2 text-center text-sm hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-800"
+                    >
+                        ← Voltar
+                    </Link>
                 </div>
-            ) : null}
 
-            <div className="mt-4 overflow-hidden rounded border">
-                <table className="w-full text-sm">
-                    <thead className="bg-slate-100 text-left text-xs uppercase text-slate-500 dark:text-gray-300">
-                        <tr>
-                            <th className="px-3 py-2">ID</th>
-                            <th className="px-3 py-2">Prompt</th>
-                            <th className="px-3 py-2">Atualizado</th>
-                            <th className="px-3 py-2">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filtered.map((n) => (
-                            <tr key={n.id} className="border-t">
-                                <td className="px-3 py-2 align-top text-slate-900 dark:text-white">{n.id}</td>
-                                <td className="px-3 py-2 align-top text-slate-900 dark:text-white">{n.prompt}</td>
-                                <td className="px-3 py-2 align-top text-slate-500 dark:text-gray-300">{n.updated_at ?? n.created_at ?? ""}</td>
-                                <td className="px-3 py-2 align-top">
-                                    <div className="flex flex-wrap gap-2 text-xs">
-                                        <Link href={`/workflow/nodes/${n.id}`} className="rounded border px-2 py-1 text-slate-900 dark:text-white">
-                                            Detalhes
-                                        </Link>
-                                        <Link
-                                            href={`/workflow/edges?source_node_id=${n.id}`}
-                                            className="rounded border px-2 py-1 text-slate-900 dark:text-white"
-                                        >
-                                            Edges
-                                        </Link>
+                {errorCode ? (
+                    <div className="mt-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
+                        Erro ao carregar nodes: {errorCode}
+                    </div>
+                ) : null}
+
+                <div className="mt-4 grid gap-3 sm:gap-4">
+                    {nodes.map((node) => (
+                        <Link
+                            key={node.id}
+                            href={`/workflow/nodes/${node.id}`}
+                            className="block rounded-lg border border-slate-200 bg-white p-4 transition-colors hover:border-blue-400 dark:border-slate-700 dark:bg-slate-800 dark:hover:border-blue-600"
+                        >
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="rounded bg-blue-100 px-2 py-0.5 text-xs font-mono font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                                            #{node.id}
+                                        </span>
                                     </div>
-                                </td>
-                            </tr>
-                        ))}
-                        {filtered.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} className="px-3 py-6 text-center text-sm text-slate-500 dark:text-gray-300">
-                                    Nenhum node encontrado.
-                                </td>
-                            </tr>
-                        ) : null}
-                    </tbody>
-                </table>
+                                    <p className="mt-1 line-clamp-2 text-sm text-slate-700 dark:text-slate-300">
+                                        {node.prompt}
+                                    </p>
+                                </div>
+                                <svg className="h-4 w-4 flex-shrink-0 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </Link>
+                    ))}
+                    {nodes.length === 0 ? (
+                        <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center dark:border-slate-700 dark:bg-slate-900">
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                                Nenhum node encontrado.
+                            </p>
+                        </div>
+                    ) : null}
+                </div>
             </div>
         </main>
     );

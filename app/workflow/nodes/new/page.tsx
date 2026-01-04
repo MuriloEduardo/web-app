@@ -43,17 +43,18 @@ export default function NewNodePage() {
     }
 
     return (
-        <main className="mx-auto w-full max-w-3xl px-4 py-6 min-h-screen text-slate-900 dark:text-white">
-            <div className="text-xs text-slate-500 dark:text-gray-300">Workflow / Nodes / Novo</div>
-            <div className="mt-1 flex items-center justify-between gap-3">
-                <h1 className="text-xl font-semibold text-slate-900 dark:text-white">Criar node</h1>
-                <Link href="/workflow/nodes" className="rounded border px-3 py-1 text-sm text-slate-900 dark:text-white">
+        <main className="min-h-screen px-3 py-4 text-slate-900 dark:text-white sm:px-4 sm:py-6">
+            <div className="mx-auto w-full max-w-3xl">
+                <div className="text-xs text-slate-500 dark:text-gray-300">Workflow / Nodes / Novo</div>
+                <div className="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    <h1 className="text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">Criar node</h1>
+                    <Link href="/workflow/nodes" className="rounded border px-3 py-1.5 text-center text-sm text-slate-900 dark:text-white">
                     Voltar
                 </Link>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-6 space-y-3">
-                <label className="block text-sm font-medium text-gray-100">
+            <form onSubmit={handleSubmit} className="mt-4 space-y-3 sm:mt-6">
+                <label className="block text-xs font-medium text-gray-700 dark:text-gray-100 sm:text-sm">
                     Prompt
                     <textarea
                         value={prompt}
@@ -64,17 +65,18 @@ export default function NewNodePage() {
                     />
                 </label>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60"
+                        className="w-full rounded border px-3 py-2 text-sm text-slate-900 dark:text-white disabled:opacity-60 sm:w-auto"
                     >
                         {isSubmitting ? "Salvando..." : "Salvar"}
                     </button>
-                    {errorCode ? <span className="text-sm text-red-700">Erro: {errorCode}</span> : null}
+                    {errorCode ? <span className="text-xs text-red-700 sm:text-sm">Erro: {errorCode}</span> : null}
                 </div>
             </form>
+            </div>
         </main>
     );
 }

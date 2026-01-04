@@ -1,0 +1,42 @@
+import { headers } from "next/headers";
+
+import { bffGet } from "@/app/lib/bff/fetcher";
+import { EdgesPageClient } from "@/app/workflow/edges/EdgesPageClient";
+import { type EdgeDto, type NodeDto } from "@/app/workflow/WorkflowTypes";
+
+type Props = {
+    searchParams: Promise<{ source_node_id?: string } | undefined>;
+};
+
+export default async function EdgesPage({ searchParams }: Props) {
+    const h = await headers();
+    const cookie = h.get("cookie");
+    const opts = cookie ? { headers: { cookie } } : undefined;
+
+    const awaitedSearch = await searchParams;
+    const rawSource = Array.isArray(awaitedSearch?.source_node_id)
+        ? awaitedSearch?.source_node_id[0]
+        : awaitedSearch?.source_node_id;
+    const sourceId = Number(rawSource);
+    const selectedSourceId = Number.isInteger(sourceId) && sourceId > 0 ? sourceId : null;
+
+    const nodesPayload = await bffGet<NodeDto[]>("/api/nodes", opts);
+    const nodes = Array.isArray(nodesPayload.data) ? nodesPayload.data : [];
+
+    const edgesPayload = selectedSourceId
+        ? await bffGet<EdgeDto[]>(`/api/edges?source_node_id=${selectedSourceId}`, opts)
+        : { data: [], error: null };
+
+    return (
+        <main className="min-h-screen px-3 py-4 text-slate-900 dark:text-white sm:px-4 sm:py-6">
+            <div className="mx-auto w-full max-w-6xl">
+                <EdgesPageClient
+                nodes={nodes}
+                nodesErrorCode={nodesPayload.error?.code ?? null}
+                selectedSourceId={selectedSourceId}
+                initialEdges={Array.isArray(edgesPayload.data) ? edgesPayload.data : []}
+                edgesErrorCode={edgesPayload.error?.code ?? null}
+            />
+        </main>
+    );
+}
