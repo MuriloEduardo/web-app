@@ -2,7 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 
 import { bffGet } from "@/app/lib/bff/fetcher";
-import { type NodeDto, type EdgeDto } from "@/app/workflow/WorkflowTypes";
+import { type NodeDto, type EdgeDto, type PropertyDto } from "@/app/workflow/WorkflowTypes";
 
 type Params = Promise<{ nodeId: string }>;
 
@@ -16,9 +16,11 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
 
     const nodePayload = await bffGet<NodeDto>(`/api/nodes/${idNum}`, opts);
     const edgesPayload = await bffGet<EdgeDto[]>(`/api/edges?source_node_id=${idNum}`, opts);
+    const propertiesPayload = await bffGet<PropertyDto[]>(`/api/node-properties?node_id=${idNum}`, opts);
 
     const node = nodePayload.data;
     const edges = Array.isArray(edgesPayload.data) ? edgesPayload.data : [];
+    const properties = Array.isArray(propertiesPayload.data) ? propertiesPayload.data : [];
 
     if (!node) {
         return (
@@ -123,6 +125,56 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
                             <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900">
                                 <p className="text-sm text-slate-500 dark:text-slate-400">
                                     Nenhuma edge configurada para este node.
+                                </p>
+                            </div>
+                        ) : null}
+                    </div>
+                </div>
+
+                {/* Properties Section */}
+                <div className="mt-6">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-lg font-semibold">Properties ({properties.length})</h2>
+                        <Link
+                            href={`/workflow/nodes/${node.id}/properties/new`}
+                            className="rounded-lg bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700"
+                        >
+                            + Nova property
+                        </Link>
+                    </div>
+
+                    <div className="mt-3 grid gap-3">
+                        {properties.map((property) => (
+                            <div
+                                key={property.id}
+                                className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <span className="rounded bg-purple-100 px-2 py-0.5 text-xs font-mono font-semibold text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                                                #{property.id}
+                                            </span>
+                                            <span className="font-semibold text-slate-900 dark:text-white">
+                                                {property.name}
+                                            </span>
+                                            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-700 dark:text-slate-400">
+                                                {property.type}
+                                            </span>
+                                        </div>
+                                        {property.key && (
+                                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                Key: {property.key}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {properties.length === 0 ? (
+                            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900">
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    Nenhuma property configurada para este node.
                                 </p>
                             </div>
                         ) : null}
