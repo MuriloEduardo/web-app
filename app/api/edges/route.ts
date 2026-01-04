@@ -25,7 +25,7 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const upstreamUrl = new URL(edgesUrl!);
     url.searchParams.forEach((value, key) => {
-        upstreamUrl.searchParams.set(key, value);
+        upstreamUrl.searchParams.append(key, value);
     });
     upstreamUrl.searchParams.set("company_id", String(company_id));
 
