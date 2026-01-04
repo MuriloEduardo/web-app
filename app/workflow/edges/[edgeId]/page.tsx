@@ -87,42 +87,42 @@ export default async function EdgeConditionsPage({ params, searchParams }: { par
     }
 
     if (initialEdgeError || initialSourceError) {
-        const message = initialEdgeError ? "Edge invalida" : "source_node_id ausente";
+        const message = initialEdgeError ? "Edge inválida" : "Informe o source_node_id";
         return (
             <main className="mx-auto w-full max-w-3xl px-4 py-6">
-                <div className="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-800">
-                    {message}. Abra esta tela a partir do modo grafo clicando em "Condicoes" da edge.
+                <div className="rounded border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-800">
+                    {message}. Abra esta tela a partir da lista de edges.
                 </div>
-                <div className="mt-4">
+                <div className="mt-4 flex gap-3">
                     <a
-                        href="/workflow?view=graph"
-                        className="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow"
+                        href="/workflow/edges"
+                        className="rounded border px-3 py-2 text-sm text-slate-900"
                     >
-                        Voltar ao grafo
+                        Voltar para edges
                     </a>
+                    {initialEdgeError ? null : (
+                        <form className="flex items-center gap-2" method="get">
+                            <label className="text-sm text-slate-700" htmlFor="source_node_id">
+                                source_node_id
+                            </label>
+                            <input
+                                id="source_node_id"
+                                name="source_node_id"
+                                type="number"
+                                min="1"
+                                className="w-32 rounded border px-3 py-2 text-sm"
+                                placeholder="ex: 10"
+                                required
+                            />
+                            <button
+                                type="submit"
+                                className="rounded border px-3 py-2 text-sm text-slate-900"
+                            >
+                                Ir
+                            </button>
+                        </form>
+                    )}
                 </div>
-                {initialEdgeError ? null : (
-                    <form className="mt-4 space-y-2" method="get">
-                        <label className="block text-sm font-semibold text-slate-800" htmlFor="source_node_id">
-                            Se souber o source_node_id, informe aqui
-                        </label>
-                        <input
-                            id="source_node_id"
-                            name="source_node_id"
-                            type="number"
-                            min="1"
-                            className="w-full rounded border border-slate-200 px-3 py-2 text-sm"
-                            placeholder="ex: 10"
-                            required
-                        />
-                        <button
-                            type="submit"
-                            className="inline-flex items-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow"
-                        >
-                            Ir para a edge
-                        </button>
-                    </form>
-                )}
             </main>
         );
     }
@@ -139,7 +139,7 @@ export default async function EdgeConditionsPage({ params, searchParams }: { par
     propertiesPayload = await fetchProperties(cookie);
 
     return (
-        <main className="mx-auto w-full max-w-3xl px-4 py-6">
+        <main className="mx-auto w-full max-w-5xl px-4 py-6">
             <EdgeConditionsClient
                 edgeId={edgeId}
                 sourceNodeId={source_node_id}
