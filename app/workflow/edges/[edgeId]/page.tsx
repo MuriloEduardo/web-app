@@ -50,42 +50,41 @@ export default async function EdgeDetailsPage({
     return (
         <main className="min-h-screen px-3 py-4 text-slate-900 dark:text-white sm:px-4 sm:py-6">
             <div className="mx-auto w-full max-w-4xl">
-                {/* Breadcrumb */}
-                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-300">
-                    <Link href="/workflow" className="hover:text-blue-600">
-                        Workflow
+                {/* Breadcrumb with Back Button */}
+                <div className="flex items-center gap-3">
+                    <Link 
+                        href={`/workflow/nodes/${edge.source_node_id}`}
+                        className="rounded-lg border border-slate-300 p-2 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
+                        title="Voltar"
+                    >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
                     </Link>
-                    <span>/</span>
-                    <Link href="/workflow/nodes" className="hover:text-blue-600">
-                        Nodes
-                    </Link>
-                    <span>/</span>
-                    <Link href={`/workflow/nodes/${edge.source_node_id}`} className="hover:text-blue-600">
-                        #{edge.source_node_id}
-                    </Link>
-                    <span>/</span>
-                    <span>Edge #{edge.id}</span>
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-300">
+                        <Link href="/workflow" className="hover:text-blue-600">
+                            Workflow
+                        </Link>
+                        <span>/</span>
+                        <Link href={`/workflow/nodes/${edge.source_node_id}`} className="hover:text-blue-600">
+                            Node #{edge.source_node_id}
+                        </Link>
+                        <span>/</span>
+                        <span>Edge #{edge.id}</span>
+                    </div>
                 </div>
 
                 {/* Header */}
-                <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                        <h1 className="text-xl font-bold sm:text-2xl">Edge #{edge.id}</h1>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
-                            <span className="text-slate-600 dark:text-slate-400">
-                                Node #{edge.source_node_id} → Node #{edge.destination_node_id}
-                            </span>
-                            <span className="rounded bg-slate-100 px-2 py-0.5 text-xs dark:bg-slate-700">
-                                Prioridade: {edge.priority}
-                            </span>
-                        </div>
+                <div className="mt-4">
+                    <h1 className="text-xl font-bold sm:text-2xl">Edge #{edge.id}</h1>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">
+                            Node #{edge.source_node_id} → Node #{edge.destination_node_id}
+                        </span>
+                        <span className="rounded bg-slate-100 px-2 py-0.5 text-xs dark:bg-slate-700">
+                            Prioridade: {edge.priority}
+                        </span>
                     </div>
-                    <Link
-                        href={`/workflow/nodes/${edge.source_node_id}`}
-                        className="rounded-lg border border-slate-300 px-4 py-2 text-center text-sm hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-800"
-                    >
-                        ← Voltar
-                    </Link>
                 </div>
 
                 {/* Edge Actions */}
@@ -102,9 +101,12 @@ export default async function EdgeDetailsPage({
                         <h2 className="text-lg font-semibold">Conditions ({conditions.length})</h2>
                         <Link
                             href={`/workflow/edges/${edge.id}/conditions/new?source_node_id=${edge.source_node_id}`}
-                            className="rounded-lg bg-orange-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-orange-700"
+                            className="rounded-lg bg-orange-600 p-2 text-white hover:bg-orange-700"
+                            title="Nova condition"
                         >
-                            + Nova condition
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
                         </Link>
                     </div>
 

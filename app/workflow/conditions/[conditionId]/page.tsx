@@ -50,29 +50,32 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
     return (
         <main className="min-h-screen px-3 py-4 text-slate-900 dark:text-white sm:px-4 sm:py-6">
             <div className="mx-auto w-full max-w-4xl">
-                {/* Breadcrumb */}
-                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-300">
-                    <Link href="/workflow" className="hover:text-blue-600">Workflow</Link>
-                    <span>→</span>
-                    <span>Condition #{condition.id}</span>
+                {/* Breadcrumb with Back Button */}
+                <div className="flex items-center gap-3">
+                    <Link 
+                        href="/workflow"
+                        className="rounded-lg border border-slate-300 p-2 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
+                        title="Voltar"
+                    >
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-300">
+                        <Link href="/workflow" className="hover:text-blue-600">Workflow</Link>
+                        <span>→</span>
+                        <span>Condition #{condition.id}</span>
+                    </div>
                 </div>
 
                 {/* Header */}
-                <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                        <h1 className="text-xl font-bold sm:text-2xl">Condition #{condition.id}</h1>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
-                            <span className="text-slate-600 dark:text-slate-400">
-                                Edge ID: {condition.edge_id}
-                            </span>
-                        </div>
+                <div className="mt-4">
+                    <h1 className="text-xl font-bold sm:text-2xl">Condition #{condition.id}</h1>
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                        <span className="text-slate-600 dark:text-slate-400">
+                            Edge ID: {condition.edge_id}
+                        </span>
                     </div>
-                    <Link
-                        href="/workflow"
-                        className="rounded-lg border border-slate-300 px-4 py-2 text-center text-sm hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-800"
-                    >
-                        ← Voltar
-                    </Link>
                 </div>
 
                 {/* Condition Details Card */}
@@ -100,9 +103,12 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                         <h2 className="text-lg font-semibold">Properties ({properties.length})</h2>
                         <Link
                             href={`/workflow/conditions/${condition.id}/properties/new`}
-                            className="rounded-lg bg-purple-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-purple-700"
+                            className="rounded-lg bg-purple-600 p-2 text-white hover:bg-purple-700"
+                            title="Nova property"
                         >
-                            + Nova property
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
                         </Link>
                     </div>
 
