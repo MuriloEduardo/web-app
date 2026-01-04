@@ -21,23 +21,25 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
 
     let properties: PropertyDto[] = [];
     let edge: EdgeDto | null = null;
-    
+
     if (condition) {
         // Get the edge to find source_node_id
         const edgePayload = await bffGet<EdgeDto>(`/api/edges/${condition.edge_id}`, opts);
         edge = edgePayload.data;
 
-        const conditionPropertiesPayload = await bffGet<Array<{ condition_id: number; property_id: number }>>(
-            `/api/condition-properties?condition_id=${idNum}`,
-            opts
-        );
-        const allPropertiesPayload = await bffGet<PropertyDto[]>(`/api/properties`, opts);
+        if (edge) {
+            const conditionPropertiesPayload = await bffGet<Array<{ condition_id: number; property_id: number }>>(
+                `/api/condition-properties?condition_id=${idNum}&edge_id=${condition.edge_id}&source_node_id=${edge.source_node_id}`,
+                opts
+            );
+            const allPropertiesPayload = await bffGet<PropertyDto[]>(`/api/properties`, opts);
 
-        const conditionPropertyIds = Array.isArray(conditionPropertiesPayload.data) ? conditionPropertiesPayload.data : [];
-        const allProperties = Array.isArray(allPropertiesPayload.data) ? allPropertiesPayload.data : [];
+            const conditionPropertyIds = Array.isArray(conditionPropertiesPayload.data) ? conditionPropertiesPayload.data : [];
+            const allProperties = Array.isArray(allPropertiesPayload.data) ? allPropertiesPayload.data : [];
 
-        const propertyIds = new Set(conditionPropertyIds.map(cp => cp.property_id));
-        properties = allProperties.filter(p => propertyIds.has(p.id));
+            const propertyIds = new Set(conditionPropertyIds.map(cp => cp.property_id));
+            properties = allProperties.filter(p => propertyIds.has(p.id));
+        }
     }
 
     if (!condition || !edge) {
@@ -60,7 +62,7 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
             <div className="mx-auto w-full max-w-4xl">
                 {/* Breadcrumb with Back Button */}
                 <div className="flex items-center gap-3">
-                    <Link 
+                    <Link
                         href="/workflow"
                         className="rounded-lg border border-slate-300 p-2 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
                         title="Voltar"
@@ -87,8 +89,8 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                 </div>
 
                 {/* Condition Details Card */}
-                <ConditionActions 
-                    conditionId={condition.id} 
+                <ConditionActions
+                    conditionId={condition.id}
                     edgeId={condition.edge_id}
                     operator={condition.operator}
                     compareValue={condition.compare_value}
@@ -134,11 +136,11 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                                             </p>
                                         )}
                                     </div>
-                                    <DeletePropertyButton 
-                                        conditionId={condition.id} 
+                                    <DeletePropertyButton
+                                        conditionId={condition.id}
                                         edgeId={condition.edge_id}
                                         sourceNodeId={edge.source_node_id}
-                                        propertyId={property.id} 
+                                        propertyId={property.id}
                                     />
                                 </div>
                             </div>
