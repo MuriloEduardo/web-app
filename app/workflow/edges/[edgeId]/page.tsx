@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 
 import { bffGet } from "@/app/lib/bff/fetcher";
 import { type EdgeDto, type ConditionDto } from "@/app/workflow/WorkflowTypes";
+import EdgeActions from "./EdgeActions";
+import DeleteConditionButton from "./DeleteConditionButton";
 
 type Params = Promise<{ edgeId: string }>;
 
@@ -86,11 +88,13 @@ export default async function EdgeDetailsPage({
                     </Link>
                 </div>
 
-                {/* Label Card */}
-                <div className="mt-6 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800 sm:p-6">
-                    <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Condição/Label</h2>
-                    <p className="mt-2 text-sm text-slate-900 dark:text-white">{edge.label}</p>
-                </div>
+                {/* Edge Actions */}
+                <EdgeActions 
+                    edgeId={edge.id} 
+                    sourceNodeId={edge.source_node_id}
+                    label={edge.label}
+                    priority={edge.priority}
+                />
 
                 {/* Conditions Section */}
                 <div className="mt-6">
@@ -106,13 +110,12 @@ export default async function EdgeDetailsPage({
 
                     <div className="mt-3 grid gap-3">
                         {conditions.map((condition) => (
-                            <Link
+                            <div
                                 key={condition.id}
-                                href={`/workflow/conditions/${condition.id}`}
-                                className="group block rounded-lg border border-slate-200 bg-white p-4 transition hover:border-orange-400 hover:shadow-md dark:border-slate-700 dark:bg-slate-800"
+                                className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
                             >
                                 <div className="flex items-start justify-between gap-3">
-                                    <div className="flex-1">
+                                    <Link href={`/workflow/conditions/${condition.id}`} className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="rounded bg-orange-100 px-2 py-0.5 text-xs font-mono font-semibold text-orange-700 dark:bg-orange-900 dark:text-orange-300">
                                                 Condition #{condition.id}
@@ -127,17 +130,14 @@ export default async function EdgeDetailsPage({
                                                 {condition.compare_value}
                                             </span>
                                         </div>
-                                    </div>
-                                    <svg
-                                        className="h-5 w-5 text-slate-400 transition group-hover:text-orange-600"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
+                                    </Link>
+                                    <DeleteConditionButton 
+                                        conditionId={condition.id}
+                                        edgeId={edge.id}
+                                        sourceNodeId={edge.source_node_id}
+                                    />
                                 </div>
-                            </Link>
+                            </div>
                         ))}
                         {conditions.length === 0 ? (
                             <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900">

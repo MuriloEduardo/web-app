@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 
 import { bffGet } from "@/app/lib/bff/fetcher";
 import { type NodeDto, type EdgeDto, type PropertyDto } from "@/app/workflow/WorkflowTypes";
+import NodeActions from "./NodeActions";
+import DeleteEdgeButton from "./DeleteEdgeButton";
 
 type Params = Promise<{ nodeId: string }>;
 
@@ -69,13 +71,8 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
                     </Link>
                 </div>
 
-                {/* Prompt Card */}
-                <div className="mt-6 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800 sm:p-6">
-                    <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Prompt</h2>
-                    <p className="mt-2 text-sm text-slate-900 dark:text-white whitespace-pre-wrap">
-                        {node.prompt}
-                    </p>
-                </div>
+                {/* Prompt Card with Actions */}
+                <NodeActions nodeId={node.id} prompt={node.prompt} />
 
                 {/* Edges Section */}
                 <div className="mt-6">
@@ -91,13 +88,12 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
 
                     <div className="mt-3 grid gap-3">
                         {edges.map((edge) => (
-                            <Link
+                            <div
                                 key={edge.id}
-                                href={`/workflow/edges/${edge.id}`}
-                                className="group block rounded-lg border border-slate-200 bg-white p-4 transition hover:border-green-400 hover:shadow-md dark:border-slate-700 dark:bg-slate-800"
+                                className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800"
                             >
                                 <div className="flex items-start justify-between gap-3">
-                                    <div className="flex-1">
+                                    <Link href={`/workflow/edges/${edge.id}`} className="flex-1">
                                         <div className="flex items-center gap-2">
                                             <span className="rounded bg-green-100 px-2 py-0.5 text-xs font-mono font-semibold text-green-700 dark:bg-green-900 dark:text-green-300">
                                                 Edge #{edge.id}
@@ -113,17 +109,10 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
                                         <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
                                             {edge.label}
                                         </p>
-                                    </div>
-                                    <svg
-                                        className="h-5 w-5 text-slate-400 transition group-hover:text-green-600"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
+                                    </Link>
+                                    <DeleteEdgeButton edgeId={edge.id} sourceNodeId={node.id} />
                                 </div>
-                            </Link>
+                            </div>
                         ))}
                         {edges.length === 0 ? (
                             <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-8 text-center dark:border-slate-700 dark:bg-slate-900">
