@@ -367,54 +367,54 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
     const plusY = GRAPH_PADDING;
 
     return (
-        <section className="flex flex-col gap-4">
+        <section className="space-y-4">
             {errorCode ? (
-                <div className="rounded border border-red-300 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-transparent dark:text-red-300">
+                <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:border-rose-900 dark:bg-rose-950/60 dark:text-rose-200">
                     Erro ao carregar nodes: {errorCode}
                 </div>
             ) : null}
 
-            <div className="rounded border p-4">
-                <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-semibold text-black dark:text-white">Workflow (Grafo)</div>
-                    <div className="flex items-center gap-2">
+            <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/60">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="text-base font-semibold">Workflow (Grafo)</div>
+                    <div className="flex flex-wrap items-center gap-2">
                         <button
                             type="button"
                             onClick={() => rehydrate()}
-                            className="rounded border px-3 py-1 text-sm text-black dark:text-white"
+                            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-900 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
                         >
                             {isRefreshing ? "Atualizando…" : "Recarregar nodes"}
                         </button>
                         <button
                             type="button"
                             onClick={() => loadGraphEdges()}
-                            className="rounded border px-3 py-1 text-sm text-black dark:text-white"
+                            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-900 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
                         >
                             {isLoadingGraph ? "Atualizando…" : "Recarregar edges"}
                         </button>
                     </div>
                 </div>
 
-                <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
+                <div className="text-xs text-slate-600 dark:text-slate-300">
                     {nodes.length} node(s) • {allEdges.length} edge(s)
                     {graphError ? ` • erro: ${graphError}` : ""}
                     {connectingFromNodeId ? " • modo: criando edge (ESC cancela)" : ""}
                 </div>
 
                 {createNodeError ? (
-                    <div className="mt-2 text-xs text-red-700 dark:text-red-300">Erro: {createNodeError}</div>
+                    <div className="text-xs text-rose-600 dark:text-rose-300">Erro: {createNodeError}</div>
                 ) : null}
                 {createEdgeError ? (
-                    <div className="mt-2 text-xs text-red-700 dark:text-red-300">Erro: {createEdgeError}</div>
+                    <div className="text-xs text-rose-600 dark:text-rose-300">Erro: {createEdgeError}</div>
                 ) : null}
                 {deleteEdgeError ? (
-                    <div className="mt-2 text-xs text-red-700 dark:text-red-300">Erro: {deleteEdgeError}</div>
+                    <div className="text-xs text-rose-600 dark:text-rose-300">Erro: {deleteEdgeError}</div>
                 ) : null}
 
-                <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_320px]">
+                <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
                     <div
                         ref={containerRef}
-                        className="relative overflow-auto rounded border"
+                        className="relative overflow-auto rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900"
                         style={{ height: 620 }}
                         onMouseMove={(ev) => {
                             if (!connectingFromNodeId) return;
@@ -422,16 +422,15 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                         }}
                         onMouseDown={(ev) => {
                             if (!connectingFromNodeId) return;
-                            // clicking on background cancels
                             if (ev.target === ev.currentTarget) {
                                 setConnectingFromNodeId(null);
                                 setCursor(null);
                             }
                         }}
                     >
-                        <div className="relative" style={{ width: layout.width + GRAPH_COL_GAP, height: layout.height }}>
+                        <div style={{ position: "relative", width: layout.width + GRAPH_COL_GAP, height: layout.height }}>
                             <svg
-                                className="absolute inset-0 h-full w-full text-zinc-400 dark:text-zinc-600"
+                                className="absolute inset-0 h-full w-full text-slate-400 dark:text-slate-500"
                                 viewBox={`0 0 ${layout.width + GRAPH_COL_GAP} ${layout.height}`}
                                 preserveAspectRatio="none"
                             >
@@ -500,9 +499,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                 return (
                                     <div
                                         key={n.id}
-                                        className={`absolute rounded border bg-white p-3 text-black dark:bg-transparent dark:text-white ${
-                                            isActive ? "ring-1 ring-zinc-400 dark:ring-zinc-600" : ""
-                                        }`}
+                                        className={`absolute rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900/70 ${isActive ? "ring-2 ring-blue-400 dark:ring-blue-500" : ""}`}
                                         style={{ left: p.x, top: p.y, width: GRAPH_NODE_W, height: GRAPH_NODE_H }}
                                         onMouseDown={(ev) => {
                                             ev.stopPropagation();
@@ -514,11 +511,11 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                             }
                                         }}
                                     >
-                                        <div className="absolute left-[-6px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border bg-white dark:bg-transparent" />
+                                        <div className="absolute left-[-6px] top-1/2 h-3 w-3 -translate-y-1/2 rounded-full border border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-800" />
                                         <button
                                             type="button"
                                             title="Criar edge a partir deste node"
-                                            className="absolute right-[-10px] top-1/2 h-5 w-5 -translate-y-1/2 rounded-full border bg-white text-xs text-black dark:bg-transparent dark:text-white"
+                                            className="absolute right-[-10px] top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full border border-slate-300 bg-white text-xs text-slate-900 shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                                             onMouseDown={(ev) => {
                                                 ev.stopPropagation();
                                                 setActiveNodeId(n.id);
@@ -529,37 +526,30 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                         >
                                             +
                                         </button>
-
-                                        <div className="flex items-center justify-between gap-2">
-                                            <div className="text-sm font-semibold">Node #{n.id}</div>
-                                            <div className="text-[10px] text-zinc-600 dark:text-zinc-300">
-                                                {n.updated_at ?? n.created_at ?? ""}
-                                            </div>
+                                        <div className="flex items-center justify-between gap-2 text-xs">
+                                            <div className="font-semibold">Node #{n.id}</div>
+                                            <div className="text-[10px] text-slate-500 dark:text-slate-300">{n.updated_at ?? n.created_at ?? ""}</div>
                                         </div>
-                                        <div className="mt-1 line-clamp-2 text-xs text-zinc-700 dark:text-zinc-200">
+                                        <div className="mt-1 text-xs text-slate-700 line-clamp-2 dark:text-slate-200">
                                             {preview(n.prompt)}
                                         </div>
-
-                                        <div className="mt-2 flex items-center justify-between gap-2">
+                                        <div className="mt-2 flex items-center justify-between gap-2 text-[11px]">
                                             <Link
                                                 href={`/workflow/${n.id}`}
-                                                className="rounded border px-2 py-1 text-[11px] text-black dark:text-white"
+                                                className="rounded border border-slate-300 px-2 py-1 text-slate-900 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
                                                 onMouseDown={(ev) => ev.stopPropagation()}
                                             >
                                                 Propriedades
                                             </Link>
-                                            <div className="text-[11px] text-zinc-600 dark:text-zinc-300">
-                                                {connectingFromNodeId === n.id ? "Selecionar destino…" : ""}
-                                            </div>
+                                            <div className="text-slate-500 dark:text-slate-300">{connectingFromNodeId === n.id ? "Selecionar destino…" : ""}</div>
                                         </div>
                                     </div>
                                 );
                             })}
 
-                            {/* New node button beside the last column */}
                             <button
                                 type="button"
-                                className="absolute rounded border bg-white p-3 text-left text-black disabled:opacity-60 dark:bg-transparent dark:text-white"
+                                className="absolute rounded-lg border border-dashed border-slate-300 bg-white p-3 text-left text-sm text-slate-900 shadow-sm transition hover:bg-slate-100 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-100 dark:hover:bg-slate-800"
                                 style={{ left: plusX, top: plusY, width: GRAPH_NODE_W, height: GRAPH_NODE_H }}
                                 onMouseDown={(ev) => {
                                     ev.stopPropagation();
@@ -568,74 +558,52 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                 disabled={isCreatingNode}
                                 title="Criar novo node"
                             >
-                                <div className="text-sm font-semibold">
-                                    {isCreatingNode ? "Criando…" : "+ Novo node"}
-                                </div>
-                                <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
-                                    Ao lado do último node
-                                </div>
+                                <div className="font-semibold">{isCreatingNode ? "Criando…" : "+ Novo node"}</div>
+                                <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">Ao lado do último node</div>
                             </button>
                         </div>
                     </div>
 
-                    <div className="rounded border p-3">
-                        <div className="text-sm font-semibold text-black dark:text-white">Edge(s) do node</div>
-                        <div className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">
-                            {activeNodeId ? `Node #${activeNodeId}` : "Selecione um node"}
-                        </div>
+                    <div className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
+                        <div className="text-sm font-semibold">Edge(s) do node</div>
+                        <div className="text-xs text-slate-600 dark:text-slate-300">{activeNodeId ? `Node #${activeNodeId}` : "Selecione um node"}</div>
 
                         {activeNodeId ? (
-                            <div className="mt-2">
-                                <div className="text-xs text-zinc-600 dark:text-zinc-300">
-                                    Clique no botão “+” do node para criar uma edge.
-                                </div>
+                            <div className="mt-2 space-y-2 text-xs text-slate-700 dark:text-slate-200">
+                                <div>Clique no botão “+” do node para criar uma edge.</div>
 
-                                <ul className="mt-2 divide-y rounded border">
+                                <ul className="divide-y divide-slate-200 overflow-hidden rounded border border-slate-200 dark:divide-slate-800 dark:border-slate-800">
                                     {outgoingEdgesForActive.map((e) => (
                                         <li key={e.id} className="flex items-center justify-between gap-2 px-2 py-2">
                                             <div className="min-w-0">
-                                                <div className="truncate text-xs font-semibold text-black dark:text-white">
-                                                    → Node #{e.destination_node_id}
-                                                </div>
-                                                <div className="truncate text-[11px] text-zinc-600 dark:text-zinc-300">
-                                                    {e.label} • priority {e.priority}
-                                                </div>
+                                                <div className="truncate font-semibold">→ Node #{e.destination_node_id}</div>
+                                                <div className="truncate text-[11px] text-slate-500 dark:text-slate-300">{e.label} • priority {e.priority}</div>
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 text-[11px]">
                                                 <Link
                                                     href={`/workflow/edges/${e.id}?source_node_id=${e.source_node_id}`}
-                                                    className="rounded border px-2 py-1 text-[11px] text-black dark:text-white"
+                                                    className="rounded border border-slate-300 px-2 py-1 text-slate-900 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
                                                 >
                                                     Condições
                                                 </Link>
-                                            <button
-                                                type="button"
-                                                onClick={() => deleteEdge(e)}
-                                                disabled={isDeletingEdgeId === e.id}
-                                                className="rounded border px-2 py-1 text-[11px] text-black disabled:opacity-60 dark:text-white"
-                                            >
-                                                {isDeletingEdgeId === e.id ? "…" : "Deletar"}
-                                            </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => deleteEdge(e)}
+                                                    disabled={isDeletingEdgeId === e.id}
+                                                    className="rounded border border-slate-300 px-2 py-1 text-slate-900 transition hover:bg-slate-100 disabled:opacity-60 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800"
+                                                >
+                                                    {isDeletingEdgeId === e.id ? "…" : "Deletar"}
+                                                </button>
                                             </div>
                                         </li>
                                     ))}
-                                    {outgoingEdgesForActive.length === 0 ? (
-                                        <li className="px-2 py-2 text-xs text-zinc-500 dark:text-zinc-400">
-                                            Nenhuma edge.
-                                        </li>
-                                    ) : null}
+                                    {outgoingEdgesForActive.length === 0 ? <li className="px-2 py-2 text-slate-500 dark:text-slate-300">Nenhuma edge.</li> : null}
                                 </ul>
 
-                                {isCreatingEdge ? (
-                                    <div className="mt-2 text-xs text-zinc-600 dark:text-zinc-300">
-                                        Criando edge…
-                                    </div>
-                                ) : null}
+                                {isCreatingEdge ? <div>Criando edge…</div> : null}
                             </div>
                         ) : (
-                            <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                                Clique em um node para ver as edges.
-                            </div>
+                            <div className="mt-2 text-xs text-slate-500 dark:text-slate-300">Clique em um node para ver as edges.</div>
                         )}
                     </div>
                 </div>
