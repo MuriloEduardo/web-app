@@ -1,33 +1,27 @@
 import { Suspense } from "react";
 import { GraphNodes, fetchNodes } from "./GraphNodes";
-import { GraphEdges } from "./GraphEdges";
+import { fetchEdges } from "./GraphEdges";
+
+async function GraphWithEdges() {
+    const nodes = await fetchNodes();
+    const nodeIds = nodes.map((n) => n.id);
+    const edges = await fetchEdges(nodeIds);
+
+    return <GraphNodes edges={edges} />;
+}
 
 export async function Graph() {
-    // Primeiro busca os nodes
-    const nodes = await fetchNodes();
-
     return (
-        <div className="space-y-8">
-            <div>
-                <h1 className="text-2xl font-bold">Workflow Graph</h1>
-                <p className="mt-1 text-sm text-gray-600">
-                    Visualização dos nodes e suas conexões (edges)
-                </p>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-2">
-                <div>
-                    <Suspense fallback={<div>Carregando nodes...</div>}>
-                        <GraphNodes />
-                    </Suspense>
+        <div>
+            <Suspense fallback={
+                <div className="animate-pulse space-y-4">
+                    <div className="h-32 rounded bg-gray-200"></div>
+                    <div className="h-32 rounded bg-gray-200"></div>
+                    <div className="h-32 rounded bg-gray-200"></div>
                 </div>
-
-                <div>
-                    <Suspense fallback={<div>Carregando edges...</div>}>
-                        <GraphEdges nodes={nodes} />
-                    </Suspense>
-                </div>
-            </div>
+            }>
+                <GraphWithEdges />
+            </Suspense>
         </div>
     );
 }
