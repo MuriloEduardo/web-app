@@ -11,6 +11,7 @@ import {
 } from "@heroicons/react/24/solid";
 
 import ProgressBar from "@/app/components/ProgressBar";
+import { ConfirmProvider } from "@/app/components/ConfirmProvider";
 
 function isActive(pathname: string, href: string) {
     if (href === "/") return pathname === "/";
@@ -29,8 +30,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="pb-20">
-            <ProgressBar />
-            {children}
+            <ConfirmProvider>
+                <ProgressBar />
+                {children}
+            </ConfirmProvider>
 
             {hideNav ? null : (
                 <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white px-4 py-3 dark:bg-black">

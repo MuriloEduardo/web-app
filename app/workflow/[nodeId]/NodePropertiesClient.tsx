@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useConfirm } from "@/app/components/ConfirmProvider";
 
 type NodeDto = {
     id: number;
@@ -49,6 +50,7 @@ export function NodePropertiesClient({
     initialNodeProperties,
     nodePropertiesErrorCode,
 }: Props) {
+    const confirm = useConfirm();
     const nodeId = node?.id ?? null;
 
     const [properties, setProperties] = useState<PropertyDto[]>(initialProperties);
@@ -213,7 +215,8 @@ export function NodePropertiesClient({
     }
 
     async function deleteProperty(propertyId: number) {
-        if (!window.confirm(`Deletar property #${propertyId}?`)) return;
+        const ok = await confirm(`Deletar property #${propertyId}?`);
+        if (!ok) return;
 
         setDeletingPropertyId(propertyId);
         setDeletePropertyError(null);
@@ -270,7 +273,8 @@ export function NodePropertiesClient({
 
     async function unlinkProperty(propertyId: number) {
         if (!nodeId) return;
-        if (!window.confirm(`Remover property #${propertyId} do node #${nodeId}?`)) return;
+        const ok = await confirm(`Remover property #${propertyId} do node #${nodeId}?`);
+        if (!ok) return;
 
         setIsMutatingNodeProperties(true);
         setNodePropertiesError(null);

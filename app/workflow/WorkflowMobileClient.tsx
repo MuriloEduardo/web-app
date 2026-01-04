@@ -7,6 +7,7 @@ import {
     PlusIcon,
     PencilSquareIcon,
 } from "@heroicons/react/24/solid";
+import Modal from "@/app/components/Modal";
 
 import { type NodeDto, type EdgeDto, type Envelope } from "@/app/workflow/WorkflowTypes";
 
@@ -55,6 +56,8 @@ export function WorkflowMobileClient({ initialNodes, initialErrorCode }: { initi
     const [nodes, setNodes] = useState<NodeDto[]>(initialNodes);
     const [errorCode, setErrorCode] = useState<string | null>(initialErrorCode ?? null);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [nodeModalOpen, setNodeModalOpen] = useState(false);
+    const [nodePrompt, setNodePrompt] = useState("");
 
     const [edgesBySourceNodeId, setEdgesBySourceNodeId] = useState<Record<number, EdgeDto[]>>({});
     const [edgesError, setEdgesError] = useState<string | null>(null);
@@ -139,8 +142,13 @@ export function WorkflowMobileClient({ initialNodes, initialErrorCode }: { initi
         }
     }
 
-    async function createNode() {
-        const prompt = window.prompt("Prompt do novo node:")?.trim() ?? "";
+    function startCreateNode() {
+        setNodePrompt("");
+        setNodeModalOpen(true);
+    }
+
+    async function submitCreateNode() {
+        const prompt = nodePrompt.trim();
         if (!prompt) return;
 
         setIsRefreshing(true);
@@ -158,6 +166,8 @@ export function WorkflowMobileClient({ initialNodes, initialErrorCode }: { initi
                 setErrorCode(payload?.error?.code ?? "NODES_CREATE_FAILED");
                 return;
             }
+            setNodeModalOpen(false);
+            setNodePrompt("");
             await rehydrate();
         } catch {
             setErrorCode("NODES_CREATE_FAILED");
@@ -257,13 +267,48 @@ export function WorkflowMobileClient({ initialNodes, initialErrorCode }: { initi
             <div className="flex justify-center">
                 <button
                     type="button"
-                    onClick={() => createNode()}
+                    onClick={() => startCreateNode()}
                     className="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
                 >
                     <PlusIcon className="h-5 w-5" />
                     Add Node
                 </button>
             </div>
+
+            <Modal
+                open={nodeModalOpen}
+                title="Novo node"
+                onClose={() => setNodeModalOpen(false)}
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => setNodeModalOpen(false)}
+                            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => submitCreateNode()}
+                            disabled={isRefreshing}
+                            className="rounded bg-blue-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
+                        >
+                            {isRefreshing ? "Criando…" : "Criar"}
+                        </button>
+                    </>
+                }
+            >
+                <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Prompt</label>
+                    <textarea
+                        value={nodePrompt}
+                        onChange={(e) => setNodePrompt(e.target.value)}
+                        className="min-h-[120px] w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        placeholder="Descreva o comportamento do node"
+                    />
+                </div>
+            </Modal>
         </section>
     );
 }

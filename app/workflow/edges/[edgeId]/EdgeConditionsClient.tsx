@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { PlusIcon, ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { useConfirm } from "@/app/components/ConfirmProvider";
+import Modal from "@/app/components/Modal";
 
 import {
     type ConditionDto,
@@ -49,6 +51,7 @@ export function EdgeConditionsClient({
     initialProperties,
     initialErrorCode,
 }: Props) {
+    const confirm = useConfirm();
     if (!Number.isInteger(edgeId) || edgeId <= 0 || !Number.isInteger(sourceNodeId) || sourceNodeId <= 0) {
         return (
             <section className="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-800">
@@ -67,6 +70,15 @@ export function EdgeConditionsClient({
     const [isDeleting, setIsDeleting] = useState<number | null>(null);
     const [isDeletingProp, setIsDeletingProp] = useState<number | null>(null);
 
+    const [conditionModalOpen, setConditionModalOpen] = useState(false);
+    const [conditionOperator, setConditionOperator] = useState("");
+    const [conditionCompare, setConditionCompare] = useState("");
+    const [editingCondition, setEditingCondition] = useState<ConditionDto | null>(null);
+
+    const [propertyModalOpen, setPropertyModalOpen] = useState(false);
+    const [propertyTargetConditionId, setPropertyTargetConditionId] = useState<number | null>(null);
+    const [selectedPropertyId, setSelectedPropertyId] = useState<string>("");
+
     const sortedConditions = useMemo(() => conditions.slice().sort((a, b) => a.id - b.id), [conditions]);
     const propertiesById = useMemo(() => {
         const map: Record<number, PropertyDto> = {};
@@ -75,6 +87,43 @@ export function EdgeConditionsClient({
         }
         return map;
     }, [properties]);
+
+    async function submitConditionForm() {
+        const operator = conditionOperator.trim();
+        const compare_value = conditionCompare.trim();
+        if (!operator || !compare_value) return;
+
+        const isEditing = !!editingCondition;
+        setIsSaving(true);
+        try {
+            const url = isEditing
+                ? `/api/conditions/${editingCondition!.id}?edge_id=${edgeId}&source_node_id=${sourceNodeId}`
+                : `/api/conditions?edge_id=${edgeId}&source_node_id=${sourceNodeId}`;
+            const method = isEditing ? "PUT" : "POST";
+            const res = await fetch(url, {
+                method,
+                headers: {
+                    accept: "application/json",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ operator, compare_value }),
+            });
+            const payload = (await res.json().catch(() => null)) as Envelope<ConditionDto> | null;
+            if (!res.ok) {
+                setErrorCode(payload?.error?.code ?? (isEditing ? "CONDITIONS_UPDATE_FAILED" : "CONDITIONS_CREATE_FAILED"));
+                return;
+            }
+            setConditionModalOpen(false);
+            setEditingCondition(null);
+            setConditionOperator("");
+            setConditionCompare("");
+            await refreshConditions();
+        } catch {
+            setErrorCode(isEditing ? "CONDITIONS_UPDATE_FAILED" : "CONDITIONS_CREATE_FAILED");
+        } finally {
+            setIsSaving(false);
+        }
+    }
 
     async function refreshConditions() {
         setIsLoading(true);
@@ -117,37 +166,16 @@ export function EdgeConditionsClient({
         }
     }
 
-    async function createCondition() {
-        const operator = window.prompt("Operador (ex: equals, contains)")?.trim() ?? "";
-        if (!operator) return;
-        const compare_value = window.prompt("Valor de comparação")?.trim() ?? "";
-        if (!compare_value) return;
-
-        setIsSaving(true);
-        try {
-            const res = await fetch(`/api/conditions?edge_id=${edgeId}&source_node_id=${sourceNodeId}`, {
-                method: "POST",
-                headers: {
-                    accept: "application/json",
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ operator, compare_value }),
-            });
-            const payload = (await res.json().catch(() => null)) as Envelope<ConditionDto> | null;
-            if (!res.ok) {
-                setErrorCode(payload?.error?.code ?? "CONDITIONS_CREATE_FAILED");
-                return;
-            }
-            await refreshConditions();
-        } catch {
-            setErrorCode("CONDITIONS_CREATE_FAILED");
-        } finally {
-            setIsSaving(false);
-        }
+    function startCreateCondition() {
+        setEditingCondition(null);
+        setConditionOperator("");
+        setConditionCompare("");
+        setConditionModalOpen(true);
     }
 
     async function deleteCondition(conditionId: number) {
-        if (!window.confirm("Remover condição?")) return;
+        const ok = await confirm("Remover condição?");
+        if (!ok) return;
         setIsDeleting(conditionId);
         try {
             const res = await fetch(
@@ -167,50 +195,14 @@ export function EdgeConditionsClient({
         }
     }
 
-    async function editCondition(condition: ConditionDto) {
-        const operator = window.prompt("Operador", condition.operator)?.trim() ?? "";
-        if (!operator) return;
-        const compare_value = window.prompt("Valor de comparação", condition.compare_value)?.trim() ?? "";
-        if (!compare_value) return;
-
-        setIsSaving(true);
-        try {
-            const res = await fetch(
-                `/api/conditions/${condition.id}?edge_id=${edgeId}&source_node_id=${sourceNodeId}`,
-                {
-                    method: "PUT",
-                    headers: {
-                        accept: "application/json",
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ operator, compare_value }),
-                }
-            );
-            const payload = (await res.json().catch(() => null)) as Envelope<ConditionDto> | null;
-            if (!res.ok) {
-                setErrorCode(payload?.error?.code ?? "CONDITIONS_UPDATE_FAILED");
-                return;
-            }
-            await refreshConditions();
-        } catch {
-            setErrorCode("CONDITIONS_UPDATE_FAILED");
-        } finally {
-            setIsSaving(false);
-        }
+    function startEditCondition(condition: ConditionDto) {
+        setEditingCondition(condition);
+        setConditionOperator(condition.operator ?? "");
+        setConditionCompare(condition.compare_value ?? "");
+        setConditionModalOpen(true);
     }
 
-    async function addProperty(conditionId: number) {
-        const propertyOptions = properties
-            .map((p) => `${p.id} - ${p.name ?? p.key ?? "(sem nome)"}`)
-            .join("\n");
-        const chosen = window.prompt(`ID da propriedade para vincular:\n${propertyOptions}`)?.trim() ?? "";
-        if (!chosen) return;
-        const property_id = Number(chosen);
-        if (!Number.isInteger(property_id) || property_id <= 0) {
-            setErrorCode("INVALID_PROPERTY_ID");
-            return;
-        }
-
+    async function addProperty(conditionId: number, propertyId: number) {
         setIsSaving(true);
         try {
             const res = await fetch(
@@ -221,7 +213,7 @@ export function EdgeConditionsClient({
                         accept: "application/json",
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ property_id }),
+                    body: JSON.stringify({ property_id: propertyId }),
                 }
             );
             const payload = (await res.json().catch(() => null)) as Envelope<ConditionPropertyDto> | null;
@@ -237,8 +229,15 @@ export function EdgeConditionsClient({
         }
     }
 
+    function startAddProperty(conditionId: number) {
+        setPropertyTargetConditionId(conditionId);
+        setSelectedPropertyId("");
+        setPropertyModalOpen(true);
+    }
+
     async function deleteProperty(conditionId: number, cpId: number) {
-        if (!window.confirm("Remover vínculo de propriedade?")) return;
+        const ok = await confirm("Remover vínculo de propriedade?");
+        if (!ok) return;
         setIsDeletingProp(cpId);
         try {
             const res = await fetch(
@@ -276,7 +275,7 @@ export function EdgeConditionsClient({
                 <div className="text-base font-semibold text-slate-900">Condições da Edge #{edgeId}</div>
                 <button
                     type="button"
-                    onClick={() => createCondition()}
+                    onClick={() => startCreateCondition()}
                     className="flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1.5 text-sm font-medium text-white shadow"
                 >
                     <PlusIcon className="h-4 w-4" />
@@ -322,7 +321,7 @@ export function EdgeConditionsClient({
                                 </button>
                                 <button
                                     type="button"
-                                    onClick={() => editCondition(c)}
+                                    onClick={() => startEditCondition(c)}
                                     disabled={isSaving}
                                     className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 disabled:opacity-50"
                                 >
@@ -335,7 +334,7 @@ export function EdgeConditionsClient({
                                     <div className="text-[13px] font-semibold text-slate-800">Propriedades vinculadas</div>
                                     <button
                                         type="button"
-                                        onClick={() => addProperty(c.id)}
+                                        onClick={() => startAddProperty(c.id)}
                                         className="flex items-center gap-1 rounded-full bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white shadow"
                                     >
                                         <PlusIcon className="h-4 w-4" />
@@ -375,6 +374,112 @@ export function EdgeConditionsClient({
                     );
                 })}
             </div>
+
+            <Modal
+                open={conditionModalOpen}
+                title={editingCondition ? `Editar condição #${editingCondition.id}` : "Nova condição"}
+                onClose={() => {
+                    setConditionModalOpen(false);
+                    setEditingCondition(null);
+                }}
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setConditionModalOpen(false);
+                                setEditingCondition(null);
+                            }}
+                            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => submitConditionForm()}
+                            className="rounded bg-blue-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-blue-500"
+                        >
+                            Salvar
+                        </button>
+                    </>
+                }
+            >
+                <div className="space-y-3">
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Operador</label>
+                        <input
+                            value={conditionOperator}
+                            onChange={(e) => setConditionOperator(e.target.value)}
+                            placeholder="equals, contains..."
+                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Valor de comparação</label>
+                        <input
+                            value={conditionCompare}
+                            onChange={(e) => setConditionCompare(e.target.value)}
+                            placeholder="valor"
+                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        />
+                    </div>
+                </div>
+            </Modal>
+
+            <Modal
+                open={propertyModalOpen}
+                title="Selecionar propriedade"
+                onClose={() => {
+                    setPropertyModalOpen(false);
+                    setPropertyTargetConditionId(null);
+                    setSelectedPropertyId("");
+                }}
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setPropertyModalOpen(false);
+                                setPropertyTargetConditionId(null);
+                                setSelectedPropertyId("");
+                            }}
+                            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            disabled={!propertyTargetConditionId || !selectedPropertyId}
+                            onClick={() => {
+                                if (!propertyTargetConditionId) return;
+                                const id = Number(selectedPropertyId);
+                                if (!Number.isInteger(id)) return;
+                                setPropertyModalOpen(false);
+                                void addProperty(propertyTargetConditionId, id);
+                            }}
+                            className="rounded bg-blue-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
+                        >
+                            Vincular
+                        </button>
+                    </>
+                }
+            >
+                <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Property</label>
+                    <select
+                        value={selectedPropertyId}
+                        onChange={(e) => setSelectedPropertyId(e.target.value)}
+                        className="w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    >
+                        <option value="">Selecione</option>
+                        {properties.map((p) => (
+                            <option key={p.id} value={p.id}>
+                                {p.id} - {p.name ?? p.key ?? "(sem nome)"}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </Modal>
         </section>
     );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useConfirm } from "@/app/components/ConfirmProvider";
 
 type NodeDto = {
     id: number;
@@ -142,6 +143,7 @@ function computeGraphLayout(nodes: NodeDto[], edges: EdgeDto[]) {
 }
 
 export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
+    const confirm = useConfirm();
     const [nodes, setNodes] = useState<NodeDto[]>(initialNodes);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [errorCode, setErrorCode] = useState<string | null>(
@@ -404,7 +406,8 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
     }
 
     async function deleteProperty(propertyId: number) {
-        if (!window.confirm(`Deletar property #${propertyId}?`)) return;
+        const ok = await confirm(`Deletar property #${propertyId}?`);
+        if (!ok) return;
 
         setDeletingPropertyId(propertyId);
         setDeletePropertyError(null);
@@ -670,7 +673,8 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
             return;
         }
 
-        if (!window.confirm(`Deletar edge #${edgeId}?`)) return;
+        const ok = await confirm(`Deletar edge #${edgeId}?`);
+        if (!ok) return;
 
         setDeletingEdgeId(edgeId);
         setDeleteEdgeError(null);
@@ -777,7 +781,8 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
     }
 
     async function unlinkProperty(nodeId: number, propertyId: number) {
-        if (!window.confirm(`Remover property #${propertyId} do node #${nodeId}?`)) return;
+        const ok = await confirm(`Remover property #${propertyId} do node #${nodeId}?`);
+        if (!ok) return;
 
         setIsMutatingPropsByNodeId((prev) => ({ ...prev, [nodeId]: true }));
         setNodePropertiesErrorByNodeId((prev) => ({ ...prev, [nodeId]: null }));
@@ -931,7 +936,8 @@ export function NodesListClient({ initialNodes, initialErrorCode }: Props) {
     }
 
     async function deleteNode(nodeId: number) {
-        if (!window.confirm(`Deletar node #${nodeId}?`)) return;
+        const ok = await confirm(`Deletar node #${nodeId}?`);
+        if (!ok) return;
 
         setDeletingId(nodeId);
         setDeleteError(null);

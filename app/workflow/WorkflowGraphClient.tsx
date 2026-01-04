@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { type NodeDto, type EdgeDto, type Envelope } from "@/app/workflow/WorkflowTypes";
+import { useConfirm } from "@/app/components/ConfirmProvider";
+import Modal from "@/app/components/Modal";
 
 type Props = {
     initialNodes: NodeDto[];
@@ -107,6 +109,7 @@ function computeGraphLayout(nodes: NodeDto[], edges: EdgeDto[]) {
 }
 
 export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
+    const confirm = useConfirm();
     const [nodes, setNodes] = useState<NodeDto[]>(initialNodes);
     const [errorCode, setErrorCode] = useState<string | null>(initialErrorCode ?? null);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -121,9 +124,16 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
 
     const [isCreatingNode, setIsCreatingNode] = useState(false);
     const [createNodeError, setCreateNodeError] = useState<string | null>(null);
+    const [nodeModalOpen, setNodeModalOpen] = useState(false);
+    const [nodePrompt, setNodePrompt] = useState("");
 
     const [isCreatingEdge, setIsCreatingEdge] = useState(false);
     const [createEdgeError, setCreateEdgeError] = useState<string | null>(null);
+    const [edgeModalOpen, setEdgeModalOpen] = useState(false);
+    const [edgeLabel, setEdgeLabel] = useState("");
+    const [edgePriority, setEdgePriority] = useState("0");
+    const [edgeSourceId, setEdgeSourceId] = useState<number | null>(null);
+    const [edgeDestId, setEdgeDestId] = useState<number | null>(null);
 
     const [isDeletingEdgeId, setIsDeletingEdgeId] = useState<number | null>(null);
     const [deleteEdgeError, setDeleteEdgeError] = useState<string | null>(null);
@@ -228,8 +238,14 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
         }
     }
 
-    async function createNodeFromGraph() {
-        const prompt = window.prompt("Prompt do novo node:")?.trim() ?? "";
+    function startCreateNode() {
+        setCreateNodeError(null);
+        setNodePrompt("");
+        setNodeModalOpen(true);
+    }
+
+    async function submitCreateNode() {
+        const prompt = nodePrompt.trim();
         if (!prompt) return;
 
         setIsCreatingNode(true);
@@ -249,6 +265,8 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                 return;
             }
 
+            setNodeModalOpen(false);
+            setNodePrompt("");
             await rehydrate();
         } catch {
             setCreateNodeError("NODES_CREATE_FAILED");
@@ -257,20 +275,36 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
         }
     }
 
-    async function createEdgeFromGraph(sourceNodeId: number, destinationNodeId: number) {
+    function startEdgeModal(sourceNodeId: number, destinationNodeId: number) {
         if (sourceNodeId === destinationNodeId) {
             setCreateEdgeError("DESTINATION_MUST_BE_DIFFERENT");
+            setConnectingFromNodeId(null);
+            setCursor(null);
             return;
         }
 
-        const label = window.prompt("Label da edge:")?.trim() ?? "";
+        setEdgeSourceId(sourceNodeId);
+        setEdgeDestId(destinationNodeId);
+        setEdgeLabel("");
+        setEdgePriority("0");
+        setEdgeModalOpen(true);
+        setConnectingFromNodeId(null);
+        setCursor(null);
+        setCreateEdgeError(null);
+    }
+
+    async function submitEdgeForm() {
+        const sourceNodeId = edgeSourceId;
+        const destinationNodeId = edgeDestId;
+        if (!sourceNodeId || !destinationNodeId) return;
+
+        const label = edgeLabel.trim();
         if (!label) {
             setCreateEdgeError("LABEL_REQUIRED");
             return;
         }
 
-        const priorityRaw = window.prompt("Priority (inteiro):", "0")?.trim() ?? "0";
-        const priority = Number(priorityRaw);
+        const priority = Number(edgePriority.trim() || "0");
         if (!Number.isFinite(priority) || !Number.isInteger(priority)) {
             setCreateEdgeError("INVALID_PRIORITY");
             return;
@@ -298,6 +332,12 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                 return;
             }
 
+            setEdgeModalOpen(false);
+            setEdgeSourceId(null);
+            setEdgeDestId(null);
+            setEdgeLabel("");
+            setEdgePriority("0");
+
             const controller = new AbortController();
             await loadGraphEdges(controller.signal);
         } catch {
@@ -308,7 +348,8 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
     }
 
     async function deleteEdge(edge: EdgeDto) {
-        if (!window.confirm(`Deletar edge #${edge.id}?`)) return;
+        const ok = await confirm(`Deletar edge #${edge.id}?`);
+        if (!ok) return;
 
         setIsDeletingEdgeId(edge.id);
         setDeleteEdgeError(null);
@@ -505,9 +546,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                             ev.stopPropagation();
                                             setActiveNodeId(n.id);
                                             if (connectingFromNodeId && connectingFromNodeId !== n.id) {
-                                                void createEdgeFromGraph(connectingFromNodeId, n.id);
-                                                setConnectingFromNodeId(null);
-                                                setCursor(null);
+                                                startEdgeModal(connectingFromNodeId, n.id);
                                             }
                                         }}
                                     >
@@ -553,7 +592,7 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                                 style={{ left: plusX, top: plusY, width: GRAPH_NODE_W, height: GRAPH_NODE_H }}
                                 onMouseDown={(ev) => {
                                     ev.stopPropagation();
-                                    void createNodeFromGraph();
+                                    startCreateNode();
                                 }}
                                 disabled={isCreatingNode}
                                 title="Criar novo node"
@@ -608,6 +647,101 @@ export function WorkflowGraphClient({ initialNodes, initialErrorCode }: Props) {
                     </div>
                 </div>
             </div>
+
+            <Modal
+                open={nodeModalOpen}
+                title="Novo node"
+                onClose={() => setNodeModalOpen(false)}
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => setNodeModalOpen(false)}
+                            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => submitCreateNode()}
+                            className="rounded bg-blue-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-blue-500"
+                            disabled={isCreatingNode}
+                        >
+                            {isCreatingNode ? "Criando…" : "Criar"}
+                        </button>
+                    </>
+                }
+            >
+                <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Prompt</label>
+                    <textarea
+                        value={nodePrompt}
+                        onChange={(e) => setNodePrompt(e.target.value)}
+                        className="min-h-[120px] w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                        placeholder="Descreva o comportamento do node"
+                    />
+                </div>
+            </Modal>
+
+            <Modal
+                open={edgeModalOpen}
+                title={`Criar edge${edgeSourceId ? ` do node #${edgeSourceId}` : ""}${edgeDestId ? ` → #${edgeDestId}` : ""}`}
+                onClose={() => {
+                    setEdgeModalOpen(false);
+                    setEdgeSourceId(null);
+                    setEdgeDestId(null);
+                    setEdgeLabel("");
+                    setEdgePriority("0");
+                    setCreateEdgeError(null);
+                }}
+                footer={
+                    <>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setEdgeModalOpen(false);
+                                setEdgeSourceId(null);
+                                setEdgeDestId(null);
+                                setEdgeLabel("");
+                                setEdgePriority("0");
+                                setCreateEdgeError(null);
+                            }}
+                            className="rounded border border-slate-300 px-3 py-1 text-sm text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => submitEdgeForm()}
+                            className="rounded bg-blue-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
+                            disabled={isCreatingEdge}
+                        >
+                            {isCreatingEdge ? "Criando…" : "Criar edge"}
+                        </button>
+                    </>
+                }
+            >
+                <div className="space-y-3">
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Label</label>
+                        <input
+                            value={edgeLabel}
+                            onChange={(e) => setEdgeLabel(e.target.value)}
+                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                            placeholder="Nome da edge"
+                        />
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-200">Prioridade (inteiro)</label>
+                        <input
+                            value={edgePriority}
+                            onChange={(e) => setEdgePriority(e.target.value)}
+                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                            placeholder="0"
+                        />
+                    </div>
+                </div>
+            </Modal>
         </section>
     );
 }
