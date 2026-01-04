@@ -5,7 +5,7 @@ import { EdgesPageClient } from "@/app/workflow/edges/EdgesPageClient";
 import { type EdgeDto, type NodeDto } from "@/app/workflow/WorkflowTypes";
 
 type Props = {
-    searchParams?: { source_node_id?: string };
+    searchParams: Promise<{ source_node_id?: string } | undefined>;
 };
 
 export default async function EdgesPage({ searchParams }: Props) {
@@ -13,9 +13,10 @@ export default async function EdgesPage({ searchParams }: Props) {
     const cookie = h.get("cookie");
     const opts = cookie ? { headers: { cookie } } : undefined;
 
-    const rawSource = Array.isArray(searchParams?.source_node_id)
-        ? searchParams?.source_node_id[0]
-        : searchParams?.source_node_id;
+    const awaitedSearch = await searchParams;
+    const rawSource = Array.isArray(awaitedSearch?.source_node_id)
+        ? awaitedSearch?.source_node_id[0]
+        : awaitedSearch?.source_node_id;
     const sourceId = Number(rawSource);
     const selectedSourceId = Number.isInteger(sourceId) && sourceId > 0 ? sourceId : null;
 
@@ -27,7 +28,7 @@ export default async function EdgesPage({ searchParams }: Props) {
         : { data: [], error: null };
 
     return (
-        <main className="mx-auto w-full max-w-6xl px-4 py-6">
+        <main className="mx-auto w-full max-w-6xl px-4 py-6 min-h-screen bg-white text-slate-900">
             <EdgesPageClient
                 nodes={nodes}
                 nodesErrorCode={nodesPayload.error?.code ?? null}

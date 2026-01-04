@@ -5,10 +5,11 @@ import { PropertiesPageClient } from "@/app/workflow/properties/PropertiesPageCl
 import { type PropertyDto } from "@/app/workflow/WorkflowTypes";
 
 type Props = {
-    searchParams?: { q?: string };
+    searchParams: Promise<{ q?: string } | undefined>;
 };
 
 export default async function PropertiesPage({ searchParams }: Props) {
+    const awaitedSearch = await searchParams;
     const h = await headers();
     const cookie = h.get("cookie");
     const opts = cookie ? { headers: { cookie } } : undefined;
@@ -17,11 +18,11 @@ export default async function PropertiesPage({ searchParams }: Props) {
     const properties = Array.isArray(payload.data) ? payload.data : [];
 
     return (
-        <main className="mx-auto w-full max-w-5xl px-4 py-6">
+        <main className="mx-auto w-full max-w-5xl px-4 py-6 min-h-screen bg-white text-slate-900">
             <PropertiesPageClient
                 initialProperties={properties}
                 initialErrorCode={payload.error?.code ?? null}
-                initialQuery={searchParams?.q?.trim() ?? ""}
+                initialQuery={awaitedSearch?.q?.trim() ?? ""}
             />
         </main>
     );

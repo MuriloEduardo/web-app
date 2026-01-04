@@ -43,7 +43,7 @@ export default function NewNodePage() {
     }
 
     return (
-        <main className="mx-auto w-full max-w-3xl px-4 py-6">
+        <main className="mx-auto w-full max-w-3xl px-4 py-6 min-h-screen bg-white text-slate-900">
             <div className="text-xs text-slate-600">Workflow / Nodes / Novo</div>
             <div className="mt-1 flex items-center justify-between gap-3">
                 <h1 className="text-xl font-semibold text-slate-900">Criar node</h1>

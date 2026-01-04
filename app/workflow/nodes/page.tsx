@@ -5,7 +5,7 @@ import { bffGet } from "@/app/lib/bff/fetcher";
 import { type NodeDto } from "@/app/workflow/WorkflowTypes";
 
 type Props = {
-    searchParams?: { q?: string };
+    searchParams: Promise<{ q?: string }>;
 };
 
 function normalize(text: string) {
@@ -15,7 +15,8 @@ function normalize(text: string) {
 export default async function NodesPage({ searchParams }: Props) {
     const h = await headers();
     const cookie = h.get("cookie");
-    const query = searchParams?.q?.trim() ?? "";
+    const awaitedSearch = await searchParams;
+    const query = awaitedSearch?.q?.trim() ?? "";
 
     const payload = await bffGet<NodeDto[]>(
         "/api/nodes",
@@ -34,7 +35,7 @@ export default async function NodesPage({ searchParams }: Props) {
         : nodes;
 
     return (
-        <main className="mx-auto w-full max-w-6xl px-4 py-6">
+        <main className="mx-auto w-full max-w-6xl px-4 py-6 min-h-screen bg-white text-slate-900">
             <div className="text-xs text-slate-600">Workflow / Nodes</div>
             <div className="mt-1 flex items-center justify-between gap-3">
                 <h1 className="text-xl font-semibold text-slate-900">Nodes</h1>

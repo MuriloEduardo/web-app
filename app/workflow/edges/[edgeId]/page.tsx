@@ -10,6 +10,11 @@ import {
     type EdgeDto,
 } from "@/app/workflow/WorkflowTypes";
 
+type Props = {
+    params: Promise<{ edgeId: string }>;
+    searchParams: Promise<{ source_node_id?: string } | undefined>;
+};
+
 async function fetchConditions(cookie: string | null, edgeId: number, source_node_id: number) {
     const payload = await bffGet<ConditionDto[]>(
         `/api/conditions?edge_id=${edgeId}&source_node_id=${source_node_id}`,
@@ -65,15 +70,17 @@ async function inferSourceNodeId(edgeId: number, cookie: string | null): Promise
     return null;
 }
 
-export default async function EdgeConditionsPage({ params, searchParams }: { params: Promise<{ edgeId: string }>; searchParams?: { source_node_id?: string } }) {
+export default async function EdgeConditionsPage({ params, searchParams }: Props) {
     const h = await headers();
     const cookie = h.get("cookie");
 
     const awaitedParams = await params;
+    const awaitedSearch = await searchParams;
+
     const edgeId = Number(awaitedParams.edgeId);
-    const rawSource = Array.isArray(searchParams?.source_node_id)
-        ? searchParams?.source_node_id[0]
-        : searchParams?.source_node_id;
+    const rawSource = Array.isArray(awaitedSearch?.source_node_id)
+        ? awaitedSearch?.source_node_id[0]
+        : awaitedSearch?.source_node_id;
     let source_node_id = Number(rawSource ?? "");
     const initialEdgeError = !Number.isInteger(edgeId) || edgeId <= 0 ? "INVALID_EDGE_ID" : null;
     let initialSourceError = !Number.isInteger(source_node_id) || source_node_id <= 0 ? "INVALID_SOURCE_NODE_ID" : null;
@@ -139,7 +146,7 @@ export default async function EdgeConditionsPage({ params, searchParams }: { par
     propertiesPayload = await fetchProperties(cookie);
 
     return (
-        <main className="mx-auto w-full max-w-5xl px-4 py-6">
+        <main className="mx-auto w-full max-w-5xl px-4 py-6 min-h-screen bg-white text-slate-900">
             <EdgeConditionsClient
                 edgeId={edgeId}
                 sourceNodeId={source_node_id}
