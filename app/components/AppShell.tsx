@@ -10,6 +10,8 @@ import {
     ChatBubbleBottomCenterIcon
 } from "@heroicons/react/24/solid";
 
+import ProgressBar from "@/app/components/ProgressBar";
+
 function isActive(pathname: string, href: string) {
     if (href === "/") return pathname === "/";
     return pathname === href || pathname.startsWith(href + "/");
@@ -27,6 +29,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="pb-20">
+            <ProgressBar />
             {children}
 
             {hideNav ? null : (
