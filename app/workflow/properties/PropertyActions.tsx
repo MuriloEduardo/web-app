@@ -5,16 +5,16 @@ import { useRouter } from "next/navigation";
 
 type PropertyActionsProps = {
     propertyId: number;
-    name: string;
-    type: string;
-    propertyKey: string | null;
+    name?: string;
+    type?: string;
+    propertyKey?: string | null;
 };
 
 export default function PropertyActions({ propertyId, name, type, propertyKey }: PropertyActionsProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
-    const [editName, setEditName] = useState(name);
-    const [editType, setEditType] = useState(type);
+    const [editName, setEditName] = useState(name || "");
+    const [editType, setEditType] = useState(type || "");
     const [editKey, setEditKey] = useState(propertyKey || "");
     const [isDeleting, setIsDeleting] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -74,8 +74,8 @@ export default function PropertyActions({ propertyId, name, type, propertyKey }:
                     <button
                         onClick={() => {
                             setIsEditing(false);
-                            setEditName(name);
-                            setEditType(type);
+                            setEditName(name || "");
+                            setEditType(type || "");
                             setEditKey(propertyKey || "");
                         }}
                         className="text-xs text-slate-500 hover:text-slate-700"

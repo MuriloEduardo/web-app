@@ -16,9 +16,7 @@ export default async function WorkflowPage() {
     return (
         <main className="min-h-screen px-3 py-4 text-slate-900 dark:text-white sm:px-4 sm:py-6">
             <div className="mx-auto w-full max-w-5xl">
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                    <h1 className="text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">Workflow - Nodes</h1>
-                </div>
+                <h1 className="text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">Workflow - Nodes</h1>
 
                 {errorCode ? (
                     <div className="mt-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
