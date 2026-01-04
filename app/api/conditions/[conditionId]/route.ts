@@ -174,53 +174,18 @@ function parseUpdateBody(body: unknown):
     return { ok: true, ...out };
 }
 
-export async function GET(req: Request, ctx: { params: Promise<{ conditionId: string }> }) {
-    const session = await getServerSession(authOptions);
-    const email = session?.user?.email?.trim().toLowerCase();
-    if (!email) {
-        return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
-    }
-
-    const parsedQuery = parseEdgeAndSource(req);
-    if (!parsedQuery.ok) {
-        return NextResponse.json({ error: { code: parsedQuery.code } }, { status: parsedQuery.status });
-    }
-
+export async function GET(_req: Request, ctx: { params: Promise<{ conditionId: string }> }) {
     const params = await ctx.params;
     const parsedId = parseConditionId(params);
     if (!parsedId.ok) {
         return NextResponse.json({ error: { code: parsedId.code } }, { status: parsedId.status });
     }
 
-    const nodesBaseUrl = resolveServiceUrlFromEnv("/nodes");
-    const edgesBaseUrl = resolveServiceUrlFromEnv("/edges");
     const conditionsBaseUrl = resolveServiceUrlFromEnv("/conditions");
-    if (!nodesBaseUrl || !edgesBaseUrl || !conditionsBaseUrl) {
+    if (!conditionsBaseUrl) {
         return NextResponse.json(
             { error: { code: "FLOW_MANAGER_SERVICE_URL_NOT_CONFIGURED" } },
             { status: 500 }
-        );
-    }
-
-    const companyIdResult = await getCompanyIdForEmail(email);
-    if (!companyIdResult.ok) {
-        return NextResponse.json(
-            { error: { code: companyIdResult.code, details: companyIdResult.details } },
-            { status: companyIdResult.status }
-        );
-    }
-
-    const edgeOwn = await assertEdgeBelongsToCompany(
-        edgesBaseUrl,
-        nodesBaseUrl,
-        companyIdResult.company_id,
-        parsedQuery.edge_id,
-        parsedQuery.source_node_id
-    );
-    if (!edgeOwn.ok) {
-        return NextResponse.json(
-            { error: { code: edgeOwn.code, details: edgeOwn.details } },
-            { status: edgeOwn.status }
         );
     }
 
@@ -231,7 +196,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ conditionId: st
         res = await fetch(upstreamUrl, { headers: { accept: "application/json" } });
     } catch (error) {
         return NextResponse.json(
-            { error: { code: "CONDITIONS_FETCH_FAILED", details: error instanceof Error ? error.message : error } },
+            { error: { code: "CONDITION_FETCH_FAILED", details: error instanceof Error ? error.message : error } },
             { status: 502 }
         );
     }
@@ -239,19 +204,9 @@ export async function GET(req: Request, ctx: { params: Promise<{ conditionId: st
     const body = await readJsonOrText(res);
     if (!res.ok) {
         return NextResponse.json(
-            { error: { code: "CONDITIONS_FETCH_FAILED", details: body } },
+            { error: { code: "CONDITION_FETCH_FAILED", details: body } },
             { status: res.status }
         );
-    }
-
-    if (typeof body === "object" && body !== null) {
-        const edgeIdValue = (body as Record<string, unknown>).edge_id;
-        if (edgeIdValue !== undefined && Number(edgeIdValue) !== parsedQuery.edge_id) {
-            return NextResponse.json(
-                { error: { code: "CONDITION_EDGE_MISMATCH" } },
-                { status: 404 }
-            );
-        }
     }
 
     return NextResponse.json({ data: body });
