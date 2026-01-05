@@ -92,6 +92,7 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                 <ConditionActions
                     conditionId={condition.id}
                     edgeId={condition.edge_id}
+                    sourceNodeId={edge.source_node_id}
                     operator={condition.operator}
                     compareValue={condition.compare_value}
                     createdAt={condition.created_at}
@@ -153,11 +154,11 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </Link>
-                                        <DeletePropertyButton 
-                                            conditionId={condition.id} 
+                                        <DeletePropertyButton
+                                            conditionId={condition.id}
                                             edgeId={condition.edge_id}
                                             sourceNodeId={edge.source_node_id}
-                                            propertyId={property.id} 
+                                            propertyId={property.id}
                                         />
                                     </div>
                                 </div>

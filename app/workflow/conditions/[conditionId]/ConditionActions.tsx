@@ -6,13 +6,14 @@ import { useRouter } from "next/navigation";
 type ConditionActionsProps = {
     conditionId: number;
     edgeId: number;
+    sourceNodeId: number;
     operator: string;
     compareValue: string;
     createdAt?: string;
     updatedAt?: string;
 };
 
-export default function ConditionActions({ conditionId, edgeId, operator, compareValue, createdAt, updatedAt }: ConditionActionsProps) {
+export default function ConditionActions({ conditionId, edgeId, sourceNodeId, operator, compareValue, createdAt, updatedAt }: ConditionActionsProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [editOperator, setEditOperator] = useState(operator);
@@ -23,12 +24,12 @@ export default function ConditionActions({ conditionId, edgeId, operator, compar
     async function handleSave() {
         setIsSaving(true);
         try {
-            const res = await fetch(`/api/conditions/${conditionId}?edge_id=${edgeId}&source_node_id=0`, {
+            const res = await fetch(`/api/conditions/${conditionId}?edge_id=${edgeId}&source_node_id=${sourceNodeId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    operator: editOperator, 
-                    compare_value: editCompareValue 
+                body: JSON.stringify({
+                    operator: editOperator,
+                    compare_value: editCompareValue
                 }),
             });
 
@@ -47,10 +48,10 @@ export default function ConditionActions({ conditionId, edgeId, operator, compar
 
     async function handleDelete() {
         if (!confirm("Tem certeza que deseja deletar esta condition?")) return;
-        
+
         setIsDeleting(true);
         try {
-            const res = await fetch(`/api/conditions/${conditionId}?edge_id=${edgeId}&source_node_id=0`, {
+            const res = await fetch(`/api/conditions/${conditionId}?edge_id=${edgeId}&source_node_id=${sourceNodeId}`, {
                 method: "DELETE",
             });
 
