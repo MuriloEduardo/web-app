@@ -300,6 +300,16 @@ export function EdgeConditionsClient({
                                     <div>
                                         <div className="text-sm font-semibold text-slate-900 dark:text-white">Condição #{c.id}</div>
                                         <div className="text-xs text-slate-500 dark:text-gray-300">{c.operator} • {c.compare_value}</div>
+                                        {c.created_at && (
+                                            <div className="text-xs text-slate-500 dark:text-gray-400">
+                                                Criado: {new Date(c.created_at).toLocaleString('pt-BR')}
+                                            </div>
+                                        )}
+                                        {c.updated_at && (
+                                            <div className="text-xs text-slate-500 dark:text-gray-400">
+                                                Atualizado: {new Date(c.updated_at).toLocaleString('pt-BR')}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex flex-wrap gap-2 text-xs">
                                         <button

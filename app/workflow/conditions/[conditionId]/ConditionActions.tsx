@@ -8,9 +8,11 @@ type ConditionActionsProps = {
     edgeId: number;
     operator: string;
     compareValue: string;
+    createdAt?: string;
+    updatedAt?: string;
 };
 
-export default function ConditionActions({ conditionId, edgeId, operator, compareValue }: ConditionActionsProps) {
+export default function ConditionActions({ conditionId, edgeId, operator, compareValue, createdAt, updatedAt }: ConditionActionsProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [editOperator, setEditOperator] = useState(operator);
@@ -137,6 +139,22 @@ export default function ConditionActions({ conditionId, edgeId, operator, compar
                                 {compareValue}
                             </span>
                         </div>
+                        {createdAt && (
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-slate-600 dark:text-slate-400">Criado em:</span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400">
+                                    {new Date(createdAt).toLocaleString('pt-BR')}
+                                </span>
+                            </div>
+                        )}
+                        {updatedAt && (
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-slate-600 dark:text-slate-400">Atualizado em:</span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400">
+                                    {new Date(updatedAt).toLocaleString('pt-BR')}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="ml-3 flex gap-2">

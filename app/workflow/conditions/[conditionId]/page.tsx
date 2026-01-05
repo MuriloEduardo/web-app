@@ -95,6 +95,8 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                     edgeId={condition.edge_id}
                     operator={condition.operator}
                     compareValue={condition.compare_value}
+                    createdAt={condition.created_at}
+                    updatedAt={condition.updated_at}
                 />
 
                 {/* Properties Section */}

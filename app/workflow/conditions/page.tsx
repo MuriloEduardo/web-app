@@ -55,6 +55,16 @@ export default async function ConditionsPage() {
                                     <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
                                         Edge ID: {condition.edge_id}
                                     </p>
+                                    {condition.created_at && (
+                                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                            Criado: {new Date(condition.created_at).toLocaleString('pt-BR')}
+                                        </p>
+                                    )}
+                                    {condition.updated_at && (
+                                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                                            Atualizado: {new Date(condition.updated_at).toLocaleString('pt-BR')}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         </div>
