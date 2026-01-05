@@ -54,9 +54,10 @@ export type PropertyDto = {
 
 export type NotificationDto = {
     id: number;
-    node_id: number;
+    trigger_node_id: number;
     company_id: number;
-    message: string;
+    subject: string;
+    active: boolean;
     created_at?: string;
     updated_at?: string;
 };

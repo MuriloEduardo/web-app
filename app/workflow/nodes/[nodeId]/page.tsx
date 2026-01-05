@@ -22,7 +22,7 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
     const edgesPayload = await bffGet<EdgeDto[]>(`/api/edges?source_node_id=${idNum}`, opts);
     const nodePropertiesPayload = await bffGet<Array<{ node_id: number; property_id: number }>>(`/api/node-properties?node_id=${idNum}`, opts);
     const allPropertiesPayload = await bffGet<PropertyDto[]>(`/api/properties`, opts);
-    const notificationsPayload = await bffGet<NotificationDto[]>(`/api/notifications?node_id=${idNum}`, opts);
+    const notificationsPayload = await bffGet<NotificationDto[]>(`/api/notifications?trigger_node_id=${idNum}`, opts);
 
     const node = nodePayload.data;
     const edges = Array.isArray(edgesPayload.data) ? edgesPayload.data : [];

@@ -63,9 +63,10 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const upstreamBody = {
-        node_id: body.node_id,
+        trigger_node_id: body.trigger_node_id,
         company_id: company_id,
-        message: body.message || "",
+        subject: body.subject || "",
+        active: body.active !== undefined ? body.active : true,
     };
 
     const res = await fetch(notificationsUrl, {

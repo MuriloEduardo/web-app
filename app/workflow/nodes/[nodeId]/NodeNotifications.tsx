@@ -12,14 +12,14 @@ type NodeNotificationsProps = {
 export default function NodeNotifications({ nodeId, notifications: initialNotifications }: NodeNotificationsProps) {
     const router = useRouter();
     const [isCreating, setIsCreating] = useState(false);
-    const [message, setMessage] = useState("");
+    const [subject, setSubject] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     async function handleCreate(e: React.FormEvent) {
         e.preventDefault();
 
-        if (!message.trim()) {
-            alert("Digite uma mensagem para a notificação");
+        if (!subject.trim()) {
+            alert("Digite um assunto para a notificação");
             return;
         }
 
@@ -29,16 +29,14 @@ export default function NodeNotifications({ nodeId, notifications: initialNotifi
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    node_id: nodeId,
-                    message: message.trim(),
+                    trigger_node_id: nodeId,
+                    subject: subject.trim(),
+                    active: true,
                 }),
             });
 
             if (res.ok) {
-                setMessage("");
-                setIsCreating(false);
-                router.refresh();
-            } else {
+                setSubject("");
                 const errorData = await res.json().catch(() => ({}));
                 alert(`Erro ao criar notificação: ${errorData.error?.code || "Erro desconhecido"}`);
             }
@@ -90,16 +88,16 @@ export default function NodeNotifications({ nodeId, notifications: initialNotifi
                 <div className="mt-3 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-700 dark:bg-yellow-900/20">
                     <form onSubmit={handleCreate} className="space-y-3">
                         <div>
-                            <label htmlFor="message" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                Mensagem da Notificação
+                            <label htmlFor="subject" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                Assunto da Notificação
                             </label>
                             <textarea
-                                id="message"
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
+                                id="subject"
+                                value={subject}
+                                onChange={(e) => setSubject(e.target.value)}
                                 className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
                                 rows={3}
-                                placeholder="Digite a mensagem que será enviada quando este node for executado"
+                                placeholder="Digite o assunto da notificação que será enviada quando este node for executado"
                                 required
                             />
                         </div>
@@ -115,7 +113,7 @@ export default function NodeNotifications({ nodeId, notifications: initialNotifi
                                 type="button"
                                 onClick={() => {
                                     setIsCreating(false);
-                                    setMessage("");
+                                    setSubject("");
                                 }}
                                 className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
                             >
@@ -138,9 +136,14 @@ export default function NodeNotifications({ nodeId, notifications: initialNotifi
                                     <span className="rounded bg-yellow-100 px-2 py-0.5 text-xs font-mono font-semibold text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300">
                                         Notification #{notification.id}
                                     </span>
+                                    {notification.active && (
+                                        <span className="rounded bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700 dark:bg-green-900 dark:text-green-300">
+                                            Ativa
+                                        </span>
+                                    )}
                                 </div>
                                 <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
-                                    {notification.message}
+                                    {notification.subject}
                                 </p>
                                 {notification.created_at && (
                                     <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
