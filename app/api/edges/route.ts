@@ -20,10 +20,11 @@ export async function GET(req: Request) {
     }
 
     const company_id = await getCompanyId(email);
-    const edgesUrl = resolveServiceUrlFromEnv("/edges");
+    const edgesBaseUrl = resolveServiceUrlFromEnv("/edges");
+    const edgesUrl = edgesBaseUrl!.endsWith('/') ? edgesBaseUrl : `${edgesBaseUrl}/`;
 
     const url = new URL(req.url);
-    const upstreamUrl = new URL(edgesUrl!);
+    const upstreamUrl = new URL(edgesUrl);
     url.searchParams.forEach((value, key) => {
         upstreamUrl.searchParams.append(key, value);
     });
@@ -49,16 +50,18 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
     }
 
-    const company_id = await getCompanyId(email);
     const edgesUrl = resolveServiceUrlFromEnv("/edges");
 
     const body = await req.json();
-    const upstreamBody = { ...body, company_id };
 
-    console.log('[POST /api/edges] Request body:', upstreamBody);
-    console.log('[POST /api/edges] Upstream URL:', edgesUrl);
+    const upstreamBody = {
+        source_node_id: body.source_node_id,
+        destination_node_id: body.destination_node_id,
+        label: body.label || "",
+        priority: body.priority ?? 0,
+    };
 
-    const res = await fetch(edgesUrl!, {
+    const res = await fetch(edgesUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(upstreamBody),
