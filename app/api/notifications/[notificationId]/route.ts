@@ -1,5 +1,5 @@
 import { requireAuth } from "@/app/api/auth-helper";
-import { resolveServiceUrlFromEnv } from "@/app/api/nodes/_shared";
+import { resolveServiceUrlFromEnv, getCompanyIdForEmail } from "@/app/api/nodes/_shared";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(
@@ -10,6 +10,17 @@ export async function DELETE(
     if (authResponse instanceof NextResponse) {
         return authResponse;
     }
+    const email = authResponse;
+
+    // Get company_id
+    const companyResult = await getCompanyIdForEmail(email);
+    if (!companyResult.ok) {
+        return NextResponse.json(
+            { error: { code: companyResult.code } },
+            { status: 500 }
+        );
+    }
+    const company_id = companyResult.company_id;
 
     const { notificationId } = await context.params;
     const id = parseInt(notificationId, 10);
@@ -31,7 +42,7 @@ export async function DELETE(
     try {
         // Remove trailing slash if present
         const baseUrl = serviceUrl.endsWith('/') ? serviceUrl.slice(0, -1) : serviceUrl;
-        const url = `${baseUrl}/${id}/`;
+        const url = `${baseUrl}/${id}/?company_id=${company_id}`;
         console.log(`[DELETE Notification] Calling: ${url}`);
 
         const res = await fetch(url, {
