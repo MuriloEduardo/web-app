@@ -429,7 +429,7 @@ export async function DELETE(
         );
     }
 
-    const upstreamUrl = `${conditionPropsBaseUrl.replace(/\/+$/, "")}/${encodeURIComponent(String(parsedId.id))}`;
+    const upstreamUrl = `${conditionPropsBaseUrl.replace(/\/+$/, "")}/${encodeURIComponent(String(parsedQuery.condition_id))}/${encodeURIComponent(String(parsedId.id))}`;
 
     let res: Response;
     try {

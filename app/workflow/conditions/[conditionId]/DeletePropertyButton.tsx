@@ -16,32 +16,11 @@ export default function DeletePropertyButton({ conditionId, edgeId, sourceNodeId
 
     async function handleDelete() {
         if (!confirm("Tem certeza que deseja desvincular esta property?")) return;
-        
+
         setIsDeleting(true);
+
         try {
-            // First, get all condition-properties to find the junction table ID
-            const listRes = await fetch(`/api/condition-properties?condition_id=${conditionId}&edge_id=${edgeId}&source_node_id=${sourceNodeId}`);
-            if (!listRes.ok) {
-                alert("Erro ao buscar condition-properties");
-                return;
-            }
-
-            const listData = await listRes.json();
-            const conditionProperties = Array.isArray(listData.data) ? listData.data : [];
-            
-            // Find the junction record that matches this condition and property
-            const record = conditionProperties.find(
-                (cp: { condition_id: number; property_id: number; id: number }) => 
-                    cp.condition_id === conditionId && cp.property_id === propertyId
-            );
-
-            if (!record) {
-                alert("Property não encontrada");
-                return;
-            }
-
-            // Now delete using the junction table ID
-            const res = await fetch(`/api/condition-properties/${record.id}?condition_id=${conditionId}&edge_id=${edgeId}&source_node_id=${sourceNodeId}`, {
+            const res = await fetch(`/api/condition-properties/${propertyId}?condition_id=${conditionId}&edge_id=${edgeId}&source_node_id=${sourceNodeId}`, {
                 method: "DELETE",
             });
 
