@@ -112,7 +112,7 @@ export default function ConditionActions({ conditionId, edgeId, sourceNodeId, op
                 <div className="mt-3 flex gap-2">
                     <button
                         onClick={handleSave}
-                        disabled={isSaving || !editOperator.trim() || !editCompareValue.trim()}
+                        disabled={isSaving}
                         className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
                     >
                         {isSaving ? "Salvando..." : "Salvar"}
