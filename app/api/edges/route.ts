@@ -21,7 +21,13 @@ export async function GET(req: Request) {
 
     const company_id = await getCompanyId(email);
     const edgesBaseUrl = resolveServiceUrlFromEnv("/edges");
-    const edgesUrl = edgesBaseUrl!.endsWith('/') ? edgesBaseUrl : `${edgesBaseUrl}/`;
+    if (!edgesBaseUrl) {
+        return NextResponse.json(
+            { error: { code: "EDGES_SERVICE_URL_NOT_CONFIGURED" } },
+            { status: 500 }
+        );
+    }
+    const edgesUrl = edgesBaseUrl.endsWith('/') ? edgesBaseUrl : `${edgesBaseUrl}/`;
 
     const url = new URL(req.url);
     const upstreamUrl = new URL(edgesUrl);
@@ -50,7 +56,14 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: { code: "UNAUTHORIZED" } }, { status: 401 });
     }
 
-    const edgesUrl = resolveServiceUrlFromEnv("/edges");
+    const edgesBaseUrl = resolveServiceUrlFromEnv("/edges");
+    if (!edgesBaseUrl) {
+        return NextResponse.json(
+            { error: { code: "EDGES_SERVICE_URL_NOT_CONFIGURED" } },
+            { status: 500 }
+        );
+    }
+    const edgesUrl = edgesBaseUrl.endsWith('/') ? edgesBaseUrl : `${edgesBaseUrl}/`;
 
     const body = await req.json();
 
