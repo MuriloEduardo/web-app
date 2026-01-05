@@ -12,15 +12,14 @@ type NotificationRecipientsProps = {
 export default function NotificationRecipients({ notificationId, recipients: initialRecipients }: NotificationRecipientsProps) {
     const router = useRouter();
     const [isAdding, setIsAdding] = useState(false);
-    const [recipientType, setRecipientType] = useState("email");
-    const [recipientValue, setRecipientValue] = useState("");
+    const [recipientIdentifier, setRecipientIdentifier] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     async function handleAdd(e: React.FormEvent) {
         e.preventDefault();
 
-        if (!recipientValue.trim()) {
-            alert("Digite um valor para o recebedor");
+        if (!recipientIdentifier.trim()) {
+            alert("Digite um identificador para o recebedor (email, telefone, etc.)");
             return;
         }
 
@@ -31,13 +30,13 @@ export default function NotificationRecipients({ notificationId, recipients: ini
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     notification_id: notificationId,
-                    recipient_type: recipientType,
-                    recipient_value: recipientValue.trim(),
+                    recipient_identifier: recipientIdentifier.trim(),
+                    active: true,
                 }),
             });
 
             if (res.ok) {
-                setRecipientValue("");
+                setRecipientIdentifier("");
                 setIsAdding(false);
                 router.refresh();
             } else {
@@ -71,9 +70,18 @@ export default function NotificationRecipients({ notificationId, recipients: ini
         }
     }
 
-    const getRecipientIcon = (type: string | undefined) => {
-        const typeStr = (type || "").toLowerCase();
-        switch (typeStr) {
+    const getRecipientIcon = (identifier: string | undefined) => {
+        const id = (identifier || "").toLowerCase();
+
+        // Detectar tipo baseado no formato do identifier
+        let type = "default";
+        if (id.includes("@")) {
+            type = "email";
+        } else if (id.includes("+") || /^\d+$/.test(id)) {
+            type = "phone";
+        }
+
+        switch (type) {
             case "email":
                 return (
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -125,32 +133,16 @@ export default function NotificationRecipients({ notificationId, recipients: ini
                 <div className="mb-3 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-700 dark:bg-blue-900/20">
                     <form onSubmit={handleAdd} className="space-y-2">
                         <div>
-                            <label htmlFor="recipient-type" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                Tipo
-                            </label>
-                            <select
-                                id="recipient-type"
-                                value={recipientType}
-                                onChange={(e) => setRecipientType(e.target.value)}
-                                className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
-                            >
-                                <option value="email">Email</option>
-                                <option value="phone">Telefone</option>
-                                <option value="sms">SMS</option>
-                                <option value="whatsapp">WhatsApp</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label htmlFor="recipient-value" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                                {recipientType === "email" ? "Endereço de Email" : "Número"}
+                            <label htmlFor="recipient-identifier" className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                                Identificador do Recebedor
                             </label>
                             <input
-                                id="recipient-value"
-                                type={recipientType === "email" ? "email" : "text"}
-                                value={recipientValue}
-                                onChange={(e) => setRecipientValue(e.target.value)}
+                                id="recipient-identifier"
+                                type="text"
+                                value={recipientIdentifier}
+                                onChange={(e) => setRecipientIdentifier(e.target.value)}
                                 className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
-                                placeholder={recipientType === "email" ? "exemplo@email.com" : "+5511999999999"}
+                                placeholder="email@exemplo.com ou +5511999999999"
                                 required
                             />
                         </div>
@@ -166,7 +158,7 @@ export default function NotificationRecipients({ notificationId, recipients: ini
                                 type="button"
                                 onClick={() => {
                                     setIsAdding(false);
-                                    setRecipientValue("");
+                                    setRecipientIdentifier("");
                                 }}
                                 className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
                             >
@@ -185,16 +177,18 @@ export default function NotificationRecipients({ notificationId, recipients: ini
                     >
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                             <span className="text-slate-500 dark:text-slate-400">
-                                {getRecipientIcon(recipient.recipient_type)}
+                                {getRecipientIcon(recipient.recipient_identifier)}
                             </span>
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400 capitalize">
-                                        {recipient.recipient_type}
-                                    </span>
+                                    {recipient.active && (
+                                        <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                                            Ativo
+                                        </span>
+                                    )}
                                 </div>
                                 <p className="text-sm text-slate-700 dark:text-slate-300 truncate">
-                                    {recipient.recipient_value}
+                                    {recipient.recipient_identifier}
                                 </p>
                             </div>
                         </div>

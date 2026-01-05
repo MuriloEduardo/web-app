@@ -65,8 +65,8 @@ export type NotificationDto = {
 export type NotificationRecipientDto = {
     id: number;
     notification_id: number;
-    recipient_type: string;
-    recipient_value: string;
+    recipient_identifier: string;
+    active: boolean;
     created_at?: string;
     updated_at?: string;
 };

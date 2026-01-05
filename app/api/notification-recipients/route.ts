@@ -51,8 +51,8 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const upstreamBody = {
         notification_id: body.notification_id,
-        recipient_type: body.recipient_type || "",
-        recipient_value: body.recipient_value || "",
+        recipient_identifier: body.recipient_identifier || "",
+        active: body.active !== undefined ? body.active : true,
     };
 
     const res = await fetch(recipientsUrl, {
