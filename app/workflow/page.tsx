@@ -26,6 +26,15 @@ export default async function WorkflowPage({ searchParams }: PageProps) {
             <div className="mx-auto w-full max-w-5xl">
                 <div className="flex items-center justify-between gap-4">
                     <h1 className="text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">Workflow - Nodes</h1>
+                    <Link
+                        href="/workflow/nodes/new"
+                        className="rounded-lg bg-blue-600 p-2 text-white hover:bg-blue-700"
+                        title="Criar novo node"
+                    >
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                    </Link>
                 </div>
 
                 {errorCode ? (
