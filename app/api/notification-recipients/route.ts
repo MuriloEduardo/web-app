@@ -49,11 +49,15 @@ export async function POST(req: NextRequest) {
     const recipientsUrl = recipientsBaseUrl.endsWith('/') ? recipientsBaseUrl : `${recipientsBaseUrl}/`;
 
     const body = await req.json();
-    const upstreamBody = {
-        notification_id: body.notification_id,
+    const upstreamBody: any = {
         recipient_identifier: body.recipient_identifier || "",
         active: body.active !== undefined ? body.active : true,
     };
+    
+    // notification_id é opcional - se não fornecido, cria um recebedor global
+    if (body.notification_id !== undefined && body.notification_id !== null) {
+        upstreamBody.notification_id = body.notification_id;
+    }
 
     const res = await fetch(recipientsUrl, {
         method: "POST",

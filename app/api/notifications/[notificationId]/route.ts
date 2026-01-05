@@ -30,6 +30,8 @@ export async function DELETE(
 
     try {
         const url = `${serviceUrl}/${id}/`;
+        console.log(`[DELETE Notification] Calling: ${url}`);
+
         const res = await fetch(url, {
             method: "DELETE",
             headers: {
@@ -40,12 +42,14 @@ export async function DELETE(
         if (!res.ok) {
             const errorText = await res.text();
             console.error(`Backend DELETE /notifications/${id}/ failed:`, res.status, errorText);
+            console.error(`Full URL was: ${url}`);
             return NextResponse.json(
                 { error: { code: "BACKEND_ERROR", message: errorText } },
                 { status: res.status }
             );
         }
 
+        console.log(`[DELETE Notification] Success: ${id}`);
         return new NextResponse(null, { status: 204 });
     } catch (error) {
         console.error("Error deleting notification:", error);

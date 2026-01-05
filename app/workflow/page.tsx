@@ -24,17 +24,26 @@ export default async function WorkflowPage({ searchParams }: PageProps) {
     return (
         <main className="min-h-screen px-3 py-4 text-slate-900 dark:text-white sm:px-4 sm:py-6">
             <div className="mx-auto w-full max-w-5xl">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center justify-between gap-4 mb-4">
                     <h1 className="text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">Workflow - Nodes</h1>
-                    <Link
-                        href="/workflow/nodes/new"
-                        className="rounded-lg bg-blue-600 p-2 text-white hover:bg-blue-700"
-                        title="Criar novo node"
-                    >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                    </Link>
+                    <div className="flex gap-2">
+                        <Link
+                            href="/workflow/recipients"
+                            className="rounded-lg border border-blue-600 bg-white px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50 dark:bg-slate-800 dark:hover:bg-slate-700"
+                            title="Gerenciar recebedores"
+                        >
+                            Recebedores
+                        </Link>
+                        <Link
+                            href="/workflow/nodes/new"
+                            className="rounded-lg bg-blue-600 p-2 text-white hover:bg-blue-700"
+                            title="Criar novo node"
+                        >
+                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                        </Link>
+                    </div>
                 </div>
 
                 {errorCode ? (
