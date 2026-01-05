@@ -5,7 +5,6 @@ import { bffGet } from "@/app/lib/bff/fetcher";
 import { type ConditionDto, type PropertyDto, type EdgeDto } from "@/app/workflow/WorkflowTypes";
 import ConditionActions from "./ConditionActions";
 import DeletePropertyButton from "./DeletePropertyButton";
-import EditPropertyButton from "@/app/workflow/components/EditPropertyButton";
 
 type Params = Promise<{ conditionId: string }>;
 
@@ -145,13 +144,15 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                                         )}
                                     </div>
                                     <div className="flex gap-2 flex-shrink-0">
-                                        <EditPropertyButton 
-                                            propertyId={property.id}
-                                            name={property.name}
-                                            type={property.type}
-                                            propertyKey={property.key}
-                                            description={property.description}
-                                        />
+                                        <Link
+                                            href={`/workflow/properties/${property.id}/edit`}
+                                            className="rounded-lg border border-slate-300 p-2 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
+                                            title="Editar property"
+                                        >
+                                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                            </svg>
+                                        </Link>
                                         <DeletePropertyButton 
                                             conditionId={condition.id} 
                                             edgeId={condition.edge_id}

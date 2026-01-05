@@ -110,6 +110,87 @@ function parseUpdateBody(body: unknown):
     };
 }
 
+export async function GET(
+    _req: Request,
+    context: { params: Promise<{ propertyId: string }> }
+) {
+    const session = await getServerSession(authOptions);
+    const email = session?.user?.email?.trim().toLowerCase();
+    if (!email) {
+        return NextResponse.json(
+            { error: { code: "UNAUTHORIZED" } },
+            { status: 401 }
+        );
+    }
+
+    const params = await context.params;
+    const parsedId = parsePropertyId(params);
+    if (!parsedId.ok) {
+        return NextResponse.json(
+            { error: { code: parsedId.code } },
+            { status: parsedId.status }
+        );
+    }
+
+    const propertiesBaseUrl = resolveServiceUrlFromEnv("/properties");
+    if (!propertiesBaseUrl) {
+        return NextResponse.json(
+            { error: { code: "FLOW_MANAGER_SERVICE_URL_NOT_CONFIGURED" } },
+            { status: 500 }
+        );
+    }
+
+    const companyIdResult = await getCompanyIdForEmail(email);
+    if (!companyIdResult.ok) {
+        return NextResponse.json(
+            { error: { code: companyIdResult.code, details: companyIdResult.details } },
+            { status: companyIdResult.status }
+        );
+    }
+
+    const ownership = await assertPropertyBelongsToCompany(
+        propertiesBaseUrl,
+        companyIdResult.company_id,
+        parsedId.propertyId
+    );
+    if (!ownership.ok) {
+        return NextResponse.json(
+            { error: { code: ownership.code, details: ownership.details } },
+            { status: ownership.status }
+        );
+    }
+
+    const propertyUrl = buildPropertyIdUrl(propertiesBaseUrl, parsedId.propertyId);
+    let res: Response;
+    try {
+        res = await fetch(propertyUrl, {
+            headers: {
+                accept: "application/json",
+            },
+        });
+    } catch (error) {
+        return NextResponse.json(
+            {
+                error: {
+                    code: "PROPERTY_FETCH_FAILED",
+                    details: error instanceof Error ? error.message : error,
+                },
+            },
+            { status: 502 }
+        );
+    }
+
+    const responseBody = await readJsonOrText(res);
+    if (!res.ok) {
+        return NextResponse.json(
+            { error: { code: "PROPERTY_FETCH_FAILED", details: responseBody } },
+            { status: res.status }
+        );
+    }
+
+    return NextResponse.json({ data: responseBody });
+}
+
 export async function PUT(
     req: Request,
     context: { params: Promise<{ propertyId: string }> }

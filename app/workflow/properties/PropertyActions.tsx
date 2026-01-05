@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type PropertyActionsProps = {
     propertyId: number;
@@ -13,40 +14,7 @@ type PropertyActionsProps = {
 
 export default function PropertyActions({ propertyId, name, type, propertyKey, description }: PropertyActionsProps) {
     const router = useRouter();
-    const [isEditing, setIsEditing] = useState(false);
-    const [editName, setEditName] = useState(name || "");
-    const [editType, setEditType] = useState(type || "");
-    const [editKey, setEditKey] = useState(propertyKey || "");
-    const [editDescription, setEditDescription] = useState(description || "");
     const [isDeleting, setIsDeleting] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-
-    async function handleSave() {
-        setIsSaving(true);
-        try {
-            const res = await fetch(`/api/properties/${propertyId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: editName,
-                    type: editType,
-                    key: editKey || null,
-                    description: editDescription || null
-                }),
-            });
-
-            if (res.ok) {
-                setIsEditing(false);
-                router.refresh();
-            } else {
-                alert("Erro ao salvar");
-            }
-        } catch (error) {
-            alert("Erro ao salvar");
-        } finally {
-            setIsSaving(false);
-        }
-    }
 
     async function handleDelete() {
         if (!confirm("Tem certeza que deseja deletar esta property? Ela será removida de todos os nodes e conditions que a utilizam.")) return;
@@ -67,85 +35,6 @@ export default function PropertyActions({ propertyId, name, type, propertyKey, d
         } finally {
             setIsDeleting(false);
         }
-    }
-
-    if (isEditing) {
-        return (
-            <div className="rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-800">
-                <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Editar Property</h3>
-                    <button
-                        onClick={() => {
-                            setIsEditing(false);
-                            setEditName(name || "");
-                            setEditType(type || "");
-                            setEditKey(propertyKey || "");
-                            setEditDescription(description || "");
-                        }}
-                        className="text-xs text-slate-500 hover:text-slate-700"
-                    >
-                        Cancelar
-                    </button>
-                </div>
-                <div className="space-y-3">
-                    <div>
-                        <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Nome
-                        </label>
-                        <input
-                            type="text"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Type
-                        </label>
-                        <input
-                            type="text"
-                            value={editType}
-                            onChange={(e) => setEditType(e.target.value)}
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Key (opcional)
-                        </label>
-                        <input
-                            type="text"
-                            value={editKey}
-                            onChange={(e) => setEditKey(e.target.value)}
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
-                            placeholder="ex: message.body"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Description (opcional)
-                        </label>
-                        <textarea
-                            value={editDescription}
-                            onChange={(e) => setEditDescription(e.target.value)}
-                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
-                            placeholder="Descrição da property"
-                            rows={3}
-                        />
-                    </div>
-                </div>
-                <div className="mt-3 flex gap-2">
-                    <button
-                        onClick={handleSave}
-                        disabled={isSaving || !editName.trim() || !editType.trim()}
-                        className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
-                    >
-                        {isSaving ? "Salvando..." : "Salvar"}
-                    </button>
-                </div>
-            </div>
-        );
     }
 
     return (
@@ -175,15 +64,15 @@ export default function PropertyActions({ propertyId, name, type, propertyKey, d
                     )}
                 </div>
                 <div className="flex gap-2">
-                    <button
-                        onClick={() => setIsEditing(true)}
+                    <Link
+                        href={`/workflow/properties/${propertyId}/edit`}
                         className="rounded-lg border border-slate-300 p-2 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
                         title="Editar"
                     >
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                         </svg>
-                    </button>
+                    </Link>
                     <button
                         onClick={handleDelete}
                         disabled={isDeleting}
