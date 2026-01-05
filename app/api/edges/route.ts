@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/app/lib/auth";
-import { getCompanyIdForEmail, resolveServiceUrlFromEnv } from "@/app/api/nodes/_shared";
+import { getCompanyIdForEmail, resolveServiceUrlFromEnv, readJsonOrText } from "@/app/api/nodes/_shared";
 
 async function getCompanyId(email: string) {
     const result = await getCompanyIdForEmail(email);
@@ -30,7 +30,14 @@ export async function GET(req: Request) {
     upstreamUrl.searchParams.set("company_id", String(company_id));
 
     const res = await fetch(upstreamUrl);
-    const data = await res.json();
+    const data = await readJsonOrText(res);
+
+    if (!res.ok) {
+        return NextResponse.json(
+            { error: { code: "EDGES_FETCH_FAILED", details: data } },
+            { status: res.status }
+        );
+    }
 
     return NextResponse.json({ data });
 }
@@ -48,12 +55,24 @@ export async function POST(req: Request) {
     const body = await req.json();
     const upstreamBody = { ...body, company_id };
 
+    console.log('[POST /api/edges] Request body:', upstreamBody);
+    console.log('[POST /api/edges] Upstream URL:', edgesUrl);
+
     const res = await fetch(edgesUrl!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(upstreamBody),
     });
 
-    const data = await res.json();
+    const data = await readJsonOrText(res);
+    console.log('[POST /api/edges] Response status:', res.status, 'data:', data);
+
+    if (!res.ok) {
+        return NextResponse.json(
+            { error: { code: "EDGE_CREATE_FAILED", details: data } },
+            { status: res.status }
+        );
+    }
+
     return NextResponse.json({ data }, { status: res.status });
 }
