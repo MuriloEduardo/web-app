@@ -2,45 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useConfirm } from "@/app/components/ConfirmProvider";
-
-type NodeDto = {
-    id: number;
-    company_id: number;
-    prompt: string;
-    created_at?: string;
-    updated_at?: string;
-};
-
-type PropertyDto = {
-    id: number;
-    name: string;
-    type: string;
-    description?: string;
-    created_at?: string;
-    updated_at?: string;
-};
+import { type NodeDto, type PropertyDto, type EdgeDto, type Envelope } from "@/app/workflow/WorkflowTypes";
 
 type NodePropertyDto = {
     node_id: number;
     property_id: number;
-};
-
-type EdgeDto = {
-    id: number;
-    source_node_id: number;
-    destination_node_id: number;
-    label: string;
-    priority: number;
-    created_at?: string;
-    updated_at?: string;
-};
-
-type Envelope<T> = {
-    data?: T;
-    error?: {
-        code: string;
-        details?: unknown;
-    };
 };
 
 type Props = {

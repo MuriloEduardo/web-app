@@ -5,39 +5,12 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { useConfirm } from "@/app/components/ConfirmProvider";
-
-export type NodeDto = {
-    id: number;
-    company_id: number;
-    prompt: string;
-    created_at?: string;
-    updated_at?: string;
-};
-
-export type PropertyDto = {
-    id: number;
-    name: string;
-    type: string;
-    description?: string | null;
-};
+import { type NodeDto, type PropertyDto, type EdgeDto, type Envelope } from "@/app/workflow/WorkflowTypes";
 
 export type NodePropertyDto = {
     id?: number;
     node_id: number;
     property_id: number;
-};
-
-export type EdgeDto = {
-    id: number;
-    source_node_id: number;
-    destination_node_id: number;
-    label: string;
-    priority: number;
-};
-
-export type Envelope<T> = {
-    data?: T;
-    error?: { code?: string };
 };
 
 type Props = {

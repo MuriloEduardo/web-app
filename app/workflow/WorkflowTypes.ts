@@ -44,7 +44,10 @@ export type ConditionPropertyDto = {
 export type PropertyDto = {
     id: number;
     company_id?: number;
-    name?: string;
-    key?: string;
-    type?: string;
+    name: string;
+    key?: string | null;
+    type: string;
+    description?: string | null;
+    created_at?: string;
+    updated_at?: string;
 };

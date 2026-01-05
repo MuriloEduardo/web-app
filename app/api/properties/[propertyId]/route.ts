@@ -75,7 +75,7 @@ async function assertPropertyBelongsToCompany(
 }
 
 function parseUpdateBody(body: unknown):
-    | { ok: true; name: string; type: string; description: string | null; created_at?: string; updated_at?: string }
+    | { ok: true; name: string; type: string; key: string | null; description: string | null; created_at?: string; updated_at?: string }
     | { ok: false; status: number; code: string } {
     if (typeof body !== "object" || body === null) {
         return { ok: false, status: 400, code: "INVALID_BODY" };
@@ -84,6 +84,10 @@ function parseUpdateBody(body: unknown):
     const record = body as Record<string, unknown>;
     const name = typeof record.name === "string" ? record.name.trim() : "";
     const type = typeof record.type === "string" ? record.type.trim() : "";
+    const key =
+        typeof record.key === "string" && record.key.trim()
+            ? record.key.trim()
+            : null;
     const description =
         typeof record.description === "string" && record.description.trim()
             ? record.description.trim()
@@ -99,6 +103,7 @@ function parseUpdateBody(body: unknown):
         ok: true,
         name,
         type,
+        key,
         description,
         ...(created_at ? { created_at } : {}),
         ...(updated_at ? { updated_at } : {}),
@@ -168,6 +173,7 @@ export async function PUT(
     const upstreamBody = {
         name: parsedBody.name,
         type: parsedBody.type,
+        key: parsedBody.key,
         description: parsedBody.description,
         ...(parsedBody.created_at ? { created_at: parsedBody.created_at } : {}),
         updated_at: parsedBody.updated_at ?? now,

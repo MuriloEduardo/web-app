@@ -11,7 +11,7 @@ import {
 } from "@/app/api/nodes/_shared";
 
 function parseCreateBody(body: unknown):
-    | { ok: true; name: string; type: string; description: string | null; created_at?: string; updated_at?: string }
+    | { ok: true; name: string; type: string; key: string | null; description: string | null; created_at?: string; updated_at?: string }
     | { ok: false; status: number; code: string } {
     if (typeof body !== "object" || body === null) {
         return { ok: false, status: 400, code: "INVALID_BODY" };
@@ -20,6 +20,10 @@ function parseCreateBody(body: unknown):
     const record = body as Record<string, unknown>;
     const name = typeof record.name === "string" ? record.name.trim() : "";
     const type = typeof record.type === "string" ? record.type.trim() : "";
+    const key =
+        typeof record.key === "string" && record.key.trim()
+            ? record.key.trim()
+            : null;
     const description =
         typeof record.description === "string" && record.description.trim()
             ? record.description.trim()
@@ -35,6 +39,7 @@ function parseCreateBody(body: unknown):
         ok: true,
         name,
         type,
+        key,
         description,
         ...(created_at ? { created_at } : {}),
         ...(updated_at ? { updated_at } : {}),
@@ -160,6 +165,7 @@ export async function POST(req: Request) {
         company_id: companyIdResult.company_id,
         name: parsed.name,
         type: parsed.type,
+        key: parsed.key,
         description: parsed.description,
         created_at: parsed.created_at ?? now,
         updated_at: parsed.updated_at ?? now,
