@@ -4,7 +4,7 @@ import { resolveServiceUrlFromEnv, readJsonOrText } from "@/app/api/nodes/_share
 import { requireAuth } from "@/app/api/auth-helper";
 
 export async function GET(req: Request) {
-    const emailOrResponse = await requireAuth();
+    const emailOrResponse = await requireAuth(req);
     if (emailOrResponse instanceof NextResponse) return emailOrResponse;
 
     const recipientsBaseUrl = resolveServiceUrlFromEnv("/notification-recipients");
@@ -36,7 +36,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-    const emailOrResponse = await requireAuth();
+    const emailOrResponse = await requireAuth(req);
     if (emailOrResponse instanceof NextResponse) return emailOrResponse;
 
     const recipientsBaseUrl = resolveServiceUrlFromEnv("/notification-recipients");

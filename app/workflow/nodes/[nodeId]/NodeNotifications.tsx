@@ -37,6 +37,9 @@ export default function NodeNotifications({ nodeId, notifications: initialNotifi
 
             if (res.ok) {
                 setSubject("");
+                setIsCreating(false);
+                router.refresh();
+            } else {
                 const errorData = await res.json().catch(() => ({}));
                 alert(`Erro ao criar notificação: ${errorData.error?.code || "Erro desconhecido"}`);
             }

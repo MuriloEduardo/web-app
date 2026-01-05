@@ -12,7 +12,7 @@ async function getCompanyId(email: string) {
 }
 
 export async function GET(req: Request) {
-    const emailOrResponse = await requireAuth();
+    const emailOrResponse = await requireAuth(req);
     if (emailOrResponse instanceof NextResponse) return emailOrResponse;
     const email = emailOrResponse;
 
@@ -47,7 +47,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-    const emailOrResponse = await requireAuth();
+    const emailOrResponse = await requireAuth(req);
     if (emailOrResponse instanceof NextResponse) return emailOrResponse;
     const email = emailOrResponse;
 
