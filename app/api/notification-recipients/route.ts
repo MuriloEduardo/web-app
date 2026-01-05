@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { resolveServiceUrlFromEnv, readJsonOrText } from "@/app/api/nodes/_shared";
 import { requireAuth } from "@/app/api/auth-helper";
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
     const emailOrResponse = await requireAuth(req);
     if (emailOrResponse instanceof NextResponse) return emailOrResponse;
 
@@ -35,7 +35,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ data });
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
     const emailOrResponse = await requireAuth(req);
     if (emailOrResponse instanceof NextResponse) return emailOrResponse;
 
