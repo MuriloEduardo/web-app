@@ -71,8 +71,9 @@ export default function NotificationRecipients({ notificationId, recipients: ini
         }
     }
 
-    const getRecipientIcon = (type: string) => {
-        switch (type.toLowerCase()) {
+    const getRecipientIcon = (type: string | undefined) => {
+        const typeStr = (type || "").toLowerCase();
+        switch (typeStr) {
             case "email":
                 return (
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
