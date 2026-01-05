@@ -2,7 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 
 import { bffGet } from "@/app/lib/bff/fetcher";
-import { type NodeDto, type EdgeDto, type PropertyDto, type NotificationDto } from "@/app/workflow/WorkflowTypes";
+import { type NodeDto, type EdgeDto, type PropertyDto, type NotificationDto, type NotificationRecipientDto } from "@/app/workflow/WorkflowTypes";
 import NodeActions from "./NodeActions";
 import DeleteEdgeButton from "./DeleteEdgeButton";
 import DeletePropertyButton from "./DeletePropertyButton";
@@ -29,6 +29,19 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
     const nodePropertyIds = Array.isArray(nodePropertiesPayload.data) ? nodePropertiesPayload.data : [];
     const allProperties = Array.isArray(allPropertiesPayload.data) ? allPropertiesPayload.data : [];
     const notifications = Array.isArray(notificationsPayload.data) ? notificationsPayload.data : [];
+
+    // Buscar recipients para todas as notificações
+    const allRecipientsPayload = await bffGet<NotificationRecipientDto[]>(`/api/notification-recipients`, opts);
+    const allRecipients = Array.isArray(allRecipientsPayload.data) ? allRecipientsPayload.data : [];
+    
+    // Agrupar recipients por notification_id
+    const recipientsMap = new Map<number, NotificationRecipientDto[]>();
+    for (const recipient of allRecipients) {
+        if (!recipientsMap.has(recipient.notification_id)) {
+            recipientsMap.set(recipient.notification_id, []);
+        }
+        recipientsMap.get(recipient.notification_id)!.push(recipient);
+    }
 
     // Match properties by ID
     const propertyIds = new Set(nodePropertyIds.map(np => np.property_id));
@@ -202,7 +215,7 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
                 </div>
 
                 {/* Notifications Section */}
-                <NodeNotifications nodeId={node.id} notifications={notifications} />
+                <NodeNotifications nodeId={node.id} notifications={notifications} recipientsMap={recipientsMap} />
             </div>
         </main>
     );

@@ -2,14 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { type NotificationDto } from "@/app/workflow/WorkflowTypes";
+import { type NotificationDto, type NotificationRecipientDto } from "@/app/workflow/WorkflowTypes";
+import NotificationRecipients from "./NotificationRecipients";
 
 type NodeNotificationsProps = {
     nodeId: number;
     notifications: NotificationDto[];
+    recipientsMap: Map<number, NotificationRecipientDto[]>;
 };
 
-export default function NodeNotifications({ nodeId, notifications: initialNotifications }: NodeNotificationsProps) {
+export default function NodeNotifications({ nodeId, notifications: initialNotifications, recipientsMap }: NodeNotificationsProps) {
     const router = useRouter();
     const [isCreating, setIsCreating] = useState(false);
     const [subject, setSubject] = useState("");
@@ -153,6 +155,12 @@ export default function NodeNotifications({ nodeId, notifications: initialNotifi
                                         Criada em {new Date(notification.created_at).toLocaleString("pt-BR")}
                                     </p>
                                 )}
+                                
+                                {/* Recipients */}
+                                <NotificationRecipients 
+                                    notificationId={notification.id} 
+                                    recipients={recipientsMap.get(notification.id) || []} 
+                                />
                             </div>
                             <button
                                 onClick={() => handleDelete(notification.id)}

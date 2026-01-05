@@ -70,3 +70,7 @@ export type NotificationRecipientDto = {
     created_at?: string;
     updated_at?: string;
 };
+
+export type NotificationWithRecipientsDto = NotificationDto & {
+    recipients: NotificationRecipientDto[];
+};
