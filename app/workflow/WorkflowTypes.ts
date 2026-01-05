@@ -51,3 +51,21 @@ export type PropertyDto = {
     created_at?: string;
     updated_at?: string;
 };
+
+export type NotificationDto = {
+    id: number;
+    node_id: number;
+    company_id: number;
+    message: string;
+    created_at?: string;
+    updated_at?: string;
+};
+
+export type NotificationRecipientDto = {
+    id: number;
+    notification_id: number;
+    recipient_type: string;
+    recipient_value: string;
+    created_at?: string;
+    updated_at?: string;
+};

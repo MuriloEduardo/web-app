@@ -2,10 +2,11 @@ import Link from "next/link";
 import { headers } from "next/headers";
 
 import { bffGet } from "@/app/lib/bff/fetcher";
-import { type NodeDto, type EdgeDto, type PropertyDto } from "@/app/workflow/WorkflowTypes";
+import { type NodeDto, type EdgeDto, type PropertyDto, type NotificationDto } from "@/app/workflow/WorkflowTypes";
 import NodeActions from "./NodeActions";
 import DeleteEdgeButton from "./DeleteEdgeButton";
 import DeletePropertyButton from "./DeletePropertyButton";
+import NodeNotifications from "./NodeNotifications";
 
 type Params = Promise<{ nodeId: string }>;
 
@@ -21,11 +22,13 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
     const edgesPayload = await bffGet<EdgeDto[]>(`/api/edges?source_node_id=${idNum}`, opts);
     const nodePropertiesPayload = await bffGet<Array<{ node_id: number; property_id: number }>>(`/api/node-properties?node_id=${idNum}`, opts);
     const allPropertiesPayload = await bffGet<PropertyDto[]>(`/api/properties`, opts);
+    const notificationsPayload = await bffGet<NotificationDto[]>(`/api/notifications?node_id=${idNum}`, opts);
 
     const node = nodePayload.data;
     const edges = Array.isArray(edgesPayload.data) ? edgesPayload.data : [];
     const nodePropertyIds = Array.isArray(nodePropertiesPayload.data) ? nodePropertiesPayload.data : [];
     const allProperties = Array.isArray(allPropertiesPayload.data) ? allPropertiesPayload.data : [];
+    const notifications = Array.isArray(notificationsPayload.data) ? notificationsPayload.data : [];
 
     // Match properties by ID
     const propertyIds = new Set(nodePropertyIds.map(np => np.property_id));
@@ -197,6 +200,9 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
                         ) : null}
                     </div>
                 </div>
+
+                {/* Notifications Section */}
+                <NodeNotifications nodeId={node.id} notifications={notifications} />
             </div>
         </main>
     );
