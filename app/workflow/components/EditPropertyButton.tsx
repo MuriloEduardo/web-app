@@ -8,14 +8,16 @@ type EditPropertyButtonProps = {
     name?: string;
     type?: string;
     propertyKey?: string | null;
+    description?: string | null;
 };
 
-export default function EditPropertyButton({ propertyId, name, type, propertyKey }: EditPropertyButtonProps) {
+export default function EditPropertyButton({ propertyId, name, type, propertyKey, description }: EditPropertyButtonProps) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(false);
     const [editName, setEditName] = useState(name || "");
     const [editType, setEditType] = useState(type || "");
     const [editKey, setEditKey] = useState(propertyKey || "");
+    const [editDescription, setEditDescription] = useState(description || "");
     const [isSaving, setIsSaving] = useState(false);
 
     async function handleSave() {
@@ -27,7 +29,8 @@ export default function EditPropertyButton({ propertyId, name, type, propertyKey
                 body: JSON.stringify({
                     name: editName,
                     type: editType,
-                    key: editKey || null
+                    key: editKey || null,
+                    description: editDescription || null
                 }),
             });
 
@@ -69,6 +72,7 @@ export default function EditPropertyButton({ propertyId, name, type, propertyKey
                             setEditName(name || "");
                             setEditType(type || "");
                             setEditKey(propertyKey || "");
+                            setEditDescription(description || "");
                         }}
                         className="text-slate-500 hover:text-slate-700"
                     >
@@ -115,6 +119,18 @@ export default function EditPropertyButton({ propertyId, name, type, propertyKey
                             placeholder="ex: message.body"
                         />
                     </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Description (opcional)
+                        </label>
+                        <textarea
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+                            placeholder="Descrição da property"
+                            rows={3}
+                        />
+                    </div>
                 </div>
                 <div className="mt-6 flex gap-3">
                     <button
@@ -130,6 +146,7 @@ export default function EditPropertyButton({ propertyId, name, type, propertyKey
                             setEditName(name || "");
                             setEditType(type || "");
                             setEditKey(propertyKey || "");
+                            setEditDescription(description || "");
                         }}
                         className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-700"
                     >

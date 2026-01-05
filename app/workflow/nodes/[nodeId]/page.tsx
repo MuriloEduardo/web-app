@@ -20,14 +20,14 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
 
     const nodePayload = await bffGet<NodeDto>(`/api/nodes/${idNum}`, opts);
     const edgesPayload = await bffGet<EdgeDto[]>(`/api/edges?source_node_id=${idNum}`, opts);
-    const nodePropertiesPayload = await bffGet<Array<{node_id: number; property_id: number}>>(`/api/node-properties?node_id=${idNum}`, opts);
+    const nodePropertiesPayload = await bffGet<Array<{ node_id: number; property_id: number }>>(`/api/node-properties?node_id=${idNum}`, opts);
     const allPropertiesPayload = await bffGet<PropertyDto[]>(`/api/properties`, opts);
 
     const node = nodePayload.data;
     const edges = Array.isArray(edgesPayload.data) ? edgesPayload.data : [];
     const nodePropertyIds = Array.isArray(nodePropertiesPayload.data) ? nodePropertiesPayload.data : [];
     const allProperties = Array.isArray(allPropertiesPayload.data) ? allPropertiesPayload.data : [];
-    
+
     // Match properties by ID
     const propertyIds = new Set(nodePropertyIds.map(np => np.property_id));
     const properties = allProperties.filter(p => propertyIds.has(p.id));
@@ -52,7 +52,7 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
             <div className="mx-auto w-full max-w-4xl">
                 {/* Breadcrumb with Back Button */}
                 <div className="flex items-center gap-3">
-                    <Link 
+                    <Link
                         href="/workflow"
                         className="rounded-lg border border-slate-300 p-2 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
                         title="Voltar"
@@ -109,9 +109,6 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
                                             <span className="text-xs text-slate-500">→</span>
                                             <span className="rounded bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-300">
                                                 Node #{edge.destination_node_id}
-                                            </span>
-                                            <span className="ml-auto rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 dark:bg-slate-700 dark:text-slate-400">
-                                                P{edge.priority}
                                             </span>
                                         </div>
                                         <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
@@ -173,11 +170,12 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
                                         )}
                                     </div>
                                     <div className="flex gap-2 flex-shrink-0">
-                                        <EditPropertyButton 
+                                        <EditPropertyButton
                                             propertyId={property.id}
                                             name={property.name}
                                             type={property.type}
                                             propertyKey={property.key}
+                                            description={property.description}
                                         />
                                         <DeletePropertyButton nodeId={node.id} propertyId={property.id} />
                                     </div>

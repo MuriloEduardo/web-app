@@ -20,6 +20,7 @@ export default function CreatePropertyForm({ nodeId, existingProperties }: Creat
     const [name, setName] = useState("");
     const [type, setType] = useState("");
     const [key, setKey] = useState("");
+    const [description, setDescription] = useState("");
     
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,7 +36,12 @@ export default function CreatePropertyForm({ nodeId, existingProperties }: Creat
                 const createRes = await fetch("/api/properties", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name, type, key: key || null }),
+                    body: JSON.stringify({ 
+                        name, 
+                        type, 
+                        key: key || null,
+                        description: description || null
+                    }),
                 });
 
                 if (!createRes.ok) {
@@ -155,6 +161,18 @@ export default function CreatePropertyForm({ nodeId, existingProperties }: Creat
                             onChange={(e) => setKey(e.target.value)}
                             className="w-full rounded border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
                             placeholder="ex: message.body"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Description (opcional)
+                        </label>
+                        <textarea
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className="w-full rounded border border-slate-300 px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-900 dark:text-white"
+                            placeholder="Descrição da property"
+                            rows={3}
                         />
                     </div>
                 </div>

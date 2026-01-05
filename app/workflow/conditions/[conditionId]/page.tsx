@@ -143,6 +143,7 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                                             name={property.name}
                                             type={property.type}
                                             propertyKey={property.key}
+                                            description={property.description}
                                         />
                                         <DeletePropertyButton 
                                             conditionId={condition.id} 

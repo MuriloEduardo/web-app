@@ -52,6 +52,7 @@ export default async function PropertiesPage() {
                             name={property.name}
                             type={property.type}
                             propertyKey={property.key}
+                            description={property.description}
                         />
                     ))}
                     {properties.length === 0 ? (
