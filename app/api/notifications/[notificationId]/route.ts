@@ -42,7 +42,7 @@ export async function DELETE(
     try {
         // Remove trailing slash if present
         const baseUrl = serviceUrl.endsWith('/') ? serviceUrl.slice(0, -1) : serviceUrl;
-        const url = `${baseUrl}/${id}/?company_id=${company_id}`;
+        const url = `${baseUrl}/${id}`;
         console.log(`[DELETE Notification] Calling: ${url}`);
 
         const res = await fetch(url, {

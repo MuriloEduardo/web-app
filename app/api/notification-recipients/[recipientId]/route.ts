@@ -32,8 +32,8 @@ export async function PATCH(
         const body = await request.json();
         // Remove trailing slash if present
         const baseUrl = serviceUrl.endsWith('/') ? serviceUrl.slice(0, -1) : serviceUrl;
-        const url = `${baseUrl}/${id}/`;
-        
+        const url = `${baseUrl}/${id}`;
+
         const res = await fetch(url, {
             method: "PATCH",
             headers: {
@@ -91,7 +91,7 @@ export async function DELETE(
     try {
         // Remove trailing slash if present
         const baseUrl = serviceUrl.endsWith('/') ? serviceUrl.slice(0, -1) : serviceUrl;
-        const url = `${baseUrl}/${id}/`;
+        const url = `${baseUrl}/${id}`;
         const res = await fetch(url, {
             method: "DELETE",
             headers: {
