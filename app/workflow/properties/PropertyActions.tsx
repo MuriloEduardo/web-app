@@ -168,6 +168,11 @@ export default function PropertyActions({ propertyId, name, type, propertyKey, d
                             Key: {propertyKey}
                         </p>
                     )}
+                    {description && (
+                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                            {description}
+                        </p>
+                    )}
                 </div>
                 <div className="flex gap-2">
                     <button

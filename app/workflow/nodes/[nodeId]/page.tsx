@@ -168,6 +168,11 @@ export default async function NodeDetailsPage({ params }: { params: Params }) {
                                                 Key: {property.key}
                                             </p>
                                         )}
+                                        {property.description && (
+                                            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                                {property.description}
+                                            </p>
+                                        )}
                                     </div>
                                     <div className="flex gap-2 flex-shrink-0">
                                         <EditPropertyButton
