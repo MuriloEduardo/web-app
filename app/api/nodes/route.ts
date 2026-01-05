@@ -55,6 +55,13 @@ export async function GET(req: Request) {
     const nodesFetchUrl = new URL(nodesUrl);
     nodesFetchUrl.searchParams.set("company_id", String(company_id));
 
+    // Forward order_by parameters from request URL
+    const requestUrl = new URL(req.url);
+    const orderByParams = requestUrl.searchParams.getAll("order_by");
+    orderByParams.forEach(orderBy => {
+        nodesFetchUrl.searchParams.append("order_by", orderBy);
+    });
+
     let res: Response;
     try {
         res = await fetch(nodesFetchUrl, {

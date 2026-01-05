@@ -4,19 +4,29 @@ import { headers } from "next/headers";
 import { bffGet } from "@/app/lib/bff/fetcher";
 import { type NodeDto } from "@/app/workflow/WorkflowTypes";
 
-export default async function WorkflowPage() {
+type PageProps = {
+    searchParams: Promise<{ order_by?: string }>;
+};
+
+export default async function WorkflowPage({ searchParams }: PageProps) {
     const h = await headers();
     const cookie = h.get("cookie");
     const opts = cookie ? { headers: { cookie } } : undefined;
 
-    const payload = await bffGet<NodeDto[]>("/api/nodes", opts);
+    const params = await searchParams;
+    const orderBy = params.order_by || "id";
+
+    const url = orderBy ? `/api/nodes?order_by=${orderBy}` : "/api/nodes";
+    const payload = await bffGet<NodeDto[]>(url, opts);
     const nodes = Array.isArray(payload.data) ? payload.data : [];
     const errorCode = payload.error?.code ?? null;
 
     return (
         <main className="min-h-screen px-3 py-4 text-slate-900 dark:text-white sm:px-4 sm:py-6">
             <div className="mx-auto w-full max-w-5xl">
-                <h1 className="text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">Workflow - Nodes</h1>
+                <div className="flex items-center justify-between gap-4">
+                    <h1 className="text-lg font-semibold text-slate-900 dark:text-white sm:text-xl">Workflow - Nodes</h1>
+                </div>
 
                 {errorCode ? (
                     <div className="mt-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
