@@ -18,12 +18,12 @@ export default async function NewConditionPropertyPage({ params }: { params: Par
     const conditionPayload = await bffGet<ConditionDto>(`/api/conditions/${idNum}`, opts);
     const condition = conditionPayload.data;
 
-    let edge: EdgeDto | null = null;
+    let edge: EdgeDto | null | undefined = null;
     let allProperties: PropertyDto[] = [];
 
     if (condition) {
         const edgePayload = await bffGet<EdgeDto>(`/api/edges/${condition.edge_id}`, opts);
-        edge = edgePayload.data;
+        edge = edgePayload.data ?? null;
 
         const propertiesPayload = await bffGet<PropertyDto[]>(`/api/properties`, opts);
         allProperties = Array.isArray(propertiesPayload.data) ? propertiesPayload.data : [];

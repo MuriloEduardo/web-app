@@ -21,12 +21,12 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
     const condition = conditionPayload.data;
 
     let properties: PropertyDto[] = [];
-    let edge: EdgeDto | null = null;
+    let edge: EdgeDto | null | undefined = null;
 
     if (condition) {
         // Get the edge to find source_node_id
         const edgePayload = await bffGet<EdgeDto>(`/api/edges/${condition.edge_id}`, opts);
-        edge = edgePayload.data;
+        edge = edgePayload.data ?? null;
 
         if (edge) {
             const conditionPropertiesPayload = await bffGet<Array<{ condition_id: number; property_id: number }>>(
