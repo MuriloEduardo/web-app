@@ -1,7 +1,6 @@
 import { requireAuth } from "@/app/api/auth-helper";
+import { resolveServiceUrlFromEnv } from "@/app/api/nodes/_shared";
 import { NextRequest, NextResponse } from "next/server";
-
-const serviceUrl = process.env.SERVICE_URL;
 
 export async function DELETE(
     request: NextRequest,
@@ -21,6 +20,7 @@ export async function DELETE(
         );
     }
 
+    const serviceUrl = resolveServiceUrlFromEnv("/notification-recipients");
     if (!serviceUrl) {
         return NextResponse.json(
             { error: { code: "SERVICE_URL_NOT_CONFIGURED" } },
@@ -29,7 +29,7 @@ export async function DELETE(
     }
 
     try {
-        const url = `${serviceUrl}/notification-recipients/${id}/`;
+        const url = `${serviceUrl}/${id}/`;
         const res = await fetch(url, {
             method: "DELETE",
             headers: {
