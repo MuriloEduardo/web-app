@@ -63,7 +63,7 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                 {/* Breadcrumb with Back Button */}
                 <div className="flex items-center gap-3">
                     <Link
-                        href="/workflow"
+                        href={`/workflow/edges/${edge.id}`}
                         className="rounded-lg border border-slate-300 p-2 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700"
                         title="Voltar"
                     >
@@ -73,6 +73,14 @@ export default async function ConditionDetailsPage({ params }: { params: Params 
                     </Link>
                     <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-300">
                         <Link href="/workflow" className="hover:text-blue-600">Workflow</Link>
+                        <span>→</span>
+                        <Link href={`/workflow/nodes/${edge.source_node_id}`} className="hover:text-blue-600">
+                            Node #{edge.source_node_id}
+                        </Link>
+                        <span>→</span>
+                        <Link href={`/workflow/edges/${edge.id}`} className="hover:text-blue-600">
+                            Edge #{edge.id}
+                        </Link>
                         <span>→</span>
                         <span>Condition #{condition.id}</span>
                     </div>
